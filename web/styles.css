@@ -92,20 +92,35 @@ input.numeric {
 }
 
 details > summary {
-    background-color: #a7a0b76a;
     padding: 5px;
-}
-
-details[open] > summary {
-    background-color: black;
-    color: white;
 }
 
 details > div {
     margin: 0px 0px 1px 1px;
 }
 
+#parameters details > summary {
+    background-color: #a7a0b76a;
+}
+
+#parameters details[open] > summary {
+    background-color: black;
+    color: white;
+}
+
+#parameters details[open] > div {
+    margin: 10px;
+}
+
 #component-location-add-segment {
     display: grid;
     grid-template-columns: auto 4fr;
+}
+
+#tree-browser > details > summary {
+    background-color: #a7a0b76a ;
+}
+
+#tree-browser > details > ul {
+    margin-left: 2rem;
 }
