@@ -1,0 +1,81 @@
+<html>
+    <head>
+        <title>PIS: верстка</title>
+    </head>
+    <body>
+        <div class="vertical" id="page-view">
+
+            <div class="horizontal" id="top-bar">
+                <a>Файл</a>
+                <a>Правка</a>
+            </div>
+
+            <div class="horizontal" id="the-editor">
+                <div class="vertical" id="tree-brownser">
+
+                </div>
+                <img id="illustration"/>
+                <div class="vertical" id="parameters">
+
+
+                    <div class="vertical" id="pattern-params">
+                        <input type="text" id="pattern-name"/>
+                        <select id="pattern-kind">
+                            
+                        </select>
+                        <input type="text" id="patern-description"/>
+                        <div class="horizontal" id="patern-size">
+                            <input type="number" class="pattern-x-min"/>
+                            <input type="number" class="pattern-x-max"/>
+                            <input type="number" class="pattern-y-min"/>
+                            <input type="number" class="pattern-y-max"/>
+                        </div>
+                        <input type="number" id="pattern-count"/>
+                        
+                        <div class="vertical" id="pattern-cell-section">
+                            <select id="pattern-cell-content-type">
+
+                            </select>
+                        </div>
+
+                        <div class="vertical" id="pattern-array-section">
+                            <select id="pattern-array-direction">
+                            </select>
+                            <select id="pattern-array-pattern">
+                            </select>
+                            <div class="horizontal" id="pattern-array-gap">
+                                <input type="number" id="pattern-array-gap-min"/>
+                                <input type="number" id="pattern-array-gap-max"/>
+                            </div>
+                            <div class="horizontal" id="pattern-array-item-count">
+                                <input type="number" id="pattern-array-item-count-min"/>
+                                <input type="number" id="pattern-array-item-count-max"/>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+
+                    <div class="vertical id="component-params">
+                        <select id="component-pattern">
+                        </select>
+                        <div class="vertical" id="component-location">
+                            <div class="horizontal" id="component-location-direction-item">
+                                <button class="remove-component-location-btn">[X]</button>
+                                <select id="component-location-direction">
+                                </select>
+                                <select id="component-location-padding-margin">
+                                </select>
+                                <input type="number" id="component-location-min"/>
+                                <input type="number" id="component-location-max"/>
+                            </div>
+                            <div class="horizontal" id="component-location-add-segment">
+                                <button class="add-component-location-btn">[+]</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
