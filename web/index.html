@@ -19,35 +19,46 @@
 
 
                     <div class="vertical" id="pattern-params">
+                        <label for="pattern-name">Название</label>
                         <input type="text" id="pattern-name"/>
+                        <label for="pattern-kind">Вид</label>
                         <select id="pattern-kind">
                             
                         </select>
-                        <input type="text" id="patern-description"/>
+                        <label for="pattern-description"></label>
+                        <input type="text" id="pattern-description"/>
                         <div class="horizontal" id="patern-size">
                             <input type="number" class="pattern-x-min"/>
                             <input type="number" class="pattern-x-max"/>
+                            -
                             <input type="number" class="pattern-y-min"/>
                             <input type="number" class="pattern-y-max"/>
                         </div>
+                        <label for="pattern-count">Количество</label>
                         <input type="number" id="pattern-count"/>
                         
                         <div class="vertical" id="pattern-cell-section">
+                            <label for="pattern-cell-content-type">Паттерн</label>
                             <select id="pattern-cell-content-type">
 
                             </select>
                         </div>
 
                         <div class="vertical" id="pattern-array-section">
+                            <label for="pattern-array-direction">Направление</label>
                             <select id="pattern-array-direction">
                             </select>
+                            <label for="id=pattern-array-pattern">Паттерн</label>
                             <select id="pattern-array-pattern">
                             </select>
                             <div class="horizontal" id="pattern-array-gap">
+                                <label for="pattern-array-gap-min">Промежуток</label>
                                 <input type="number" id="pattern-array-gap-min"/>
+                                -
                                 <input type="number" id="pattern-array-gap-max"/>
                             </div>
                             <div class="horizontal" id="pattern-array-item-count">
+                                <label for="pattern-array-item-count">Количество</label>
                                 <input type="number" id="pattern-array-item-count-min"/>
                                 <input type="number" id="pattern-array-item-count-max"/>
                             </div>
@@ -56,7 +67,8 @@
                     </div>
 
 
-                    <div class="vertical id="component-params">
+                    <div class="vertical" id="component-params">
+                        <label for="component-pattern">Паттерн</label>
                         <select id="component-pattern">
                         </select>
                         <div class="vertical" id="component-location">
