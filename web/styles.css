@@ -3,13 +3,15 @@
     margin: 0;
 }
 
-button, select {
+button,
+select {
     border-width: 0;
     border-radius: 0.4rem;
     padding: 0.2rem;
 }
 
-input, textarea {
+input,
+textarea {
     border-width: 0;
     border-radius: 0.4rem;
     background-color: #a7a0b76a;
@@ -23,7 +25,8 @@ input.numeric {
 #parameters * {
 }
 
-#pattern-parameters, #component-parameters {
+#pattern-parameters,
+#component-parameters {
     display: grid;
     grid-template-columns: auto 1fr;
 }

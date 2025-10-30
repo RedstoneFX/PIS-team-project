@@ -6,110 +6,100 @@
         <link rel="stylesheet" href="styles.css" />
     </head>
     <body>
-        <div id="page-view">
-            <div id="top-bar">
-                <button id="file-button">Файл</button>
-                <button id="edit-button">Правка</button>
-            </div>
+        <div id="top-bar">
+            <button id="file-button">Файл</button>
+            <button id="edit-button">Правка</button>
+        </div>
 
-            <div id="the-editor">
-                <div id="tree-brownser"></div>
-                <img id="illustration" />
-                <div id="parameters">
-                    <details>
-                        <summary>Общие параметры паттерна</summary>
-                        <div id="pattern-parameters">
-                            <label>Название</label>
-                            <input type="text" id="pattern-name" />
+        <div id="the-editor">
+            <div id="tree-brownser"></div>
+            <img id="illustration" />
+            <div id="parameters">
+                <details>
+                    <summary>Общие параметры паттерна</summary>
+                    <div id="pattern-parameters">
+                        <label>Название</label>
+                        <input type="text" id="pattern-name" />
 
-                            <label>Вид</label>
-                            <select id="pattern-kind"></select>
+                        <label>Вид</label>
+                        <select id="pattern-kind"></select>
 
-                            <label>Описание</label>
-                            <textarea id="pattern-description"></textarea>
+                        <label>Описание</label>
+                        <textarea id="pattern-description"></textarea>
 
-                            <label>Размер</label>
-                            <div id="patern-size">
-                                <input type="number" class="pattern-x-min numeric" />
-                                <input type="number" class="pattern-x-max numeric" />
-                                -
-                                <input type="number" class="pattern-y-min numeric" />
-                                <input type="number" class="pattern-y-max numeric" />
-                            </div>
-
-                            <label>Количество</label>
-                            <input type="number" class="numeric" id="pattern-count" />
-                        </div>
-                    </details>
-
-                    <details>
-                        <summary>Параметры вида CELL</summary>
-                        <div>
-                            <label>Паттерн</label>
-                            <select id="pattern-cell-content-type"></select>
+                        <label>Размер</label>
+                        <div id="patern-size">
+                            <input type="number" class="pattern-x-min numeric" />
+                            <input type="number" class="pattern-x-max numeric" />
+                            -
+                            <input type="number" class="pattern-y-min numeric" />
+                            <input type="number" class="pattern-y-max numeric" />
                         </div>
 
-                        <summary>Параметры вида ARRAY</summary>
-                        <div id="pattern-array-section">
-                            <label>Направление</label>
-                            <select id="pattern-array-direction"></select>
+                        <label>Количество</label>
+                        <input type="number" class="numeric" id="pattern-count" />
+                    </div>
+                </details>
 
-                            <label>Паттерн</label>
-                            <select id="pattern-array-pattern"></select>
+                <details>
+                    <summary>Параметры вида CELL</summary>
+                    <div>
+                        <label>Паттерн</label>
+                        <select id="pattern-cell-content-type"></select>
+                    </div>
 
-                            <label>Промежуток</label>
-                            <div id="pattern-array-gap">
-                                <input type="number" class="numeric" id="pattern-array-gap-min" />
-                                -
-                                <input type="number" class="numeric" id="pattern-array-gap-max" />
+                    <summary>Параметры вида ARRAY</summary>
+                    <div id="pattern-array-section">
+                        <label>Направление</label>
+                        <select id="pattern-array-direction"></select>
+
+                        <label>Паттерн</label>
+                        <select id="pattern-array-pattern"></select>
+
+                        <label>Промежуток</label>
+                        <div id="pattern-array-gap">
+                            <input type="number" class="numeric" id="pattern-array-gap-min" />
+                            -
+                            <input type="number" class="numeric" id="pattern-array-gap-max" />
+                        </div>
+                        <label for="pattern-array-item-count">Количество</label>
+                        <div id="pattern-array-item-count">
+                            <input
+                                type="number"
+                                class="numeric"
+                                id="pattern-array-item-count-min"
+                            />
+                            -
+                            <input
+                                type="number"
+                                class="numeric"
+                                id="pattern-array-item-count-max"
+                            />
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Параметры компонента</summary>
+                    <div id="component-parameters">
+                        <label for="component-pattern">Паттерн</label>
+                        <select id="component-pattern"></select>
+
+                        <label>Позиционирование</label>
+                        <div id="component-location">
+                            <div id="component-location-direction-item">
+                                <button class="remove-component-location-btn">[X]</button>
+                                <select id="component-location-direction"></select>
+                                <select id="component-location-padding-margin"></select>
+                                <input type="number" class="numeric" id="component-location-min" />
+                                <input type="number" class="numeric" id="component-location-max" />
                             </div>
-                            <label for="pattern-array-item-count">Количество</label>
-                            <div id="pattern-array-item-count">
-                                <input
-                                    type="number"
-                                    class="numeric"
-                                    id="pattern-array-item-count-min"
-                                />
-                                -
-                                <input
-                                    type="number"
-                                    class="numeric"
-                                    id="pattern-array-item-count-max"
-                                />
+                            <div id="component-location-add-segment">
+                                <button class="add-component-location-btn">[+]</button>
                             </div>
                         </div>
-                    </details>
-
-                    <details>
-                        <summary>Параметры компонента</summary>
-                        <div id="component-parameters">
-                            <label for="component-pattern">Паттерн</label>
-                            <select id="component-pattern"></select>
-
-                            <label>Позиционирование</label>
-                            <div id="component-location">
-                                <div id="component-location-direction-item">
-                                    <button class="remove-component-location-btn">[X]</button>
-                                    <select id="component-location-direction"></select>
-                                    <select id="component-location-padding-margin"></select>
-                                    <input
-                                        type="number"
-                                        class="numeric"
-                                        id="component-location-min"
-                                    />
-                                    <input
-                                        type="number"
-                                        class="numeric"
-                                        id="component-location-max"
-                                    />
-                                </div>
-                                <div id="component-location-add-segment">
-                                    <button class="add-component-location-btn">[+]</button>
-                                </div>
-                            </div>
-                        </div>
-                    </details>
-                </div>
+                    </div>
+                </details>
             </div>
         </div>
     </body>
