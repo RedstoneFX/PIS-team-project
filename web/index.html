@@ -8,12 +8,11 @@
     </head>
     <body>
         <div id="top-bar">
-            <button id="file-button">Файл</button>
-            <button id="edit-button">Правка</button>
+            <button id="file-button">Файл</button><button id="edit-button">Правка</button>
         </div>
 
         <div id="the-editor">
-            <div id="tree-brownser"></div>
+            <div id="tree-browser"></div>
             <img id="illustration" />
             <div id="parameters">
                 <details>
@@ -29,10 +28,10 @@
                         <textarea id="pattern-description"></textarea>
 
                         <label>Размер</label>
-                        <div id="patern-size">
+                        <div id="pattern-size">
                             <input type="number" class="pattern-x-min numeric" />
                             <input type="number" class="pattern-x-max numeric" />
-                            -
+                            <div>-</div>
                             <input type="number" class="pattern-y-min numeric" />
                             <input type="number" class="pattern-y-max numeric" />
                         </div>
@@ -48,7 +47,8 @@
                         <label>Паттерн</label>
                         <select id="pattern-cell-content-type"></select>
                     </div>
-
+                </details>
+                <details>
                     <summary>Параметры вида ARRAY</summary>
                     <div id="pattern-array-section">
                         <label>Направление</label>
