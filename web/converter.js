@@ -238,6 +238,10 @@ class Grammar {
             return new Range(rangeStr, rangeStr);
         }
 
+        if (rangeStr.includes('*')) {
+            return new Range(-Infinity, Infinity);
+        }
+        
         if (rangeStr.includes('..')) {
             const parts = rangeStr.split('..');
 
