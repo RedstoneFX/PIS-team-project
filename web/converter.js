@@ -22,7 +22,7 @@ class Grammar {
 
         for (const [patternName, patternData] of Object.entries(yamlData.patterns)) {
             try {
-                const pattern = this.createPattern(patternName, patternData);
+                const pattern = this.parsePattern(patternName, patternData);
                 this.patterns.set(patternName, pattern);
 
                 if (pattern.isRoot) {
@@ -68,7 +68,7 @@ class Grammar {
 
         switch (kind) {
             case 'CELL':
-                return new Cell(
+                return new CellPattern(
                     name,
                     kind,
                     desc,
@@ -95,7 +95,7 @@ class Grammar {
                 );
 
             case 'AREA':
-                return new Area(
+                return new AreaPattern(
                     name,
                     kind,
                     desc,
@@ -117,16 +117,16 @@ class Grammar {
      * @param {Object} data
      */
     static setPatternRelations(pattern, data) {
-        if (pattern instanceof Array) {
+        if (pattern instanceof ArrayPattern) {
             this.setArrayRelations(pattern, data);
-        } else if (pattern instanceof Area) {
+        } else if (pattern instanceof AreaPattern) {
             this.setAreaRelations(pattern, data);
         }
     }
 
     /**
      * Устанавливает связи для массива
-     * @param {Array} arrayPattern 
+     * @param {ArrayPattern} arrayPattern 
      * @param {Object} data 
      */
     static setArrayRelations(arrayPattern, data) {
@@ -146,7 +146,7 @@ class Grammar {
 
     /**
      * Устанавливает связи для области
-     * @param {Area} areaPattern
+     * @param {AreaPattern} areaPattern
      * @param {Object} data 
      */
     static setAreaRelations(areaPattern, data) {
@@ -154,14 +154,14 @@ class Grammar {
 
         if (data.inner) {
             for (const [componentName, componentData] of Object.entries(data.inner)) {
-                const component = this.parseComponent(componentName, componentData, true);
+                const component = this.parseComponent(areaPattern.name, componentName, componentData, true);
                 areaPattern.components.push(component);
             }
         }
 
         if (data.outer) {
             for (const [constraintName, constraintData] of Object.entries(data.outer)) {
-                const constraint = this.parseComponent(constraintName, constraintData, false);
+                const constraint = this.parseComponent(areaPattern.name, constraintName, constraintData, false);
                 areaPattern.components.push(constraint);
             }
         }
@@ -174,7 +174,7 @@ class Grammar {
      * @param {boolean} isInner 
      * @returns {Component} 
      */
-    static parseComponent(componentName, componentData, isInner) {
+    static parseComponent(parentName, componentName, componentData, isInner) {
         const location = this.parseLocation(componentData.location);
         const optional = componentData.optional === true;
 
@@ -186,9 +186,9 @@ class Grammar {
                 throw new Error(`Не удалось найти паттерн "${componentData.pattern}" для компонента "${componentName}"`);
             }
         } else if (componentData.pattern_definition) {
-            const referencedPatternName = `${componentName}_pattern`;
+            const referencedPatternName = `${parentName}__${componentName}`;
             try {
-                referencedPattern = this.createPattern(referencedPatternName, componentData.pattern_definition);
+                referencedPattern = this.parsePattern(referencedPatternName, componentData.pattern_definition);
                 this.patterns.set(referencedPatternName, referencedPattern);
                 this.setPatternRelations(referencedPattern, componentData.pattern_definition);
             } catch (error) {
@@ -448,7 +448,7 @@ class Pattern {
     }
 }
 
-class Cell extends Pattern {
+class CellPattern extends Pattern {
     /** @type {String} */
     contentType
 
@@ -458,7 +458,7 @@ class Cell extends Pattern {
     }
 }
 
-class Array extends Pattern {
+class ArrayPattern extends Pattern {
     /** @type {"ROW" | "COL" | "FILL"} */
     direction
     /** @type {Pattern} */
@@ -477,7 +477,7 @@ class Array extends Pattern {
     }
 }
 
-class Area extends Pattern {
+class AreaPattern extends Pattern {
     /** @type {Component[]} */
     components
 
