@@ -1,9 +1,13 @@
+const yaml = require('js-yaml');
+
 class Grammar {
     /** @type {String[]} */
-    cellTypes
+    static cellTypes = [];
     /** @type {Map<String, Pattern>} */
-    patterns
+    static patterns = new Map();
     /** @type {String} */
+    static rootName = null;
+
     rootName
 
     constructor(cellTypes, patterns, rootName) {
@@ -132,14 +136,14 @@ class Cell extends Pattern {
     /** @type {String} */
     contentType
 
-    constructor(name, kind, desc, count, width, height, isRoot, extend, contentType) {
-        super(name, kind, desc, count, width, height, isRoot, extend);
+    constructor(name, kind, desc, countInDoc, width, height, isRoot, contentType) {
+        super(name, kind, desc, countInDoc, width, height, isRoot);
         this.contentType = contentType;
     }
 }
 
 class Array extends Pattern {
-    /** @type {"ROW" | "COL" | "AREA"} */
+    /** @type {"ROW" | "COL" | "FILL"} */
     direction
     /** @type {Pattern} */
     pattern
@@ -148,8 +152,8 @@ class Array extends Pattern {
     /** @type {Range} */
     itemCount
 
-    constructor(name, kind, desc, count, width, height, isRoot, extend, direction, pattern, gap, itemCount) {
-        super(name, kind, desc, count, width, height, isRoot, extend);
+    constructor(name, kind, desc, countInDoc, width, height, isRoot, direction, pattern, gap, itemCount) {
+        super(name, kind, desc, countInDoc, width, height, isRoot);
         this.direction = direction;
         this.pattern = pattern;
         this.gap = gap; 
@@ -161,7 +165,8 @@ class Area extends Pattern {
     /** @type {Component[]} */
     components
 
-    constructor(components) {
+    constructor(name, kind, desc, countInDoc, width, height, isRoot, components) {
+        super(name, kind, desc, countInDoc, width, height, isRoot);
         this.components = components;
     }
 }
