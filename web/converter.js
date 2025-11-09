@@ -80,7 +80,7 @@ class Grammar {
                 );
 
             case 'ARRAY':
-                return new Array(
+                return new ArrayPattern(
                     name,
                     kind,
                     desc,
@@ -91,7 +91,24 @@ class Grammar {
                     data.direction?.toUpperCase() || 'ROW',
                     null,
                     this.parseRange(data.gap),
-                    this.parseRange(data.item_count)
+                    this.parseRange(data.item_count),
+                    false
+                );
+                
+            case 'ARRAY-IN-CONTEXT':
+                return new ArrayPattern(
+                    name,
+                    kind,
+                    desc,
+                    countInDoc,
+                    size?.width || new Range(1, 1),
+                    size?.height || new Range(1, 1),
+                    isRoot,
+                    data.direction?.toUpperCase() || 'ROW',
+                    null,
+                    this.parseRange(data.gap),
+                    this.parseRange(data.item_count),
+                    true
                 );
 
             case 'AREA':
@@ -475,13 +492,16 @@ class ArrayPattern extends Pattern {
     gap
     /** @type {Range} */
     itemCount
+    /** @type {Boolean} */
+    isInContext
 
-    constructor(name, kind, desc, countInDoc, width, height, isRoot, direction, pattern, gap, itemCount) {
+    constructor(name, kind, desc, countInDoc, width, height, isRoot, direction, pattern, gap, itemCount, isInContext) {
         super(name, kind, desc, countInDoc, width, height, isRoot);
         this.direction = direction;
         this.pattern = pattern;
         this.gap = gap;
         this.itemCount = itemCount;
+        this.isInContext = isInContext;
     }
 }
 
