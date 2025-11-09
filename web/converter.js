@@ -297,7 +297,6 @@ class Grammar {
             });
         } else if (typeof locationData === 'object') {
             for (const [key, value] of Object.entries(locationData)) {
-                const offset = this.parseRange(value);
                 let side = key;
                 let range = value;
                 if (typeof value === 'string' && (value.includes('top') || value.includes('bottom')
