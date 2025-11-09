@@ -1,5 +1,3 @@
-const yaml = require('js-yaml');
-
 class Grammar {
     /** @type {String[]} */
     static cellTypes = [];
@@ -8,12 +6,330 @@ class Grammar {
     /** @type {String} */
     static rootName = null;
 
-    rootName
+    /**
+     * Конвертирует YAML данные в объекты классов
+     * @param {Object} yamlData 
+     * @returns {Grammar}
+     */
+    static parse(yamlData) {
+        if (!yamlData || typeof yamlData !== 'object') {
+            throw new Error("Некорректные данные YAML");
+        }
 
-    constructor(cellTypes, patterns, rootName) {
-        this.cellTypes = cellTypes;
-        this.patterns = patterns;
-        this.rootName = rootName;
+        this.cellTypes = [];
+        this.patterns = new Map();
+        this.rootName = null;
+
+        for (const [patternName, patternData] of Object.entries(yamlData.patterns)) {
+            try {
+                const pattern = this.createPattern(patternName, patternData);
+                this.patterns.set(patternName, pattern);
+
+                if (pattern.isRoot) {
+                    if (this.rootName) {
+                        throw new Error(`Обнаружено несколько корневых паттернов: ${this.rootName} и ${patternName}`);
+                    }
+                    this.rootName = patternName;
+                }
+            } catch (error) {
+                throw new Error(`Ошибка создания паттерна "${patternName}": ${error.message}`);
+            }
+        }
+
+        for (const [patternName, patternData] of Object.entries(yamlData.patterns)) {
+            try {
+                this.setPatternRelations(this.patterns.get(patternName), patternData);
+            } catch (error) {
+                throw new Error(`Ошибка установки связей для паттерна "${patternName}": ${error.message}`);
+            }
+        }
+
+        if (!Grammar.rootName) {
+            throw new Error('Не найден корневой паттерн');
+        }
+    }
+
+    /**
+     * Конвертирует один паттерн
+     * @param {String} name
+     * @param {Object} data
+     * @returns {Pattern}
+     */
+    static parsePattern(name, data) {
+        if (!data.kind) {
+            throw new Error(`Паттерн '${name}' не имеет поля 'kind'`);
+        }
+
+        const kind = data.kind.toUpperCase();
+        const desc = data.description || '';
+        const countInDoc = this.parseRange(data.count_in_document);
+        const size = this.parseSize(data.size);
+        const isRoot = data.root === true;
+
+        switch (kind) {
+            case 'CELL':
+                return new Cell(
+                    name,
+                    kind,
+                    desc,
+                    countInDoc,
+                    size?.width || new Range(1, 1),
+                    size?.height || new Range(1, 1),
+                    isRoot,
+                    data.content_type
+                );
+
+            case 'ARRAY':
+                return new Array(
+                    name,
+                    kind,
+                    desc,
+                    countInDoc,
+                    size?.width || new Range(1, 1),
+                    size?.height || new Range(1, 1),
+                    isRoot,
+                    data.direction?.toUpperCase() || 'ROW',
+                    null,
+                    this.parseRange(data.gap),
+                    this.parseRange(data.item_count)
+                );
+
+            case 'AREA':
+                return new Area(
+                    name,
+                    kind,
+                    desc,
+                    countInDoc,
+                    size?.width || new Range(1, 1),
+                    size?.height || new Range(1, 1),
+                    isRoot,
+                    []
+                );
+
+            default:
+                throw new Error(`Неизвестный тип паттерна: ${kind}`);
+        }
+    }
+
+    /**
+     * Устанавливает связи между паттернами
+     * @param {Pattern} pattern
+     * @param {Object} data
+     */
+    static setPatternRelations(pattern, data) {
+        if (pattern instanceof Array) {
+            this.setArrayRelations(pattern, data);
+        } else if (pattern instanceof Area) {
+            this.setAreaRelations(pattern, data);
+        }
+    }
+
+    /**
+     * Устанавливает связи для массива
+     * @param {Array} arrayPattern 
+     * @param {Object} data 
+     */
+    static setArrayRelations(arrayPattern, data) {
+        if (!data.item_pattern) {
+            throw new Error('Массив должен содержать item_pattern');
+        }
+
+        const patternName = data.item_pattern;
+        const itemPattern = this.patterns.get(patternName);
+
+        if (!itemPattern) {
+            throw new Error(`Паттерн "${patternName}" не найден`);
+        }
+
+        arrayPattern.pattern = itemPattern;
+    }
+
+    /**
+     * Устанавливает связи для области
+     * @param {Area} areaPattern
+     * @param {Object} data 
+     */
+    static setAreaRelations(areaPattern, data) {
+        areaPattern.components = [];
+
+        if (data.inner) {
+            for (const [componentName, componentData] of Object.entries(data.inner)) {
+                const component = this.parseComponent(componentName, componentData, true);
+                areaPattern.components.push(component);
+            }
+        }
+
+        if (data.outer) {
+            for (const [constraintName, constraintData] of Object.entries(data.outer)) {
+                const constraint = this.parseComponent(constraintName, constraintData, false);
+                areaPattern.components.push(constraint);
+            }
+        }
+    }
+
+    /**
+     * Конвертирует один компонент
+     * @param {string} componentName
+     * @param {Object} componentData
+     * @param {boolean} isInner 
+     * @returns {Component} 
+     */
+    static parseComponent(componentName, componentData, isInner) {
+        const location = this.parseLocation(componentData.location);
+        const optional = componentData.optional === true;
+
+        let referencedPattern;
+
+        if (componentData.pattern) {
+            referencedPattern = this.patterns.get(componentData.pattern);
+            if (!referencedPattern) {
+                throw new Error(`Не удалось найти паттерн "${componentData.pattern}" для компонента "${componentName}"`);
+            }
+        } else if (componentData.pattern_definition) {
+            const referencedPatternName = `${componentName}_pattern`;
+            try {
+                referencedPattern = this.createPattern(referencedPatternName, componentData.pattern_definition);
+                this.patterns.set(referencedPatternName, referencedPattern);
+                this.setPatternRelations(referencedPattern, componentData.pattern_definition);
+            } catch (error) {
+                throw new Error(`Ошибка создания паттерна для компонента "${componentName}": ${error.message}`);
+            }
+        } else {
+            throw new Error(`Компонент "${componentName}" должен содержать pattern или pattern_definition`);
+        }
+
+        return new Component(
+            componentName,
+            referencedPattern,
+            location,
+            optional,
+            isInner
+        );
+    }
+
+    /**
+     * Парсит диапазон значений
+     * @param {string|number} rangeStr
+     * @returns {Range}
+     */
+    static parseRange(rangeStr) {
+        if (!rangeStr) {
+            return new Range(0, 0);
+        }
+
+        if (typeof rangeStr === 'number') {
+            return new Range(rangeStr, rangeStr);
+        }
+
+        if (rangeStr.includes('..')) {
+            const parts = rangeStr.split('..');
+
+            if (parts.length !== 2) {
+                throw new Error(`Некорректный формат диапазона: ${rangeStr}`);
+            }
+
+            const begin = parseInt(parts[0]);
+            const end = parseInt(parts[1]);
+
+            if (isNaN(begin) || (isNaN(end))) {
+                throw new Error(`Некорректный формат диапазона: ${rangeStr}`);
+            }
+
+            return new Range(begin, end);
+        }
+
+        if (rangeStr.endsWith('+') || rangeStr.endsWith('-')) {
+            const number = parseInt(rangeStr.slice(0, -1));
+            const modifier = rangeStr.slice(-1);
+
+            if (isNaN(number)) {
+                throw new Error(`Некорректный формат диапазона: ${rangeStr}`);
+            }
+
+            if (modifier === '+') {
+                return new Range(number, Infinity);
+            } else {
+                return new Range(-Infinity, number);
+            }
+        }
+    }
+
+    /**
+     * Парсит размер
+     * @param {string} sizeStr 
+     * @returns {Object}
+     */
+    static parseSize(sizeStr) {
+        if (!sizeStr) return null;
+
+        const parts = sizeStr.trim().split(/\s*x\s*/);
+
+        if (parts.length !== 2 || !parts[0] || !parts[1]) {
+            throw new Error(`Некорректный формат размера: ${sizeStr}. Ожидается формат "ширина x высота"`);
+        }
+
+        return {
+            width: this.parseRange(parts[0]),
+            height: this.parseRange(parts[1])
+        };
+    }
+
+    /**
+     * Парсит расположение
+     * @param {string|Object} locationData 
+     * @returns {Location} 
+     */
+    static parseLocation(locationData) {
+        if (!locationData) return null;
+
+        let padding = new CellOffset(0, 0, 0, 0);
+        let margin = new CellOffset(0, 0, 0, 0);
+
+        if (typeof locationData === 'string') {
+            const parts = locationData.split(',').map(part => part.trim());
+            parts.forEach(part => {
+                switch (part) {
+                    case 'top': padding.top = 0; break;
+                    case 'right': padding.right = 0; break;
+                    case 'bottom': padding.bottom = 0; break;
+                    case 'left': padding.left = 0; break;
+                }
+            });
+        } else if (typeof locationData === 'object') {
+            for (const [key, value] of Object.entries(locationData)) {
+                const offset = this.parseRange(value);
+                let side = key;
+
+                if (key.startsWith('padding-') || key.endsWith('-padding')) {
+                    side = side.replace('padding-', '');
+                    side = side.replace('-padding', '');
+                    this.setOffset(padding, side, offset);
+                } else if (key.startsWith('margin-')) {
+                    side = side.replace('margin-', '');
+                    side = side.replace('-margin', '');
+                    this.setOffset(margin, side, offset);
+                } else {
+                    this.setOffset(padding, key, offset);
+                }
+            }
+        }
+
+        return new Location(padding, margin);
+    }
+
+    /**
+     * Устанавливает значение отступа для стороны
+     * @param {CellOffset} offset
+     * @param {string} side
+     * @param {number} value
+     */
+    static setOffset(offset, side, value) {
+        switch (side.toLowerCase) {
+            case 'left': offset.left = value; break;
+            case 'top': offset.top = value; break;
+            case 'right': offset.right = value; break;
+            case 'bottom': offset.bottom = value; break;
+        }
     }
 }
 
@@ -21,11 +337,11 @@ class CellOffset {
     /** @type {number}  */
     left
     /** @type {number} */
-    top 
+    top
     /** @type {number} */
-    right 
+    right
     /** @type {number} */
-    bottom 
+    bottom
 
     constructor(left, top, right, bottom) {
         this.left = left;
@@ -86,9 +402,9 @@ class Range {
 
 class Component {
     /** @type {String} */
-    name 
+    name
     /** @type {Pattern} */
-    pattern 
+    pattern
     /** @type {Location} */
     location
     /** @type {boolean} */
@@ -156,7 +472,7 @@ class Array extends Pattern {
         super(name, kind, desc, countInDoc, width, height, isRoot);
         this.direction = direction;
         this.pattern = pattern;
-        this.gap = gap; 
+        this.gap = gap;
         this.itemCount = itemCount;
     }
 }
