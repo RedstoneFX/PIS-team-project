@@ -299,12 +299,21 @@ class Grammar {
             for (const [key, value] of Object.entries(locationData)) {
                 const offset = this.parseRange(value);
                 let side = key;
+                let range = value;
+                if (typeof value === 'string' && (value.includes('top') || value.includes('bottom')
+                                              || value.includes('left') || value.includes('right'))) {
+                    side = value;
+                    range = 0;
+                } else if (typeof value === 'object') {
+                    [side, range] = Object.entries(value)[0];
+                }
+                const offset = this.parseRange(range);
 
-                if (key.startsWith('padding-') || key.endsWith('-padding')) {
+                if (side.startsWith('padding-') || side.endsWith('-padding')) {
                     side = side.replace('padding-', '');
                     side = side.replace('-padding', '');
                     this.setOffset(padding, side, offset);
-                } else if (key.startsWith('margin-')) {
+                } else if (side.startsWith('margin-') || side.endsWith('-margin')) {
                     side = side.replace('margin-', '');
                     side = side.replace('-margin', '');
                     this.setOffset(margin, side, offset);
