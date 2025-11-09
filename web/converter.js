@@ -299,17 +299,17 @@ class Grammar {
     static parseLocation(locationData) {
         if (!locationData) return null;
 
-        let padding = new CellOffset(0, 0, 0, 0);
-        let margin = new CellOffset(0, 0, 0, 0);
+        let padding = new CellOffset(new Range(0, 0), new Range(0, 0), new Range(0, 0), new Range(0, 0));
+        let margin = new CellOffset(new Range(0, 0), new Range(0, 0), new Range(0, 0), new Range(0, 0));
 
         if (typeof locationData === 'string') {
             const parts = locationData.split(',').map(part => part.trim());
             parts.forEach(part => {
                 switch (part) {
-                    case 'top': padding.top = 0; break;
-                    case 'right': padding.right = 0; break;
-                    case 'bottom': padding.bottom = 0; break;
-                    case 'left': padding.left = 0; break;
+                    case 'top': padding.top = new Range(0, 0); break;
+                    case 'right': padding.right = new Range(0, 0); break;
+                    case 'bottom': padding.bottom = new Range(0, 0); break;
+                    case 'left': padding.left = new Range(0, 0); break;
                 }
             });
         } else if (typeof locationData === 'object') {
@@ -334,7 +334,7 @@ class Grammar {
                     side = side.replace('-margin', '');
                     this.setOffset(margin, side, offset);
                 } else {
-                    this.setOffset(padding, key, offset);
+                    this.setOffset(padding, side, offset);
                 }
             }
         }
@@ -346,10 +346,10 @@ class Grammar {
      * Устанавливает значение отступа для стороны
      * @param {CellOffset} offset
      * @param {string} side
-     * @param {number} value
+     * @param {Range} value
      */
     static setOffset(offset, side, value) {
-        switch (side.toLowerCase) {
+        switch (side) {
             case 'left': offset.left = value; break;
             case 'top': offset.top = value; break;
             case 'right': offset.right = value; break;
@@ -359,13 +359,13 @@ class Grammar {
 }
 
 class CellOffset {
-    /** @type {number}  */
+    /** @type {Range}  */
     left
-    /** @type {number} */
+    /** @type {Range} */
     top
-    /** @type {number} */
+    /** @type {Range} */
     right
-    /** @type {number} */
+    /** @type {Range} */
     bottom
 
     constructor(left, top, right, bottom) {
