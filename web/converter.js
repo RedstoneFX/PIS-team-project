@@ -238,7 +238,7 @@ class Grammar {
             return new Range(rangeStr, rangeStr);
         }
 
-        if (rangeStr.includes('*')) {
+        if (rangeStr === '*') {
             return new Range(-Infinity, Infinity);
         }
         
@@ -249,8 +249,15 @@ class Grammar {
                 throw new Error(`Некорректный формат диапазона: ${rangeStr}`);
             }
 
-            const begin = parseInt(parts[0]);
-            const end = parseInt(parts[1]);
+            let begin = parseInt(parts[0]);
+            let end = parseInt(parts[1]);
+
+            if (parts[0] === '*') {
+                begin = -Infinity;
+            }
+            if (parts[1] === '*') {
+                end = Infinity;
+            }
 
             if (isNaN(begin) || (isNaN(end))) {
                 throw new Error(`Некорректный формат диапазона: ${rangeStr}`);
