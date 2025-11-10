@@ -68,7 +68,7 @@ class Grammar {
 
         const kind = data.kind.toUpperCase();
         const desc = data.description || '';
-        const countInDoc = this.parseRange(data.count_in_document);
+        const countInDoc = this.parseYamlRange(data.count_in_document);
         const size = this.parseSize(data.size);
         const isRoot = data.root === true;
 
@@ -79,8 +79,8 @@ class Grammar {
                     kind,
                     desc,
                     countInDoc,
-                    size?.width || new Range(1, 1),
-                    size?.height || new Range(1, 1),
+                    size?.width || new YamlRange(1, 1),
+                    size?.height || new YamlRange(1, 1),
                     isRoot,
                     data.content_type
                 );
@@ -91,13 +91,13 @@ class Grammar {
                     kind,
                     desc,
                     countInDoc,
-                    size?.width || new Range(1, 1),
-                    size?.height || new Range(1, 1),
+                    size?.width || new YamlRange(1, 1),
+                    size?.height || new YamlRange(1, 1),
                     isRoot,
                     data.direction?.toUpperCase() || 'ROW',
                     null,
-                    this.parseRange(data.gap),
-                    this.parseRange(data.item_count),
+                    this.parseYamlRange(data.gap),
+                    this.parseYamlRange(data.item_count),
                     false
                 );
                 
@@ -107,13 +107,13 @@ class Grammar {
                     kind,
                     desc,
                     countInDoc,
-                    size?.width || new Range(1, 1),
-                    size?.height || new Range(1, 1),
+                    size?.width || new YamlRange(1, 1),
+                    size?.height || new YamlRange(1, 1),
                     isRoot,
                     data.direction?.toUpperCase() || 'ROW',
                     null,
-                    this.parseRange(data.gap),
-                    this.parseRange(data.item_count),
+                    this.parseYamlRange(data.gap),
+                    this.parseYamlRange(data.item_count),
                     true
                 );
 
@@ -123,8 +123,8 @@ class Grammar {
                     kind,
                     desc,
                     countInDoc,
-                    size?.width || new Range(1, 1),
-                    size?.height || new Range(1, 1),
+                    size?.width || new YamlRange(1, 1),
+                    size?.height || new YamlRange(1, 1),
                     isRoot,
                     []
                 );
@@ -233,19 +233,19 @@ class Grammar {
     /**
      * Парсит диапазон значений
      * @param {string|number} rangeStr
-     * @returns {Range}
+     * @returns {YamlRange}
      */
-    static parseRange(rangeStr) {
+    static parseYamlRange(rangeStr) {
         if (!rangeStr) {
-            return new Range(0, 0);
+            return new YamlRange(0, 0);
         }
 
         if (typeof rangeStr === 'number') {
-            return new Range(rangeStr, rangeStr);
+            return new YamlRange(rangeStr, rangeStr);
         }
 
         if (rangeStr === '*') {
-            return new Range(-Infinity, Infinity);
+            return new YamlRange(-Infinity, Infinity);
         }
         
         if (rangeStr.includes('..')) {
@@ -269,7 +269,7 @@ class Grammar {
                 throw new Error(`Некорректный формат диапазона: ${rangeStr}`);
             }
 
-            return new Range(begin, end);
+            return new YamlRange(begin, end);
         }
 
         if (rangeStr.endsWith('+') || rangeStr.endsWith('-')) {
@@ -281,9 +281,9 @@ class Grammar {
             }
 
             if (modifier === '+') {
-                return new Range(number, Infinity);
+                return new YamlRange(number, Infinity);
             } else {
-                return new Range(-Infinity, number);
+                return new YamlRange(-Infinity, number);
             }
         }
     }
@@ -303,8 +303,8 @@ class Grammar {
         }
 
         return {
-            width: this.parseRange(parts[0]),
-            height: this.parseRange(parts[1])
+            width: this.parseYamlRange(parts[0]),
+            height: this.parseYamlRange(parts[1])
         };
     }
 
@@ -316,17 +316,17 @@ class Grammar {
     static parseLocation(locationData) {
         if (!locationData) return null;
 
-        let padding = new CellOffset(new Range(0, 0), new Range(0, 0), new Range(0, 0), new Range(0, 0));
-        let margin = new CellOffset(new Range(0, 0), new Range(0, 0), new Range(0, 0), new Range(0, 0));
+        let padding = new CellOffset(new YamlRange(0, 0), new YamlRange(0, 0), new YamlRange(0, 0), new YamlRange(0, 0));
+        let margin = new CellOffset(new YamlRange(0, 0), new YamlRange(0, 0), new YamlRange(0, 0), new YamlRange(0, 0));
 
         if (typeof locationData === 'string') {
             const parts = locationData.split(',').map(part => part.trim());
             parts.forEach(part => {
                 switch (part) {
-                    case 'top': padding.top = new Range(0, 0); break;
-                    case 'right': padding.right = new Range(0, 0); break;
-                    case 'bottom': padding.bottom = new Range(0, 0); break;
-                    case 'left': padding.left = new Range(0, 0); break;
+                    case 'top': padding.top = new YamlRange(0, 0); break;
+                    case 'right': padding.right = new YamlRange(0, 0); break;
+                    case 'bottom': padding.bottom = new YamlRange(0, 0); break;
+                    case 'left': padding.left = new YamlRange(0, 0); break;
                 }
             });
         } else if (typeof locationData === 'object') {
@@ -340,7 +340,7 @@ class Grammar {
                 } else if (typeof value === 'object') {
                     [side, range] = Object.entries(value)[0];
                 }
-                const offset = this.parseRange(range);
+                const offset = this.parseYamlRange(range);
 
                 if (side.startsWith('padding-') || side.endsWith('-padding')) {
                     side = side.replace('padding-', '');
@@ -363,7 +363,7 @@ class Grammar {
      * Устанавливает значение отступа для стороны
      * @param {CellOffset} offset
      * @param {string} side
-     * @param {Range} value
+     * @param {YamlRange} value
      */
     static setOffset(offset, side, value) {
         switch (side) {
@@ -376,13 +376,13 @@ class Grammar {
 }
 
 class CellOffset {
-    /** @type {Range}  */
+    /** @type {YamlRange}  */
     left
-    /** @type {Range} */
+    /** @type {YamlRange} */
     top
-    /** @type {Range} */
+    /** @type {YamlRange} */
     right
-    /** @type {Range} */
+    /** @type {YamlRange} */
     bottom
 
     constructor(left, top, right, bottom) {
@@ -405,7 +405,7 @@ class Location {
     }
 }
 
-class Range {
+class YamlRange {
     /** @type {number} */
     #begin
     /** @type {number} */
@@ -470,11 +470,11 @@ class Pattern {
     kind
     /** @type {String} */
     desc
-    /** @type {Range} */
+    /** @type {YamlRange} */
     countInDoc
-    /** @type {Range} */
+    /** @type {YamlRange} */
     width
-    /** @type {Range} */
+    /** @type {YamlRange} */
     height
     /** @type {boolean} */
     isRoot
@@ -505,9 +505,9 @@ class ArrayPattern extends Pattern {
     direction
     /** @type {Pattern} */
     pattern
-    /** @type {Range} */
+    /** @type {YamlRange} */
     gap
-    /** @type {Range} */
+    /** @type {YamlRange} */
     itemCount
     /** @type {Boolean} */
     isInContext
