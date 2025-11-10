@@ -379,6 +379,26 @@ class Grammar {
             case 'bottom': offset.bottom = value; break;
         }
     }
+
+    /**
+     * Конвертирует Grammar в YAML-объект
+     * @returns {Object}
+     */
+    static toYamlObject() {
+        const result = {
+            patterns: {}
+        };
+
+        for (const [patternName, pattern] of this.patterns) {
+            result.patterns[patternName] = pattern.toYaml();
+        }
+
+        if (this.cellTypesFilepath) {
+            result.cell_types_filepath = this.cellTypesFilepath;
+        }
+
+        return result;
+    }
 }
 
 class CellOffset {
@@ -408,6 +428,43 @@ class YamlLocation {
     constructor(padding, margin) {
         this.padding = padding;
         this.margin = margin;
+    }
+
+    /**
+     * Конвертирует YamlLocation в YAML-представление
+     * @returns {string|Object}
+     */
+    toYaml() {
+        const { padding, margin } = this;
+        const result = {};
+
+        if (padding.left?.isDefined()) {
+            result['padding-left'] = padding.left.toYaml();
+        }
+        if (padding.top?.isDefined()) {
+            result['padding-top'] = padding.top.toYaml();
+        }
+        if (padding.right?.isDefined()) {
+            result['padding-right'] = padding.right.toYaml();
+        }
+        if (padding.bottom?.isDefined()) {
+            result['padding-bottom'] = padding.bottom.toYaml();
+        }
+
+        if (margin.left?.isDefined()) {
+            result['margin-left'] = margin.left.toYaml();
+        }
+        if (margin.top?.isDefined()) {
+            result['margin-top'] = margin.top.toYaml();
+        }
+        if (margin.right?.isDefined()) {
+            result['margin-right'] = margin.right.toYaml();
+        }
+        if (margin.bottom?.isDefined()) {
+            result['margin-bottom'] = margin.bottom.toYaml();
+        }       
+
+        return result;
     }
 }
 
@@ -461,6 +518,29 @@ class YamlRange {
         }
         this.#end = value;
     }
+
+    /**
+     * Конвертирует YamlRange в YAML-строку
+     * @returns {string}
+     */
+    toYaml() {
+        if (this.isDefined()) {
+            const begin = this.getBegin();
+            const end = this.getEnd();
+
+            if (begin === end) {
+                return begin.toString();
+            } else if (begin === -Infinity && end === Infinity) {
+                return '*';
+            } else if (begin === -Infinity) {
+                return `${end}-`;
+            } else if (end === Infinity) {
+                return `${begin}+`;
+            } else {
+                return `${begin}..${end}`;
+            }
+        }
+    }
 }
 
 class Component {
@@ -481,6 +561,28 @@ class Component {
         this.location = location;
         this.optional = optional;
         this.inner = inner;
+    }
+
+    /**
+     * Конвертирует Component в YAML-объект
+     * @returns {Object}
+     */
+    toYaml() {
+        const result = {};
+
+        if (this.pattern) {
+            result.pattern = this.pattern.name;
+        }
+
+        if (this.location) {
+            result.location = this.location.toYaml();
+        }
+
+        if (this.optional === true) {
+            result.optional = true;
+        }
+
+        return result;
     }
 }
 
@@ -509,6 +611,43 @@ class Pattern {
         this.height = height;
         this.isRoot = isRoot;
     }
+
+    /**
+     * Конвертирует Pattern в YAML-объект
+     * @returns {Object}
+     */
+    toYaml() {
+        const result = {
+            description: this.desc,
+            kind: this.kind.toLowerCase()
+        };
+
+        if (this.countInDoc?.isDefined()) {
+            result.count_in_document = this.countInDoc.toYaml();
+        }
+
+        if (this.width?.isDefined() && this.height?.isDefined()) {
+            result.size = this.sizeToYaml(this.width, this.height);
+        }
+
+        if (this.isRoot) {
+            result.root = true;
+        }
+
+        return result;
+    }
+
+    /**
+     * Конвертирует размер в YAML-строку
+     * @param {YamlRange} width
+     * @param {YamlRange} height  
+     * @returns {string}
+     */
+    sizeToYaml(width, height) {
+        if (width?.isDefined() && height?.isDefined()) {
+            return `${width.toYaml()} x ${height.toYaml()}`;
+        }
+    }
 }
 
 class CellPattern extends Pattern {
@@ -518,6 +657,20 @@ class CellPattern extends Pattern {
     constructor(name, kind, desc, countInDoc, width, height, isRoot, contentType) {
         super(name, kind, desc, countInDoc, width, height, isRoot);
         this.contentType = contentType;
+    }
+
+    /**
+     * Конвертирует CellPattern в YAML-объект
+     * @returns {Object}
+     */
+    toYaml() {
+        const result = super.toYaml();
+        
+        if (this.contentType) {
+            result.content_type = this.contentType;
+        }
+
+        return result;
     }
 }
 
@@ -541,6 +694,36 @@ class ArrayPattern extends Pattern {
         this.itemCount = itemCount;
         this.isInContext = isInContext;
     }
+
+    /**
+     * Конвертирует ArrayPattern в YAML-объект
+     * @returns {Object}
+     */
+    toYaml() {
+        const result = super.toYaml();
+
+        if (this.isInContext) {
+            result.kind = 'array-in-context';
+        }
+        
+        if (this.direction) {
+            result.direction = this.direction.toLowerCase();
+        }
+        
+        if (this.pattern) {
+            result.item_pattern = this.pattern.name;
+        }
+
+        if (this.itemCount?.isDefined()) {
+            result.item_count = this.itemCount.toYaml();
+        }
+
+        if (this.gap?.isDefined()) {
+            result.gap = this.gap.toYaml();
+        }
+
+        return result;
+    }
 }
 
 class AreaPattern extends Pattern {
@@ -550,6 +733,29 @@ class AreaPattern extends Pattern {
     constructor(name, kind, desc, countInDoc, width, height, isRoot, components) {
         super(name, kind, desc, countInDoc, width, height, isRoot);
         this.components = components;
+    }
+
+    /**
+     * Конвертирует AreaPattern в YAML-объект
+     * @returns {Object}
+     */
+    toYaml() {
+        const result = super.toYaml();
+        
+        if (this.components && this.components.length > 0) {
+           
+            for (const component of this.components) {
+                if (component.inner) {
+                    if (!result.inner) result.inner = {};
+                    result.inner[component.name] = component.toYaml();
+                } else {
+                    if (!result.outer) result.outer = {};
+                    result.outer[component.name] = component.toYaml();
+                }
+            }
+        }
+
+        return result;
     }
 }
 
