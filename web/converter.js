@@ -68,8 +68,14 @@ class Grammar {
 
         const kind = data.kind.toUpperCase();
         const desc = data.description || '';
-        const countInDoc = this.parseYamlRange(data.count_in_document);
-        const size = this.parseSize(data.size);
+        let countInDoc = new YamlRange(0, 0).setUndefined();
+        if (data.count_in_document) {
+            countInDoc = this.parseYamlRange(data.count_in_document);
+        }
+        let size = { width: new YamlRange(0, 0).setUndefined(), height: new YamlRange(0, 0).setUndefined() };
+        if (data.size) {
+            size = this.parseSize(data.size);
+        }
         const isRoot = data.root === true;
 
         switch (kind) {
@@ -79,8 +85,8 @@ class Grammar {
                     kind,
                     desc,
                     countInDoc,
-                    size?.width || new YamlRange(1, 1),
-                    size?.height || new YamlRange(1, 1),
+                    size?.width || new YamlRange(0, 0).setUndefined(),
+                    size?.height || new YamlRange(0, 0).setUndefined(),
                     isRoot,
                     data.content_type
                 );
@@ -91,8 +97,8 @@ class Grammar {
                     kind,
                     desc,
                     countInDoc,
-                    size?.width || new YamlRange(1, 1),
-                    size?.height || new YamlRange(1, 1),
+                    size?.width || new YamlRange(0, 0).setUndefined(),
+                    size?.height || new YamlRange(0, 0).setUndefined(),
                     isRoot,
                     data.direction?.toUpperCase() || 'ROW',
                     null,
@@ -107,8 +113,8 @@ class Grammar {
                     kind,
                     desc,
                     countInDoc,
-                    size?.width || new YamlRange(1, 1),
-                    size?.height || new YamlRange(1, 1),
+                    size?.width || new YamlRange(0, 0).setUndefined(),
+                    size?.height || new YamlRange(0, 0).setUndefined(),
                     isRoot,
                     data.direction?.toUpperCase() || 'ROW',
                     null,
@@ -123,8 +129,8 @@ class Grammar {
                     kind,
                     desc,
                     countInDoc,
-                    size?.width || new YamlRange(1, 1),
-                    size?.height || new YamlRange(1, 1),
+                    size?.width || new YamlRange(0, 0).setUndefined(),
+                    size?.height || new YamlRange(0, 0).setUndefined(),
                     isRoot,
                     []
                 );
@@ -237,7 +243,7 @@ class Grammar {
      */
     static parseYamlRange(rangeStr) {
         if (!rangeStr) {
-            return new YamlRange(0, 0);
+            return new YamlRange(0, 0).setUndefined();
         }
 
         if (typeof rangeStr === 'number') {
