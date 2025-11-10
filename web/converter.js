@@ -316,8 +316,8 @@ class Grammar {
     static parseYamlLocation(locationData) {
         if (!locationData) return null;
 
-        let padding = new CellOffset(new YamlRange(0, 0), new YamlRange(0, 0), new YamlRange(0, 0), new YamlRange(0, 0));
-        let margin = new CellOffset(new YamlRange(0, 0), new YamlRange(0, 0), new YamlRange(0, 0), new YamlRange(0, 0));
+        let padding = new CellOffset(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined());
+        let margin = new CellOffset(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined());
 
         if (typeof locationData === 'string') {
             const parts = locationData.split(',').map(part => part.trim());
@@ -410,6 +410,8 @@ class YamlRange {
     #begin
     /** @type {number} */
     #end
+    /** @type {boolean} */
+    #isDefined 
 
     constructor(begin, end) {
         if (begin > end) {
@@ -417,6 +419,19 @@ class YamlRange {
         }
         this.#begin = begin;
         this.#end = end;
+        this.#isDefined = true;
+    }
+
+    setDefined() {
+        this.#isDefined = true;
+    }
+
+    setUndefined() {
+        this.#isDefined = false;
+    }
+
+    isDefined() {
+        return this.#isDefined;
     }
 
     getBegin() {
