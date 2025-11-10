@@ -5,6 +5,8 @@ class Grammar {
     static patterns = new Map();
     /** @type {String} */
     static rootName = null;
+    /** @type {String} */
+    static cellTypesFilepath = '';
 
     /**
      * Конвертирует YAML данные в объекты классов
@@ -14,6 +16,10 @@ class Grammar {
     static parse(yamlData) {
         if (!yamlData || typeof yamlData !== 'object') {
             throw new Error("Некорректные данные YAML");
+        }
+
+        if (yamlData.cell_types_filepath) {
+            this.cellTypesFilepath = yamlData.cell_types_filepath;
         }
 
         this.cellTypes = [];
