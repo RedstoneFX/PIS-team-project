@@ -198,7 +198,7 @@ class Grammar {
      * @returns {Component} 
      */
     static parseComponent(parentName, componentName, componentData, isInner) {
-        const location = this.parseLocation(componentData.location);
+        const location = this.parseYamlLocation(componentData.location);
         const optional = componentData.optional === true;
 
         let referencedPattern;
@@ -311,9 +311,9 @@ class Grammar {
     /**
      * Парсит расположение
      * @param {string|Object} locationData 
-     * @returns {Location} 
+     * @returns {YamlLocation} 
      */
-    static parseLocation(locationData) {
+    static parseYamlLocation(locationData) {
         if (!locationData) return null;
 
         let padding = new CellOffset(new YamlRange(0, 0), new YamlRange(0, 0), new YamlRange(0, 0), new YamlRange(0, 0));
@@ -356,7 +356,7 @@ class Grammar {
             }
         }
 
-        return new Location(padding, margin);
+        return new YamlLocation(padding, margin);
     }
 
     /**
@@ -393,7 +393,7 @@ class CellOffset {
     }
 }
 
-class Location {
+class YamlLocation {
     /** @type {CellOffset} */
     padding
     /** @type {CellOffset} */
@@ -447,7 +447,7 @@ class Component {
     name
     /** @type {Pattern} */
     pattern
-    /** @type {Location} */
+    /** @type {YamlLocation} */
     location
     /** @type {boolean} */
     optional
