@@ -380,6 +380,7 @@ class Grammar {
                     case 'right': padding.right = new YamlRange(0, 0); break;
                     case 'bottom': padding.bottom = new YamlRange(0, 0); break;
                     case 'left': padding.left = new YamlRange(0, 0); break;
+                    default: throw Error("Не удается распознать сторону " + part);
                 }
             });
         } else if (typeof locationData === 'object') {
