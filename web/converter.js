@@ -52,18 +52,18 @@ class Grammar {
             }
         }
 
-        // Связывание паттернов
-        for (const [patternName, patternData] of Object.entries(yamlData.patterns)) { // Для каждого паттерна
-            try {
-                this.setPatternRelations(this.patterns.get(patternName), patternData); // Попытаться связать паттерн
-            } catch (error) {
-                throw new Error(`Ошибка установки связей для паттерна "${patternName}": ${error.message}`);
-            }
-        }
-
         // Сообщить об ошибке, если не найден корневой паттерн
         if (!Grammar.rootName) {
             throw new Error('Не найден корневой паттерн');
+        }
+
+        // Связывание паттернов
+        for (const [name, pattern] of this.patterns.entries()) {
+            try {
+                pattern.resolveLinks();
+            } catch (error) {
+                throw new Error(`Ошибка установки связей для паттерна "${patternName}": ${error.message}`);
+            }
         }
     }
 
@@ -74,92 +74,22 @@ class Grammar {
      * @returns {Pattern}
      */
     static parsePattern(name, data) {
-        
+
         // Сообщаем об ошибке, если паттерн не имеет типа
         if (!data.kind) {
             throw new Error(`Паттерн '${name}' не имеет поля 'kind'`);
         }
 
-        // Считываем данные
         const kind = data.kind.toUpperCase();
-        const desc = data.description || '';
-        let countInDoc = new YamlRange(0, 0).setUndefined();
 
-        // Считываем количество вхождений паттерна в документ
-        // TODO: может выкинуть ошибку?
-        if (data.count_in_document) {
-            countInDoc = this.parseYamlRange(data.count_in_document);
-        }
-
-        // Считываем размер паттерна в клетках
-        let size = this.parseSize(data.size);
-
-        // Считываем isRoot
-        let isRoot = data.root;
-        if(isRoot === null || isRoot == undefined) isRoot = false;
-        if(!(isRoot === true || isRoot === false))
-            throw new Error(`Паттерн ${name} имеет непонятное значение root (${data.root})`);
-        
-
-        // Возвращаем паттерн определенного типа, в зависимости от поля kind
-        switch (kind) {
-            case 'CELL':
-                return new CellPattern(
-                    name,
-                    kind,
-                    desc,
-                    countInDoc,
-                    size.width,
-                    size.height,
-                    isRoot,
-                    data.content_type
-                );
-
-            case 'ARRAY':
-                return new ArrayPattern(
-                    name,
-                    kind,
-                    desc,
-                    countInDoc,
-                    size.width,
-                    size.height,
-                    isRoot,
-                    data.direction?.toUpperCase() || 'ROW',
-                    null,
-                    this.parseYamlRange(data.gap),
-                    this.parseYamlRange(data.item_count)
-                );
-                
-            case 'ARRAY-IN-CONTEXT':
-                return new ArrayPattern(
-                    name,
-                    kind,
-                    desc,
-                    countInDoc,
-                    size.width,
-                    size.height,
-                    isRoot,
-                    data.direction?.toUpperCase() || 'ROW',
-                    null,
-                    this.parseYamlRange(data.gap),
-                    this.parseYamlRange(data.item_count)
-                );
-
-            case 'AREA':
-                return new AreaPattern(
-                    name,
-                    kind,
-                    desc,
-                    countInDoc,
-                    size.width ,
-                    size.height,
-                    isRoot,
-                    []
-                );
-
-            default:
-                throw new Error(`Неизвестный тип паттерна: ${kind}`);
-        }
+        if (kind == "CELL")
+            return new CellPattern(name, data);
+        else if (kind == "ARRAY" || kind == "ARRAY-IN-CONTEXT")
+            return new ArrayPattern(name, data);
+        else if (kind == "AREA")
+            return new ArrayPattern(name, data);
+        else
+            throw new Error(`Неизвестный тип паттерна: ${kind}`);
     }
 
     /**
@@ -189,77 +119,10 @@ class Grammar {
         const itemPattern = this.patterns.get(patternName); // Находим паттерн с таким названием
 
         if (!itemPattern) { // Сообщаем об ошибке, если не удалось найти такой паттерн
-            throw new Error(`Не удалось найти паттерн "${patternName}" для массива`); 
+            throw new Error(`Не удалось найти паттерн "${patternName}" для массива`);
         }
 
         arrayPattern.pattern = itemPattern; // Привязываем паттерн к текущему как элемент
-    }
-
-    /**
-     * Устанавливает связи для области
-     * @param {AreaPattern} areaPattern
-     * @param {Object} data 
-     */
-    static setAreaRelations(areaPattern, data) {
-        areaPattern.components = []; // Очищаем список компонентов области
-
-        if (data.inner) { // Если... У области есть внутренняя часть?? 
-            for (const [componentName, componentData] of Object.entries(data.inner)) { // Для каждого внутреннего компонента...
-                const component = this.parseComponent(areaPattern.name, componentName, componentData, true); // Распознаем компонент
-                areaPattern.components.push(component); // Добавляем компонент в список компонентов
-            }
-        }
-
-        if (data.outer) { // Если... У области есть внешняя часть?? 
-            for (const [constraintName, constraintData] of Object.entries(data.outer)) { // Для каждого внешнего компонента...
-                const constraint = this.parseComponent(areaPattern.name, constraintName, constraintData, false); // Распознаем компонент
-                areaPattern.components.push(constraint); // Добавляем компонент в список компонентов
-            }
-        }
-    }
-
-    /**
-     * Конвертирует один компонент
-     * @param {string} componentName
-     * @param {Object} componentData
-     * @param {boolean} isInner 
-     * @returns {Component} 
-     */
-    static parseComponent(parentName, componentName, componentData, isInner) {
-        const location = this.parseYamlLocation(componentData.location); // Распознаем позицию элемента
-
-        // Распознаем поле optional
-        let optional = componentData.optional; 
-        if(optional === null || optional == undefined) optional = false;
-        if(!(optional === true || optional === false)) throw new Error("Не удалось распознать поле optional у компонента " + componentName);
-
-        let referencedPattern;
-
-        if (componentData.pattern) { // Если данный компонент имеет поле pattern
-            referencedPattern = this.patterns.get(componentData.pattern); // ищем паттерн с таким именем
-            if (!referencedPattern) { // Сообщаем об ошибке, если такого компонента нет
-                throw new Error(`Не удалось найти паттерн "${componentData.pattern}" для компонента "${componentName}"`);
-            }
-        } else if (componentData.pattern_definition) { // Если данный компонент объявляет паттерн непосредственно...
-            const referencedPatternName = `${parentName}__${componentName}`; // Генерируем новое имя для паттерна
-            try {
-                referencedPattern = this.parsePattern(referencedPatternName, componentData.pattern_definition).setInlineDefined();  // Распознаем внутренний паттерн
-                this.componentsInlinePatterns.set(referencedPatternName, referencedPattern); // Добавляем паттерн в словарь паттернов для компонентов
-                this.setPatternRelations(referencedPattern, componentData.pattern_definition); // Связываем паттерн
-            } catch (error) {
-                throw new Error(`Ошибка создания паттерна для компонента "${componentName}": ${error.message}`);
-            }
-        } else {
-            throw new Error(`Компонент "${componentName}" должен содержать pattern или pattern_definition`);
-        }
-
-        return new Component(
-            componentName,
-            referencedPattern,
-            location,
-            optional,
-            isInner
-        );
     }
 
     /**
@@ -280,13 +143,13 @@ class Grammar {
         }
 
         // Если переданна не строка, то я хз, что делать
-        if(typeof rangeStr != "string") {
+        if (typeof rangeStr != "string") {
             throw new Error("Не удается распознать интервал " + rangeStr);
         }
 
         rangeStr = rangeStr.replaceAll(/\s+/g, "");
 
-        if(/\d+/.test(rangeStr)) {
+        if (/\d+/.test(rangeStr)) {
             let i = parseInt(rangeStr);
             return new YamlRange(i, i);
         }
@@ -295,27 +158,27 @@ class Grammar {
         if (rangeStr === '*') {
             return new YamlRange(-Infinity, Infinity); // Жеееесть, но ОК
         }
-        
+
         // Если в строке точно есть интервал...
-        if (rangeStr.includes('..')) { 
+        if (rangeStr.includes('..')) {
             const parts = rangeStr.split('..', 2); // Выделяем левую и правую часть интервала
 
             let begin;
             let end;
 
             // Парсим левую часть интервала
-            if(/\d+/.test(parts[0])) { 
+            if (/\d+/.test(parts[0])) {
                 begin = parseInt(parts[0]);
-            } else if(parts[0] == "*"){
+            } else if (parts[0] == "*") {
                 begin = -Infinity;
             } else {
                 throw new Error("Не удается распознать левую часть интервала " + rangeStr);
             }
 
             // Парсим правую часть интервала
-            if(/\d+/.test(parts[1])) { 
+            if (/\d+/.test(parts[1])) {
                 begin = parseInt(parts[1]);
-            } else if(parts[1] == "*"){
+            } else if (parts[1] == "*") {
                 begin = -Infinity;
             } else {
                 throw new Error("Не удается распознать правую часть интервала " + rangeStr);
@@ -330,7 +193,7 @@ class Grammar {
             const modifier = rangeStr.slice(-1);
 
             // Парсим число
-            if(/\d+/.test(number)) { 
+            if (/\d+/.test(number)) {
                 number = parseInt(number);
             } else {
                 throw new Error("Не удается распознать число в интервале: " + rangeStr);
@@ -355,7 +218,7 @@ class Grammar {
         if (!sizeStr) return new PatternSize(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined()); // Возвращаем пустышку, если размеры не указаны
 
         // Удалить пробелы из приведённой к нижнему регистру строки и разделить по "x"
-        const parts = sizeStr.toLowerCase().replaceAll(/\s+/g, "") .split("x");
+        const parts = sizeStr.toLowerCase().replaceAll(/\s+/g, "").split("x");
 
         // Выбросить ошибку, если строка не задаёт размер
         if (parts.length !== 2 || !parts[0] || !parts[1]) {
@@ -372,38 +235,56 @@ class Grammar {
     /**
      * Парсит расположение
      * @param {string|Object} locationData 
+     * @param {boolean} isInner 
      * @returns {YamlLocation} 
      */
-    static parseYamlLocation(locationData) {
-        // if (!locationData) return null; // Вернется заглушка
+    static parseYamlLocation(locationData, isInner) {
 
         let padding = new CellOffset(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined());
         let margin = new CellOffset(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined());
 
-        if (typeof locationData === 'string') {
+        // Для внутреннего компонента стандартный промежуток считается нулевым, для внешнего - бесконечным
+        const defaultRange = isInner ? '0' : '*';
+
+        if (typeof locationData === 'string') { // Если расположение задано одной строкой
+
+            // Отделить стороны друг от друга
             const parts = locationData.split(',').map(part => part.trim());
+
+            // Задать соответствующий промежуток для каждой присутствующей стороны
             parts.forEach(part => {
                 switch (part) {
-                    case 'top': padding.top = new YamlRange(0, 0); break;
-                    case 'right': padding.right = new YamlRange(0, 0); break;
-                    case 'bottom': padding.bottom = new YamlRange(0, 0); break;
-                    case 'left': padding.left = new YamlRange(0, 0); break;
+                    case 'top': padding.top = this.parseYamlRange(defaultRange); break;
+                    case 'right': padding.right = this.parseYamlRange(defaultRange); break;
+                    case 'bottom': padding.bottom = this.parseYamlRange(defaultRange); break;
+                    case 'left': padding.left = this.parseYamlRange(defaultRange); break;
                     default: throw Error("Не удается распознать сторону " + part);
                 }
             });
-        } else if (typeof locationData === 'object') {
+
+        } else if (typeof locationData === 'object') { // Иначе если положение задано как пара направление - промежуток
             for (const [key, value] of Object.entries(locationData)) {
                 let side = key.trim();
                 let range = value;
+
+                // Обработка смешанной записи, где только часть заданных направлений имеют стандартный промежуток, а не указанный явно
                 if (typeof value === 'string' && (value.includes('top') || value.includes('bottom')
-                                              || value.includes('left') || value.includes('right'))) {
-                    side = value;
-                    range = 0;
-                } else if (typeof value === 'object') {
-                    [side, range] = Object.entries(value)[0];
+                    || value.includes('left') || value.includes('right'))) { // Если на месте промежутка оказалось направление
+                    side = value; // Вернуть направление на место
+                    range = defaultRange; // Считать, что промежуток являтся стандартным
+                } else if (typeof value === 'object') { // Иначе если на месте промежутка пара направление - промежуток 
+                    [side, range] = Object.entries(value)[0]; // Распаковать объект
                 }
+
+                // Выбросить ошибку, если итоговая сторона не задаёт направление
+                if (!(side.includes('top') || side.includes('bottom') || side.includes('left') || side.includes('right'))) {
+                    throw Error("Не удается распознать сторону " + part);
+                }
+
+                // Обработать промежуток
                 const offset = this.parseYamlRange(range);
 
+                // Записать промежуток в соответствии с типом и стороной
                 if (side.includes('padding')) {
                     side = side.replace('padding-', '');
                     side = side.replace('-padding', '');
@@ -412,8 +293,10 @@ class Grammar {
                     side = side.replace('margin-', '');
                     side = side.replace('-margin', '');
                     this.setOffset(margin, side, offset);
-                } else {
+                } else if (isInner) {
                     this.setOffset(padding, side, offset);
+                } else {
+                    this.setOffset(margin, side, offset);
                 }
             }
         }
@@ -520,9 +403,24 @@ class YamlLocation {
         }
         if (margin.bottom?.isDefined()) {
             result['margin-bottom'] = margin.bottom.toYaml();
-        }       
+        }
 
         return result;
+    }
+
+    isDefined() {
+        const ranges = [
+            this.padding?.left,
+            this.padding?.top,
+            this.padding?.right,
+            this.padding?.bottom,
+            this.margin?.left,
+            this.margin?.top,
+            this.margin?.right,
+            this.margin?.bottom
+        ];
+
+        return ranges.some(range => range?.isDefined() === true);
     }
 }
 
@@ -532,7 +430,7 @@ class YamlRange {
     /** @type {number} */
     #end
     /** @type {boolean} */
-    #isDefined 
+    #isDefined
 
     constructor(begin, end) {
         if (begin > end) {
@@ -610,6 +508,8 @@ class Component {
     name
     /** @type {Pattern} */
     pattern
+    /** @type {String} */
+    #patternName
     /** @type {YamlLocation} */
     location
     /** @type {boolean} */
@@ -617,12 +517,35 @@ class Component {
     /** @type {boolean} */
     inner
 
-    constructor(name, pattern, location, optional, inner) {
+    constructor(name, data, isInner) {
         this.name = name;
-        this.pattern = pattern;
-        this.location = location;
-        this.optional = optional;
-        this.inner = inner;
+
+        this.location = this.parseYamlLocation(data.location, isInner); // Распознаем позицию элемента
+
+        // Распознаем поле optional
+        let optional = data.optional;
+        if (optional === null || optional == undefined) optional = false;
+        if (!(optional === true || optional === false)) throw new Error("Не удалось распознать поле optional у компонента " + componentName);
+
+        // Запоминаем имя паттерна
+        if (data.pattern) {
+            this.#patternName = data.pattern;
+            this.pattern = null;
+        } else if (data.pattern_definition) {
+            try {
+                this.pattern = new Pattern("", data.pattern_definition).setInlineDefined();
+            } catch (e) {
+                throw new Error(`Не удается распознать вложнный паттерн в компоненте ${this.name}: ${e.message}`);
+            }
+        } else {
+            throw new Error(`Компонент "${componentName}" должен содержать pattern или pattern_definition`);
+        }
+    }
+
+    resolveLinks() {
+        this.pattern = Grammar.patterns.get(this.#patternName);
+        if (!this.pattern)
+            throw new Error(`Не удалось найти паттерн с названием ${this.#patternName} для привязки к компоненту ${this.name}`);
     }
 
     /**
@@ -633,10 +556,14 @@ class Component {
         const result = {};
 
         if (this.pattern) {
-            result.pattern = this.pattern.name;
+            if (this.pattern.isInline) {
+                result.pattern_definition = this.pattern.toYaml();
+            } else {
+                result.pattern = this.pattern.name;
+            }
         }
 
-        if (this.location) {
+        if (this.location?.isDefined()) {
             result.location = this.location.toYaml();
         }
 
@@ -666,15 +593,28 @@ class Pattern {
     /** @type {boolean} */
     isInline
 
-    constructor(name, kind, desc, countInDoc, width, height, isRoot) {
+    constructor(name, data) {
         this.name = name;
-        this.kind = kind;
-        this.desc = desc;
-        this.countInDoc = countInDoc;
-        this.width = width;
-        this.height = height;
-        this.isRoot = isRoot;
+        this.kind = data.kind.toUpperCase();
+        this.desc = data.desc || "";
+
+        this.countInDoc = new YamlRange(0, 0).setUndefined();
+        if (data.count_in_document) this.countInDoc = Grammar.parseYamlRange(data.count_in_document);
+
+        let size = Grammar.parseSize(data.size);
+        this.width = size.width;
+        this.height = size.height;
+
+        this.isRoot = data.root;
+        if (this.isRoot === null || this.isRoot == undefined) this.isRoot = false;
+        if (!(this.isRoot === true || this.isRoot === false))
+            throw new Error(`Паттерн ${name} имеет непонятное значение root (${data.root})`);
+
         this.isInline = false;
+    }
+
+    resolveLinks() {
+        // У обычного паттерна нет ссылок
     }
 
     setInlineDefined() {
@@ -688,9 +628,12 @@ class Pattern {
      */
     toYaml() {
         const result = {
-            description: this.desc,
             kind: this.kind.toLowerCase()
         };
+
+        if (this.desc) {
+            result.description = this.desc;
+        }
 
         if (this.countInDoc?.isDefined()) {
             result.count_in_document = this.countInDoc.toYaml();
@@ -722,11 +665,20 @@ class Pattern {
 
 class CellPattern extends Pattern {
     /** @type {String} */
+    #contentTypePatternName
+    /** @type {Pattern} */
     contentType
 
-    constructor(name, kind, desc, countInDoc, width, height, isRoot, contentType) {
-        super(name, kind, desc, countInDoc, width, height, isRoot);
-        this.contentType = contentType;
+    constructor(name, data) {
+        super(name, data);
+        if (typeof data.contentType != "string") throw new Error(`Тип паттерна для паттерна-ячейки ${name} не является строкой.`);
+        this.#contentTypePatternName = data.contentType;
+    }
+
+    resolveLinks() {
+        this.contentType = Grammar.patterns.get(this.#contentTypePatternName);
+        if (!this.contentType)
+            throw new Error(`Не удалось найти паттерн с названием ${this.#contentTypePatternName} для привязки к паттерну ${this.name}`);
     }
 
     /**
@@ -735,9 +687,9 @@ class CellPattern extends Pattern {
      */
     toYaml() {
         const result = super.toYaml();
-        
+
         if (this.contentType) {
-            result.content_type = this.contentType;
+            result.content_type = this.contentType.name;
         }
 
         return result;
@@ -749,17 +701,25 @@ class ArrayPattern extends Pattern {
     direction
     /** @type {Pattern} */
     pattern
+    /** @type {string} */
+    #patternName
     /** @type {YamlRange} */
     gap
     /** @type {YamlRange} */
     itemCount
 
-    constructor(name, kind, desc, countInDoc, width, height, isRoot, direction, pattern, gap, itemCount) {
-        super(name, kind, desc, countInDoc, width, height, isRoot);
-        this.direction = direction;
-        this.pattern = pattern;
-        this.gap = gap;
-        this.itemCount = itemCount;
+    constructor(name, data) {
+        super(name, data);
+        this.direction = data.direction?.toUpperCase() || "ROW";
+        this.#patternName = data.item_pattern;
+        this.gap = Grammar.parseYamlRange(data.gap);
+        this.itemCount = Grammar.parseYamlRange(data.gap);
+    }
+
+    resolveLinks() {
+        this.pattern = Grammar.patterns.get(this.#patternName);
+        if (!this.contentType)
+            throw new Error(`Не удалось найти паттерн с названием ${this.#patternName} для привязки к паттерну ${this.name}`);
     }
 
     /**
@@ -768,11 +728,11 @@ class ArrayPattern extends Pattern {
      */
     toYaml() {
         const result = super.toYaml();
-        
+
         if (this.direction) {
             result.direction = this.direction.toLowerCase();
         }
-        
+
         if (this.pattern) {
             result.item_pattern = this.pattern.name;
         }
@@ -781,7 +741,7 @@ class ArrayPattern extends Pattern {
             result.item_count = this.itemCount.toYaml();
         }
 
-        if (this.gap && this.itemCount.isDefined()) {
+        if (this.gap?.isDefined()) {
             result.gap = this.gap.toYaml();
         }
 
@@ -793,9 +753,35 @@ class AreaPattern extends Pattern {
     /** @type {Component[]} */
     components
 
-    constructor(name, kind, desc, countInDoc, width, height, isRoot, components) {
-        super(name, kind, desc, countInDoc, width, height, isRoot);
-        this.components = components;
+    constructor(name, data) {
+        super(name, data);
+
+        // Спарсить компоненты
+        this.components = [];
+
+        if (data.inner) { // Если... У области есть внутренняя часть?? 
+            for (const [componentName, componentData] of Object.entries(data.inner)) { // Для каждого внутреннего компонента...
+                const component = new Component(componentName, componentData, true); // Распознаем компонент
+                this.components.push(component);
+            }
+        }
+
+        if (data.outer) { // Если... У области есть внешняя часть?? 
+            for (const [componentName, componentData] of Object.entries(data.outer)) { // Для каждого внешнего компонента...
+                const component = new Component(componentName, componentData, false); // Распознаем компонент
+                this.components.push(component);
+            }
+        }
+    }
+
+    resolveLinks() {
+        for (let component of this.components) {
+            try {
+                component.resolveLinks();
+            } catch (e) {
+                throw new Error(`Не удалось привязать все компоненты паттерна ${this.name}: ${e.message}`);
+            }
+        }
     }
 
     /**
@@ -804,10 +790,10 @@ class AreaPattern extends Pattern {
      */
     toYaml() {
         const result = super.toYaml();
-        
+
         // Если у области есть более одного компонента
         if (this.components && this.components.length > 0) {
-           
+
             // Добавить компоненты в зависимости от их расположения (inner или outer)
             for (const component of this.components) {
                 if (component.inner) {
@@ -834,6 +820,6 @@ class PatternSize {
 
     constructor(width, height) {
         this.width = width;
-        this.height  = height;
+        this.height = height;
     }
 }
