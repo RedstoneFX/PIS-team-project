@@ -31,8 +31,10 @@
 
                         <label>Вид</label>
                         <select id="pattern-kind">
-                            <option value="cell">Клетка</option>
-                            <option value="array">Массив</option>
+                            <option value="CELL">Клетка</option>
+                            <option value="ARRAY">Массив</option>
+                            <option value="AREA">Область</option>
+                            <option value="ARRAY-IN-CONTEXT">Массив в контексте</option>
                         </select>
 
                         <label>Описание</label>
@@ -45,7 +47,8 @@
                         <div id="pattern-size">
                             <input
                                 type="number"
-                                class="pattern-x-min numeric"
+                                id="pattern-x-min"
+                                class="numeric"
                                 min="0"
                                 ,
                                 max="100"
@@ -53,7 +56,8 @@
                             />
                             <input
                                 type="number"
-                                class="pattern-x-max numeric"
+                                id="pattern-x-max"
+                                class="numeric"
                                 min="0"
                                 max="100"
                                 placeholder="ymin"
@@ -61,14 +65,16 @@
                             <div>-</div>
                             <input
                                 type="number"
-                                class="pattern-y-min numeric"
+                                id="pattern-y-min"
+                                class="numeric"
                                 min="0"
                                 max="100"
                                 placeholder="xmax"
                             />
                             <input
                                 type="number"
-                                class="pattern-y-max numeric"
+                                id="pattern-y-max"
+                                class="numeric"
                                 min="0"
                                 max="100"
                                 placeholder="ymax"
@@ -102,9 +108,9 @@
                     <div class="parameters-table">
                         <label>Направление</label>
                         <select id="pattern-array-direction">
-                            <option value="left">Строка</option>
-                            <option value="left">Столбец</option>
-                            <option value="left">Область</option>
+                            <option value="ROW">Строка</option>
+                            <option value="COLUMN">Столбец</option>
+                            <option value="FILL">Область</option>
                         </select>
 
                         <label>Паттерн</label>
@@ -170,9 +176,9 @@
                                 <button class="remove-component-location-btn">[X]</button>
                                 <select id="component-location-direction">
                                     <option value="left">Левый</option>
-                                    <option value="left">Верхний</option>
-                                    <option value="left">Правый</option>
-                                    <option value="left">Нижний</option>
+                                    <option value="top">Верхний</option>
+                                    <option value="right">Правый</option>
+                                    <option value="bottom">Нижний</option>
                                 </select>
                                 <select id="component-location-padding-margin">
                                     <option value="padding">padding</option>
