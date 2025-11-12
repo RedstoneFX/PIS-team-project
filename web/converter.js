@@ -107,8 +107,8 @@ class Grammar {
                     kind, // TODO: а клетке нужно помнить о том, что она клетка?
                     desc,
                     countInDoc,
-                    size?.width || new YamlRange(0, 0).setUndefined(),
-                    size?.height || new YamlRange(0, 0).setUndefined(),
+                    size.width,
+                    size.height,
                     isRoot,
                     data.content_type
                 );
@@ -119,8 +119,8 @@ class Grammar {
                     kind, // окей, допустим, аррэй может быть разных типов
                     desc,
                     countInDoc,
-                    size?.width || new YamlRange(0, 0).setUndefined(),
-                    size?.height || new YamlRange(0, 0).setUndefined(),
+                    size.width,
+                    size.height,
                     isRoot,
                     data.direction?.toUpperCase() || 'ROW',
                     null,
@@ -135,8 +135,8 @@ class Grammar {
                     kind, // окей, допустим, аррэй может быть разных типов
                     desc,
                     countInDoc,
-                    size?.width || new YamlRange(0, 0).setUndefined(),
-                    size?.height || new YamlRange(0, 0).setUndefined(),
+                    size.width,
+                    size.height,
                     isRoot,
                     data.direction?.toUpperCase() || 'ROW',
                     null,
@@ -151,8 +151,8 @@ class Grammar {
                     kind,
                     desc,
                     countInDoc,
-                    size?.width || new YamlRange(0, 0).setUndefined(),
-                    size?.height || new YamlRange(0, 0).setUndefined(),
+                    size.width ,
+                    size.height,
                     isRoot,
                     []
                 );
