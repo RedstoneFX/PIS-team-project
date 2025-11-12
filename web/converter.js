@@ -3,6 +3,8 @@ class Grammar {
     static cellTypes = [];
     /** @type {Map<String, Pattern>} */
     static patterns = new Map();
+    /** @type {Map<String, Pattern>} */
+    static componentsInlinePatterns = new Map();
     /** @type {String} */
     static rootName = null;
     /** @type {String} */
