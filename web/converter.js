@@ -50,9 +50,9 @@ class Grammar {
         }
 
         // Связывание паттернов
-        for (const [patternName, patternData] of Object.entries(yamlData.patterns)) {
+        for (const [patternName, patternData] of Object.entries(yamlData.patterns)) { // Для каждого паттерна
             try {
-                this.setPatternRelations(this.patterns.get(patternName), patternData);
+                this.setPatternRelations(this.patterns.get(patternName), patternData); // Попытаться связать паттерн
             } catch (error) {
                 throw new Error(`Ошибка установки связей для паттерна "${patternName}": ${error.message}`);
             }
@@ -165,9 +165,9 @@ class Grammar {
      * @param {Object} data
      */
     static setPatternRelations(pattern, data) {
-        if (pattern instanceof ArrayPattern) {
+        if (pattern instanceof ArrayPattern) { // Если этот паттерн - массив
             this.setArrayRelations(pattern, data);
-        } else if (pattern instanceof AreaPattern) {
+        } else if (pattern instanceof AreaPattern) { // Если этот паттерн - область
             this.setAreaRelations(pattern, data);
         }
     }
@@ -178,18 +178,18 @@ class Grammar {
      * @param {Object} data 
      */
     static setArrayRelations(arrayPattern, data) {
-        if (!data.item_pattern) {
+        if (!data.item_pattern) { // Выбросить ошибку, если у этого массива нет элементов
             throw new Error('Массив должен содержать item_pattern');
         }
 
-        const patternName = data.item_pattern;
-        const itemPattern = this.patterns.get(patternName);
+        const patternName = data.item_pattern; // Извлекаем имя паттерна-элемента
+        const itemPattern = this.patterns.get(patternName); // Находим паттерн с таким названием
 
-        if (!itemPattern) {
-            throw new Error(`Паттерн "${patternName}" не найден`);
+        if (!itemPattern) { // Сообщаем об ошибке, если не удалось найти такой паттерн
+            throw new Error(`Не удалось найти паттерн "${patternName}" для массива`); 
         }
 
-        arrayPattern.pattern = itemPattern;
+        arrayPattern.pattern = itemPattern; // Привязываем паттерн к текущему как элемент
     }
 
     /**
@@ -198,19 +198,19 @@ class Grammar {
      * @param {Object} data 
      */
     static setAreaRelations(areaPattern, data) {
-        areaPattern.components = [];
+        areaPattern.components = []; // Очищаем список компонентов области
 
-        if (data.inner) {
-            for (const [componentName, componentData] of Object.entries(data.inner)) {
-                const component = this.parseComponent(areaPattern.name, componentName, componentData, true);
-                areaPattern.components.push(component);
+        if (data.inner) { // Если... У области есть внутренняя часть?? 
+            for (const [componentName, componentData] of Object.entries(data.inner)) { // Для каждого внутреннего компонента...
+                const component = this.parseComponent(areaPattern.name, componentName, componentData, true); // Распознаем компонент
+                areaPattern.components.push(component); // Добавляем компонент в список компонентов
             }
         }
 
-        if (data.outer) {
-            for (const [constraintName, constraintData] of Object.entries(data.outer)) {
-                const constraint = this.parseComponent(areaPattern.name, constraintName, constraintData, false);
-                areaPattern.components.push(constraint);
+        if (data.outer) { // Если... У области есть внешняя часть?? 
+            for (const [constraintName, constraintData] of Object.entries(data.outer)) { // Для каждого внешнего компонента...
+                const constraint = this.parseComponent(areaPattern.name, constraintName, constraintData, false); // Распознаем компонент
+                areaPattern.components.push(constraint); // Добавляем компонент в список компонентов
             }
         }
     }
