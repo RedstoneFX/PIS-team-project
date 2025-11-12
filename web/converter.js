@@ -229,7 +229,7 @@ class Grammar {
         const location = this.parseYamlLocation(componentData.location); // Распознаем позицию элемента
 
         // Распознаем поле optional
-        const optional = componentData.optional; 
+        let optional = componentData.optional; 
         if(optional === null) optional = false;
         if(!(optional === true || optional === false)) throw new Error("Не удалось распознать поле optional у компонента " + componentName);
 
