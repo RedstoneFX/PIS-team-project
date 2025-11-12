@@ -284,7 +284,7 @@ class Grammar {
             throw new Error("Не удается распознать интервал " + rangeStr);
         }
 
-        rangeStr = rangeStr.replaceAll(/\s/, "");
+        rangeStr = rangeStr.replaceAll(/\s+/g, "");
 
         // Если передана * - то интервал любой
         if (rangeStr === '*') {
@@ -349,7 +349,7 @@ class Grammar {
     static parseSize(sizeStr) {
         if (!sizeStr) return new PatternSize(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined()); // Возвращаем пустышку, если размеры не указаны
 
-        const parts = sizeStr.toLowerCase().replaceAll(" ", "") .split("x");
+        const parts = sizeStr.toLowerCase().replaceAll(/\s+/g, "") .split("x");
 
         if (parts.length !== 2 || !parts[0] || !parts[1]) {
             throw new Error(`Некорректный формат размера: ${sizeStr}. Ожидается формат "ширина x высота"`);
