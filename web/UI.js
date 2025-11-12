@@ -14,6 +14,9 @@ class UI {
     static patternByID = new Map()
     static last_id = 0;
 
+    /** @type {HTMLElement} */
+    static selectedPatternInBrowser;
+
     static loadFromGrammar() {
         this.resetUI();
         for (const [name, pattern] of Grammar.patterns.entries()) {
@@ -48,8 +51,21 @@ class UI {
      * @param {PointerEvent} element 
      */
     static onPatternSelected(element) {
+        if (this.selectedPatternInBrowser) this.selectedPatternInBrowser.classList.remove("selected-browser-pattern");
+        this.selectedPatternInBrowser = element.target;
+        element.target.classList.add("selected-browser-pattern");
         let pattern = this.patternByID.get(element.target.id);
-        console.log(pattern);
+        this.loadPatternToUI(pattern);
+    }
+
+    /**
+     * Функция, загружающяя данные из этого паттерна в интерфейс параметров
+     * @param {Pattern} pattern 
+     */
+    static loadPatternToUI(pattern) {
+        if (pattern instanceof CellPattern) this.setCellParamsEnabled(true);
+        else if (pattern instanceof ArrayPattern) this.setArrayParamsEnabled(true);
+        else this.setGeneralPatternParamsEnabled(true);
     }
 
     static resetUI() {
