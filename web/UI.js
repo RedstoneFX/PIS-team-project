@@ -1,5 +1,16 @@
 class UI {
 
+    /** @type {HTMLElement} */
+    browser
+    /** @type {HTMLElement} */
+    patternParams
+    /** @type {HTMLElement} */
+    cellParams
+    /** @type {HTMLElement} */
+    arrayParams
+    /** @type {HTMLElement} */
+    componentParams
+
     static resetUI() {
         this.clearBrowser();
         this.setPatternParamsEnabled(false);
