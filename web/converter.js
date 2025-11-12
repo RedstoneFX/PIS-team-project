@@ -23,6 +23,7 @@ class Grammar {
         // Обнуление даных
         this.cellTypes = [];
         this.patterns = new Map();
+        this.componentsInlinePatterns = new Map();
         this.rootName = null;
         this.cellTypesFilepath = null;
 
@@ -234,17 +235,17 @@ class Grammar {
 
         let referencedPattern;
 
-        if (componentData.pattern) {
-            referencedPattern = this.patterns.get(componentData.pattern);
-            if (!referencedPattern) {
+        if (componentData.pattern) { // Если данный компонент имеет поле pattern
+            referencedPattern = this.patterns.get(componentData.pattern); // ищем паттерн с таким именем
+            if (!referencedPattern) { // Сообщаем об ошибке, если такого компонента нет
                 throw new Error(`Не удалось найти паттерн "${componentData.pattern}" для компонента "${componentName}"`);
             }
-        } else if (componentData.pattern_definition) {
-            const referencedPatternName = `${parentName}__${componentName}`;
+        } else if (componentData.pattern_definition) { // Если данный компонент объявляет паттерн непосредственно...
+            const referencedPatternName = `${parentName}__${componentName}`; // Генерируем новое имя для паттерна
             try {
-                referencedPattern = this.parsePattern(referencedPatternName, componentData.pattern_definition);
-                this.patterns.set(referencedPatternName, referencedPattern);
-                this.setPatternRelations(referencedPattern, componentData.pattern_definition);
+                referencedPattern = this.parsePattern(referencedPatternName, componentData.pattern_definition); // Распознаем внутренний паттерн
+                this.componentsInlinePatterns.set(referencedPatternName, referencedPattern); // Добавляем паттерн в словарь паттернов для компонентов
+                this.setPatternRelations(referencedPattern, componentData.pattern_definition); // Связываем паттерн
             } catch (error) {
                 throw new Error(`Ошибка создания паттерна для компонента "${componentName}": ${error.message}`);
             }
