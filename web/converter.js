@@ -785,3 +785,9 @@ class AreaPattern extends Pattern {
     }
 }
 
+class PatternSize {
+    constructor(width, height) {
+        this.width = width;
+        this.height  = height;
+    }
+}
