@@ -286,6 +286,11 @@ class Grammar {
 
         rangeStr = rangeStr.replaceAll(/\s+/g, "");
 
+        if(/\d+/.test(rangeStr)) {
+            let i = parseInt(rangeStr);
+            return new YamlRange(i, i);
+        }
+
         // Если передана * - то интервал любой
         if (rangeStr === '*') {
             return new YamlRange(-Infinity, Infinity); // Жеееесть, но ОК
