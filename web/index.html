@@ -23,7 +23,7 @@
             </div>
             <img id="illustration" />
             <div id="parameters">
-                <details>
+                <details id="pattern-parameters">
                     <summary>Общие параметры паттерна</summary>
                     <div class="parameters-table">
                         <label>Название</label>
@@ -87,7 +87,7 @@
                     </div>
                 </details>
 
-                <details>
+                <details id="cell-parameters">
                     <summary>Параметры вида CELL</summary>
                     <div class="parameters-table">
                         <label>Паттерн</label>
@@ -96,7 +96,8 @@
                         </select>
                     </div>
                 </details>
-                <details>
+
+                <details id="array-parameters">
                     <summary>Параметры вида ARRAY</summary>
                     <div class="parameters-table">
                         <label>Направление</label>
@@ -154,9 +155,9 @@
                     </div>
                 </details>
 
-                <details>
+                <details id="component-parameters">
                     <summary>Параметры компонента</summary>
-                    <div id="component-parameters">
+                    <div>
                         <div class="parameters-table">
                             <label for="component-pattern">Паттерн</label>
                             <select id="component-pattern">
