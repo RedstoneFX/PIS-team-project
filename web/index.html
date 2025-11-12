@@ -119,7 +119,7 @@
                         <select id="pattern-array-direction">
                             <option value="ROW">Строка</option>
                             <option value="COLUMN">Столбец</option>
-                            <option value="FILL">Область</option>
+                            <option value="FILL">Заполнение</option>
                         </select>
 
                         <label>Паттерн</label>
@@ -137,7 +137,7 @@
                                 max="100"
                                 placeholder="min"
                             />
-                            <div>-</div>
+                            <div>..</div>
                             <input
                                 type="number"
                                 class="numeric"
@@ -155,16 +155,16 @@
                                 id="pattern-array-count-min"
                                 min="0"
                                 max="100"
-                                placeholder="min"
+                                placeholder="-Infinity"
                             />
-                            <div>-</div>
+                            <div>..</div>
                             <input
                                 type="number"
                                 class="numeric"
                                 id="pattern-array-count-max"
                                 min="0"
                                 max="100"
-                                placeholder="max"
+                                placeholder="+Infinity"
                             />
                         </div>
                     </div>
@@ -199,15 +199,14 @@
                                     id="component-location-min"
                                     min="0"
                                     max="100"
-                                    placeholder="max"
-                                />
-                                <input
+                                    placeholder="-inf"
+                                /><input
                                     type="number"
                                     class="numeric"
                                     id="component-location-max"
                                     min="0"
                                     max="100"
-                                    placeholder="max"
+                                    placeholder="+inf"
                                 />
                             </div>
                             <div id="component-location-add-segment">
