@@ -129,3 +129,8 @@ details > div {
     font-weight: bold;
     background-color: #8b849b6a !important;
 }
+
+#pattern-count {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+}
