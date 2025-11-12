@@ -311,19 +311,27 @@ class Grammar {
         }
 
         if (rangeStr.endsWith('+') || rangeStr.endsWith('-')) {
-            const number = parseInt(rangeStr.slice(0, -1));
+
+            let number = rangeStr.slice(0, -1);
             const modifier = rangeStr.slice(-1);
 
-            if (isNaN(number)) {
-                throw new Error(`Некорректный формат диапазона: ${rangeStr}`);
+            // Парсим число
+            if(number.test(/\d+/)) { 
+                number = parseInt(number);
+            } else {
+                throw new Error("Не удается распознать число в интервале: " + rangeStr);
             }
 
             if (modifier === '+') {
                 return new YamlRange(number, Infinity);
-            } else {
+            } else if (modifier === '-') {
                 return new YamlRange(-Infinity, number);
+            } else {
+                throw new Error("Не удается распознать модификатор в интервале: " + rangeStr);
             }
         }
+
+        throw new Error("Не удается распознать интервал " + rangeStr);
     }
 
     /**
