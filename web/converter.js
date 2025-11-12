@@ -81,20 +81,30 @@ class Grammar {
         const kind = data.kind.toUpperCase();
         const desc = data.description || '';
         let countInDoc = new YamlRange(0, 0).setUndefined();
+
+        // Считываем количество вхождений паттерна в документ
+        // TODO: может выкинуть ошибку?
         if (data.count_in_document) {
             countInDoc = this.parseYamlRange(data.count_in_document);
         }
+
+        // Считываем размер паттерна в клетках
         let size = { width: new YamlRange(0, 0).setUndefined(), height: new YamlRange(0, 0).setUndefined() };
         if (data.size) {
-            size = this.parseSize(data.size);
+            size = this.parseSize(data.size); // TODO: может выкинуть ошибку?
         }
-        const isRoot = data.root === true;
 
+        // Считываем isRoot
+        if(data.root && !(data.root === true || data.root === false))
+            throw new Error(`Паттерн ${name} имеет непонятное значение root (${data.root})`);
+        const isRoot = data.root;
+
+        // Возвращаем паттерн определенного типа, в зависимости от поля kind
         switch (kind) {
             case 'CELL':
                 return new CellPattern(
                     name,
-                    kind,
+                    kind, // TODO: а клетке нужно помнить о том, что она клетка?
                     desc,
                     countInDoc,
                     size?.width || new YamlRange(0, 0).setUndefined(),
@@ -106,7 +116,7 @@ class Grammar {
             case 'ARRAY':
                 return new ArrayPattern(
                     name,
-                    kind,
+                    kind, // окей, допустим, аррэй может быть разных типов
                     desc,
                     countInDoc,
                     size?.width || new YamlRange(0, 0).setUndefined(),
@@ -122,7 +132,7 @@ class Grammar {
             case 'ARRAY-IN-CONTEXT':
                 return new ArrayPattern(
                     name,
-                    kind,
+                    kind, // окей, допустим, аррэй может быть разных типов
                     desc,
                     countInDoc,
                     size?.width || new YamlRange(0, 0).setUndefined(),
