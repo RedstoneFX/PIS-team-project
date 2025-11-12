@@ -825,6 +825,11 @@ class AreaPattern extends Pattern {
 }
 
 class PatternSize {
+    /** @type {YamlRange} */
+    width
+    /** @type {YamlRange} */
+    height
+
     constructor(width, height) {
         this.width = width;
         this.height  = height;
