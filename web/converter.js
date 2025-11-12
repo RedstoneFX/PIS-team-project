@@ -544,6 +544,21 @@ class YamlLocation {
 
         return result;
     }
+
+    isDefined() {
+        const ranges = [
+            this.padding?.left,
+            this.padding?.top, 
+            this.padding?.right,
+            this.padding?.bottom,
+            this.margin?.left,
+            this.margin?.top,
+            this.margin?.right,
+            this.margin?.bottom
+        ];
+        
+        return ranges.some(range => range?.isDefined() === true);
+    }
 }
 
 class YamlRange {
@@ -660,7 +675,7 @@ class Component {
             }
         }
 
-        if (this.location) {
+        if (this.location?.isDefined()) {
             result.location = this.location.toYaml();
         }
 
