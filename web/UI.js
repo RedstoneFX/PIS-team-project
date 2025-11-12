@@ -54,7 +54,7 @@ class UI {
 
     static resetUI() {
         this.clearBrowser();
-        this.setPatternParamsEnabled(false);
+        this.setGeneralPatternParamsEnabled(false);
         this.setComponentParamsEnabled(false);
         this.patternByID.clear();
         this.last_id = 0;
@@ -69,13 +69,16 @@ class UI {
      * Устанавливает секцию параметров видимой/невидимой
      * @param {boolean} isEnabled 
      */
-    static setPatternParamsEnabled(isEnabled) {
-        this.patternParams.hidden = !isEnabled;
-        if (!isEnabled) {
+    static setGeneralPatternParamsEnabled(isEnabled) {
+        if (isEnabled) {
+            this.patternParams.hidden = false;
             this.cellParams.hidden = true;
             this.arrayParams.hidden = true;
+            this.componentParams.hidden = true;
         } else {
-            this.setComponentParamsEnabled(false);
+            this.patternParams.hidden = true;
+            this.cellParams.hidden = true;
+            this.arrayParams.hidden = true;
         }
     }
 
@@ -84,9 +87,8 @@ class UI {
  * @param {boolean} isEnabled 
  */
     static setCellParamsEnabled(isEnabled) {
-        this.patternParams.hidden = !isEnabled;
+        this.setGeneralPatternParamsEnabled(isEnabled);
         this.cellParams.hidden = !isEnabled;
-        if (isEnabled) this.arrayParams.hidden = true;
     }
 
     /**
@@ -94,9 +96,8 @@ class UI {
  * @param {boolean} isEnabled 
  */
     static setArrayParamsEnabled(isEnabled) {
-        this.patternParams.hidden = !isEnabled;
+        this.setGeneralPatternParamsEnabled(isEnabled);
         this.arrayParams.hidden = !isEnabled;
-        if (isEnabled) this.cellParams.hidden = true;
     }
 
     /**
@@ -105,7 +106,7 @@ class UI {
  */
     static setComponentParamsEnabled(isEnabled) {
         this.componentParams.hidden = !isEnabled;
-        if (isEnabled) this.setPatternParamsEnabled(false);
+        if (isEnabled) this.setGeneralPatternParamsEnabled(false);
     }
 
     static init() {
