@@ -14,18 +14,24 @@ class Grammar {
      * @returns {Grammar}
      */
     static parse(yamlData) {
+
+        // Проверка типа данных: должен быть объект
         if (!yamlData || typeof yamlData !== 'object') {
             throw new Error("Некорректные данные YAML");
         }
 
+        // Обнуление даных
+        this.cellTypes = [];
+        this.patterns = new Map();
+        this.rootName = null;
+        this.cellTypesFilepath = null;
+
+        // Сохранение пути к файлу с типами ячеек
         if (yamlData.cell_types_filepath) {
             this.cellTypesFilepath = yamlData.cell_types_filepath;
         }
 
-        this.cellTypes = [];
-        this.patterns = new Map();
-        this.rootName = null;
-
+        // Обход и сохранение паттернов
         for (const [patternName, patternData] of Object.entries(yamlData.patterns)) {
             try {
                 const pattern = this.parsePattern(patternName, patternData);
