@@ -3,6 +3,8 @@ class Grammar {
     static cellTypes = [];
     /** @type {Map<String, Pattern>} */
     static patterns = new Map();
+    /** @type {Map<String, Pattern>} */
+    static componentsInlinePatterns = new Map();
     /** @type {String} */
     static rootName = null;
     /** @type {String} */
@@ -93,9 +95,9 @@ class Grammar {
         let size = this.parseSize(data.size);
 
         // Считываем isRoot
-        const isRoot = data.root;
-        if(isRoot === null) isRoot = false;
-        if(!(data.root === true || data.root === false))
+        let isRoot = data.root;
+        if(isRoot === null || isRoot == undefined) isRoot = false;
+        if(!(isRoot === true || isRoot === false))
             throw new Error(`Паттерн ${name} имеет непонятное значение root (${data.root})`);
         
 
@@ -228,7 +230,7 @@ class Grammar {
 
         // Распознаем поле optional
         let optional = componentData.optional; 
-        if(optional === null) optional = false;
+        if(optional === null || optional == undefined) optional = false;
         if(!(optional === true || optional === false)) throw new Error("Не удалось распознать поле optional у компонента " + componentName);
 
         let referencedPattern;
