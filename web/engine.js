@@ -8,6 +8,7 @@ function onPageLoaded() {
 
     try {
         Grammar.parse(testData);
+        UI.loadFromGrammar();
     } catch (e) {
         UI.resetUI();
         alert(e.message);

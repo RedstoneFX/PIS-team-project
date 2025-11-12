@@ -11,6 +11,30 @@ class UI {
     /** @type {HTMLElement} */
     componentParams
 
+    static loadFromGrammar() {
+        this.resetUI();
+        for (const [name, pattern] of Grammar.patterns.entries()) {
+            this.addPattern(name, pattern);
+        }
+    }
+
+    /**
+     * 
+     * @param {string} name 
+     * @param {Pattern} pattern 
+     */
+    static addPattern(name, pattern) {
+        let newBlock = document.createElement("details");
+        let title = document.createElement("summary");
+        let components = document.createElement("div");
+
+        title.innerText = name;
+
+        newBlock.append(title);
+        newBlock.append(components);
+        this.browser.append(newBlock);
+    }
+
     static resetUI() {
         this.clearBrowser();
         this.setPatternParamsEnabled(false);
