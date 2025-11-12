@@ -805,7 +805,7 @@ class ArrayPattern extends Pattern {
             result.item_count = this.itemCount.toYaml();
         }
 
-        if (this.gap && this.itemCount.isDefined()) {
+        if (this.gap?.isDefined()) {
             result.gap = this.gap.toYaml();
         }
 
