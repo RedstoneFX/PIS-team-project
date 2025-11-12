@@ -653,7 +653,11 @@ class Component {
         const result = {};
 
         if (this.pattern) {
-            result.pattern = this.pattern.name;
+            if (this.pattern.isInline) {
+                result.pattern_definition = this.pattern.toYaml();
+            } else {
+                result.pattern = this.pattern.name;
+            }
         }
 
         if (this.location) {
