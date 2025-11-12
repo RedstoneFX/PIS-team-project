@@ -52,7 +52,7 @@
                                 min="0"
                                 ,
                                 max="100"
-                                placeholder="xmin"
+                                placeholder="-inf"
                             />
                             <input
                                 type="number"
@@ -60,7 +60,7 @@
                                 class="numeric"
                                 min="0"
                                 max="100"
-                                placeholder="ymin"
+                                placeholder="-inf"
                             />
                             <div>-</div>
                             <input
@@ -69,7 +69,7 @@
                                 class="numeric"
                                 min="0"
                                 max="100"
-                                placeholder="xmax"
+                                placeholder="+inf"
                             />
                             <input
                                 type="number"
@@ -77,19 +77,28 @@
                                 class="numeric"
                                 min="0"
                                 max="100"
-                                placeholder="ymax"
+                                placeholder="+inf"
                             />
                         </div>
 
                         <label>Количество</label>
-                        <input
-                            type="number"
-                            class="numeric"
-                            id="pattern-count"
-                            min="0"
-                            max="100"
-                            placeholder="count"
-                        />
+                        <div id="pattern-count">
+                            <input
+                                type="number"
+                                class="numeric"
+                                id="pattern-count-min"
+                                min="0"
+                                max="100"
+                                placeholder="-Infinity"
+                            />..<input
+                                type="number"
+                                class="numeric"
+                                id="pattern-count-max"
+                                min="0"
+                                max="100"
+                                placeholder="+Infinity"
+                            />
+                        </div>
                     </div>
                 </details>
 
