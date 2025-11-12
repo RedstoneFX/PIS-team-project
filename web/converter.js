@@ -583,15 +583,15 @@ class YamlRange {
             const begin = this.getBegin();
             const end = this.getEnd();
 
-            if (begin === end) {
+            if (begin === end) { // Если начало и конец равны, возвращается одно число
                 return begin.toString();
-            } else if (begin === -Infinity && end === Infinity) {
+            } else if (begin === -Infinity && end === Infinity) { // Если начало и конец бесконечны, возвращается "*"
                 return '*';
-            } else if (begin === -Infinity) {
+            } else if (begin === -Infinity) { // Если бесконечно начало, возвращается конец с минусом
                 return `${end}-`;
-            } else if (end === Infinity) {
+            } else if (end === Infinity) { // Если бесконечен конец, возвращается начало с плюсом
                 return `${begin}+`;
-            } else {
+            } else { // Иначе возвращается промежуток
                 return `${begin}..${end}`;
             }
         }
