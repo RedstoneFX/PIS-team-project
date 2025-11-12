@@ -91,16 +91,9 @@ input.numeric {
     margin: 0;
 }
 
-details > summary {
-    padding: 5px;
-}
-
-details > div {
-    margin: 0px 0px 1px 1px;
-}
-
 #parameters details > summary {
     background-color: #a7a0b76a;
+    padding: 5px;
 }
 
 #parameters details[open] > summary {
@@ -119,6 +112,9 @@ details > div {
 
 #tree-browser > details > summary {
     background-color: #a7a0b76a ;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-out;
+    padding-left: 10px;
 }
 
 #tree-browser > details > ul {
@@ -128,9 +124,15 @@ details > div {
 .selected-browser-pattern {
     font-weight: bold;
     background-color: #8b849b6a !important;
+    transform: translate(1rem);
 }
 
 #pattern-count {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
+}
+
+#tree-browser > details > summary:hover {
+    transform: translate(1rem);
+    background-color: #8b849b6a;
 }
