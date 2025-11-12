@@ -89,10 +89,7 @@ class Grammar {
         }
 
         // Считываем размер паттерна в клетках
-        let size = { width: new YamlRange(0, 0).setUndefined(), height: new YamlRange(0, 0).setUndefined() };
-        if (data.size) {
-            size = this.parseSize(data.size); // TODO: может выкинуть ошибку?
-        }
+        let size = this.parseSize(data.size);
 
         // Считываем isRoot
         if(data.root && !(data.root === true || data.root === false))
@@ -319,10 +316,10 @@ class Grammar {
     /**
      * Парсит размер
      * @param {string} sizeStr 
-     * @returns {Object}
+     * @returns {PatternSize}
      */
     static parseSize(sizeStr) {
-        if (!sizeStr) return new YamlRange(0, 0).setUndefined(); // Возвращаем пустышку, если размеры не указаны
+        if (!sizeStr) return new PatternSize(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined()); // Возвращаем пустышку, если размеры не указаны
 
         const parts = sizeStr.toLowerCase().replaceAll(" ", "") .split("x");
 
@@ -330,10 +327,10 @@ class Grammar {
             throw new Error(`Некорректный формат размера: ${sizeStr}. Ожидается формат "ширина x высота"`);
         }
 
-        return {
-            width: this.parseYamlRange(parts[0]),
-            height: this.parseYamlRange(parts[1])
-        };
+        return new PatternSize(
+            this.parseYamlRange(parts[0]),
+            this.parseYamlRange(parts[1])
+        );
     }
 
     /**
