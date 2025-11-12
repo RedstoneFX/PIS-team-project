@@ -727,9 +727,12 @@ class Pattern {
      */
     toYaml() {
         const result = {
-            description: this.desc,
             kind: this.kind.toLowerCase()
         };
+
+        if (this.desc) {
+            result.description = this.desc;
+        }
 
         if (this.countInDoc?.isDefined()) {
             result.count_in_document = this.countInDoc.toYaml();
