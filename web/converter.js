@@ -92,9 +92,11 @@ class Grammar {
         let size = this.parseSize(data.size);
 
         // Считываем isRoot
-        if(data.root && !(data.root === true || data.root === false))
-            throw new Error(`Паттерн ${name} имеет непонятное значение root (${data.root})`);
         const isRoot = data.root;
+        if(isRoot === null) isRoot = false;
+        if(!(data.root === true || data.root === false))
+            throw new Error(`Паттерн ${name} имеет непонятное значение root (${data.root})`);
+        
 
         // Возвращаем паттерн определенного типа, в зависимости от поля kind
         switch (kind) {
