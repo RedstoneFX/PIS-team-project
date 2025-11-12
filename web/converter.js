@@ -284,6 +284,8 @@ class Grammar {
             throw new Error("Не удается распознать интервал " + rangeStr);
         }
 
+        rangeStr = rangeStr.replaceAll(/\s/, "");
+
         // Если передана * - то интервал любой
         if (rangeStr === '*') {
             return new YamlRange(-Infinity, Infinity); // Жеееесть, но ОК
@@ -331,10 +333,8 @@ class Grammar {
 
             if (modifier === '+') {
                 return new YamlRange(number, Infinity);
-            } else if (modifier === '-') {
-                return new YamlRange(-Infinity, number);
             } else {
-                throw new Error("Не удается распознать модификатор в интервале: " + rangeStr);
+                return new YamlRange(-Infinity, number);
             }
         }
 
