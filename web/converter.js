@@ -393,8 +393,8 @@ class Grammar {
             for (const [key, value] of Object.entries(locationData)) {
                 let side = key.trim();
                 let range = value;
-                if (typeof value === 'string' && (value == 'top' || value == 'bottom'
-                                              || value =='left' || value =='right')) {
+                if (typeof value === 'string' && (value.includes('top') || value.includes('bottom')
+                                              || value.includes('left') || value.includes('right'))) {
                     side = value;
                     range = 0;
                 } else if (typeof value === 'object') {
@@ -402,11 +402,11 @@ class Grammar {
                 }
                 const offset = this.parseYamlRange(range);
 
-                if (side.startsWith('padding-') || side.endsWith('-padding')) {
+                if (side.includes('padding')) {
                     side = side.replace('padding-', '');
                     side = side.replace('-padding', '');
                     this.setOffset(padding, side, offset);
-                } else if (side.startsWith('margin-') || side.endsWith('-margin')) {
+                } else if (side.includes('margin')) {
                     side = side.replace('margin-', '');
                     side = side.replace('-margin', '');
                     this.setOffset(margin, side, offset);
