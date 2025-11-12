@@ -54,11 +54,7 @@ class UI {
         if (isEnabled) this.setPatternParamsEnabled(false);
     }
 
-    /**
-     * Метод, проводящий инициализацию интерфейса
-     * @param {HTMLElement} browser 
-     */
-    static init(browser) {
+    static init() {
         this.browser = document.getElementById("tree-browser");
         this.patternParams = document.getElementById("pattern-parameters");
         this.cellParams = document.getElementById("cell-parameters");
