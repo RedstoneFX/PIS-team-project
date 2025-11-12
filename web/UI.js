@@ -47,6 +47,8 @@ class UI {
 
     /** @type {Map<String, Pattern>} */
     static patternByID = new Map()
+    /** @type {Map<Pattern, String>} */
+    static IDByPattern = new Map()
     static last_id = 0;
 
     /** @type {HTMLElement} */
@@ -72,6 +74,7 @@ class UI {
         title.innerText = name;
         title.id = `pattern_${this.last_id}`;
         this.patternByID.set(title.id, pattern);
+        this.IDByPattern.set(pattern, title.id);
         title.onclick = (d) => this.onPatternSelected(d);
 
         newBlock.append(title);
@@ -202,6 +205,7 @@ class UI {
         this.setGeneralPatternParamsEnabled(false);
         this.setComponentParamsEnabled(false);
         this.patternByID.clear();
+        this.IDByPattern.clear();
         this.last_id = 0;
     }
 
