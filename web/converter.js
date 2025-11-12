@@ -385,10 +385,10 @@ class Grammar {
             });
         } else if (typeof locationData === 'object') {
             for (const [key, value] of Object.entries(locationData)) {
-                let side = key;
+                let side = key.trim();
                 let range = value;
-                if (typeof value === 'string' && (value.includes('top') || value.includes('bottom')
-                                              || value.includes('left') || value.includes('right'))) {
+                if (typeof value === 'string' && (value == 'top' || value == 'bottom'
+                                              || value =='left' || value =='right')) {
                     side = value;
                     range = 0;
                 } else if (typeof value === 'object') {
