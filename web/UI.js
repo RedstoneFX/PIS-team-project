@@ -56,32 +56,61 @@ class UI {
 
     static loadFromGrammar() {
         this.resetUI();
+        this.generatePatternIDs();
+        this.generateBrowserTree();
+        this.generateSelections();
+    }
+
+    static generateSelections() {
+        // Для каджого селектора...
+        let selections = document.getElementsByClassName("pattern-select");
+        for (let i = selections.length - 1; i >= 0; --i) {
+            let selection = selections.item(i);
+            // Удаляем все известные ссылки
+            for (let c = selection.children.length - 1; c >= 0; --c) {
+                selection.children[c].remove();
+            }
+            // Генерируем новые ссылки
+            for (const [id, pattern] of this.patternByID.entries()) {
+                let newOption = document.createElement("option");
+                newOption.innerText = pattern.name;
+                newOption.value = id;
+                selection.append(newOption);
+            }
+        }
+    }
+
+    static generateBrowserTree() {
+        this.clearBrowser();
+        let newBlock, title, components;
         for (const [name, pattern] of Grammar.patterns.entries()) {
-            this.addPattern(name, pattern);
+            newBlock = document.createElement("details");
+            title = document.createElement("summary");
+            components = document.createElement("div");
+
+            title.innerText = name;
+            title.id = this.IDByPattern.get(pattern);
+            title.onclick = (d) => this.onPatternSelected(d);
+
+            newBlock.append(title);
+            newBlock.append(components);
+            this.browser.append(newBlock);
         }
     }
 
     /**
-     * 
-     * @param {string} name 
-     * @param {Pattern} pattern 
+     * Регенерирует идентификаторы для всех известных паттернов
      */
-    static addPattern(name, pattern) {
-        let newBlock = document.createElement("details");
-        let title = document.createElement("summary");
-        let components = document.createElement("div");
-
-        title.innerText = name;
-        title.id = `pattern_${this.last_id}`;
-        this.patternByID.set(title.id, pattern);
-        this.IDByPattern.set(pattern, title.id);
-        title.onclick = (d) => this.onPatternSelected(d);
-
-        newBlock.append(title);
-        newBlock.append(components);
-        this.browser.append(newBlock);
-
-        this.last_id += 1;
+    static generatePatternIDs() {
+        this.IDByPattern.clear();
+        this.patternByID.clear();
+        let id = "";
+        for (const [name, pattern] of Grammar.patterns.entries()) {
+            id = `pattern_${this.last_id}`;
+            this.patternByID.set(id, pattern);
+            this.IDByPattern.set(pattern, id);
+            this.last_id += 1;
+        }
     }
 
     /**
