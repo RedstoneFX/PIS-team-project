@@ -440,10 +440,12 @@ class Grammar {
             patterns: {}
         };
 
+        // Добавление всех паттернов
         for (const [patternName, pattern] of this.patterns) {
             result.patterns[patternName] = pattern.toYaml();
         }
 
+        // Добавление пути к файлу с типами данных, если он присутствует
         if (this.cellTypesFilepath) {
             result.cell_types_filepath = this.cellTypesFilepath;
         }
