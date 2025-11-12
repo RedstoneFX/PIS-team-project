@@ -367,7 +367,7 @@ class Grammar {
      * @returns {YamlLocation} 
      */
     static parseYamlLocation(locationData) {
-        if (!locationData) return null;
+        // if (!locationData) return null; // Вернется заглушка
 
         let padding = new CellOffset(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined());
         let margin = new CellOffset(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined());
