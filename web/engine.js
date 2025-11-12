@@ -12,6 +12,7 @@ function onPageLoaded() {
     } catch (e) {
         UI.resetUI();
         alert(e.message);
+        throw e;
     }
 }
 

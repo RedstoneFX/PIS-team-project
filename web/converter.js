@@ -62,7 +62,7 @@ class Grammar {
             try {
                 pattern.resolveLinks();
             } catch (error) {
-                throw new Error(`Ошибка установки связей для паттерна "${patternName}": ${error.message}`);
+                throw new Error(`Ошибка установки связей для паттерна "${name}": ${error.message}`);
             }
         }
     }
@@ -87,42 +87,9 @@ class Grammar {
         else if (kind == "ARRAY" || kind == "ARRAY-IN-CONTEXT")
             return new ArrayPattern(name, data);
         else if (kind == "AREA")
-            return new ArrayPattern(name, data);
+            return new AreaPattern(name, data);
         else
             throw new Error(`Неизвестный тип паттерна: ${kind}`);
-    }
-
-    /**
-     * Устанавливает связи между паттернами
-     * @param {Pattern} pattern
-     * @param {Object} data
-     */
-    static setPatternRelations(pattern, data) {
-        if (pattern instanceof ArrayPattern) { // Если этот паттерн - массив
-            this.setArrayRelations(pattern, data);
-        } else if (pattern instanceof AreaPattern) { // Если этот паттерн - область
-            this.setAreaRelations(pattern, data);
-        }
-    }
-
-    /**
-     * Устанавливает связи для массива
-     * @param {ArrayPattern} arrayPattern 
-     * @param {Object} data 
-     */
-    static setArrayRelations(arrayPattern, data) {
-        if (!data.item_pattern) { // Выбросить ошибку, если у этого массива нет элементов
-            throw new Error('Массив должен содержать item_pattern');
-        }
-
-        const patternName = data.item_pattern; // Извлекаем имя паттерна-элемента
-        const itemPattern = this.patterns.get(patternName); // Находим паттерн с таким названием
-
-        if (!itemPattern) { // Сообщаем об ошибке, если не удалось найти такой паттерн
-            throw new Error(`Не удалось найти паттерн "${patternName}" для массива`);
-        }
-
-        arrayPattern.pattern = itemPattern; // Привязываем паттерн к текущему как элемент
     }
 
     /**
@@ -520,12 +487,12 @@ class Component {
     constructor(name, data, isInner) {
         this.name = name;
 
-        this.location = this.parseYamlLocation(data.location, isInner); // Распознаем позицию элемента
+        this.location = Grammar.parseYamlLocation(data.location, isInner); // Распознаем позицию элемента
 
         // Распознаем поле optional
         let optional = data.optional;
         if (optional === null || optional == undefined) optional = false;
-        if (!(optional === true || optional === false)) throw new Error("Не удалось распознать поле optional у компонента " + componentName);
+        if (!(optional === true || optional === false)) throw new Error("Не удалось распознать поле optional у компонента " + this.name);
 
         // Запоминаем имя паттерна
         if (data.pattern) {
@@ -538,11 +505,12 @@ class Component {
                 throw new Error(`Не удается распознать вложнный паттерн в компоненте ${this.name}: ${e.message}`);
             }
         } else {
-            throw new Error(`Компонент "${componentName}" должен содержать pattern или pattern_definition`);
+            throw new Error(`Компонент "${this.name}" должен содержать pattern или pattern_definition`);
         }
     }
 
     resolveLinks() {
+        if(!this.#patternName) return;
         this.pattern = Grammar.patterns.get(this.#patternName);
         if (!this.pattern)
             throw new Error(`Не удалось найти паттерн с названием ${this.#patternName} для привязки к компоненту ${this.name}`);
@@ -596,7 +564,7 @@ class Pattern {
     constructor(name, data) {
         this.name = name;
         this.kind = data.kind.toUpperCase();
-        this.desc = data.desc || "";
+        this.desc = data.description || "";
 
         this.countInDoc = new YamlRange(0, 0).setUndefined();
         if (data.count_in_document) this.countInDoc = Grammar.parseYamlRange(data.count_in_document);
@@ -671,14 +639,15 @@ class CellPattern extends Pattern {
 
     constructor(name, data) {
         super(name, data);
-        if (typeof data.contentType != "string") throw new Error(`Тип паттерна для паттерна-ячейки ${name} не является строкой.`);
+        if (data.contentType && typeof data.contentType != "string") throw new Error(`Тип паттерна не является строкой.`);
         this.#contentTypePatternName = data.contentType;
     }
 
     resolveLinks() {
+        if(!this.#contentTypePatternName) return;
         this.contentType = Grammar.patterns.get(this.#contentTypePatternName);
         if (!this.contentType)
-            throw new Error(`Не удалось найти паттерн с названием ${this.#contentTypePatternName} для привязки к паттерну ${this.name}`);
+            throw new Error(`Не удалось найти паттерн с названием ${this.#contentTypePatternName}`);
     }
 
     /**
@@ -717,9 +686,10 @@ class ArrayPattern extends Pattern {
     }
 
     resolveLinks() {
+        if(!this.#patternName) return;
         this.pattern = Grammar.patterns.get(this.#patternName);
-        if (!this.contentType)
-            throw new Error(`Не удалось найти паттерн с названием ${this.#patternName} для привязки к паттерну ${this.name}`);
+        if (!this.pattern)
+            throw new Error(`Не удалось найти паттерн с названием ${this.#patternName}`);
     }
 
     /**
@@ -776,11 +746,7 @@ class AreaPattern extends Pattern {
 
     resolveLinks() {
         for (let component of this.components) {
-            try {
-                component.resolveLinks();
-            } catch (e) {
-                throw new Error(`Не удалось привязать все компоненты паттерна ${this.name}: ${e.message}`);
-            }
+            component.resolveLinks();
         }
     }
 
