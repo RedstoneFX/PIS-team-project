@@ -225,8 +225,12 @@ class Grammar {
      * @returns {Component} 
      */
     static parseComponent(parentName, componentName, componentData, isInner) {
-        const location = this.parseYamlLocation(componentData.location);
-        const optional = componentData.optional === true;
+        const location = this.parseYamlLocation(componentData.location); // Распознаем позицию элемента
+
+        // Распознаем поле optional
+        const optional = componentData.optional; 
+        if(optional === null) optional = false;
+        if(!(optional === true || optional === false)) throw new Error("Не удалось распознать поле optional у компонента " + componentName);
 
         let referencedPattern;
 
