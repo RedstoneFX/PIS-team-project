@@ -1,6 +1,18 @@
 
 /// <reference path="converter.js" />
 
-let rawYAMLData = YAML.load(request("cnf/grammar_root.yml"))
 
-console.log(rawYAMLData);
+function onPageLoaded() {
+    let testData = YAML.load(request("cnf/grammar_root.yml"));
+    UI.init();
+
+    try {
+        Grammar.parse(testData);
+    } catch (e) {
+        UI.resetUI();
+        alert(e.message);
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', onPageLoaded());
