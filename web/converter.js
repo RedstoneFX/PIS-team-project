@@ -261,37 +261,50 @@ class Grammar {
      * @returns {YamlRange}
      */
     static parseYamlRange(rangeStr) {
+
+        // Возвращаем пустышку, если ничего не переданно
         if (!rangeStr) {
             return new YamlRange(0, 0).setUndefined();
         }
 
+        // Если переданно число, то интервал сокращается до точки
         if (typeof rangeStr === 'number') {
             return new YamlRange(rangeStr, rangeStr);
         }
 
+        // Если переданна не строка, то я хз, что делать
+        if(typeof rangeStr != "string") {
+            throw new Error("Не удается распознать интервал " + rangeStr);
+        }
+
+        // Если передана * - то интервал любой
         if (rangeStr === '*') {
-            return new YamlRange(-Infinity, Infinity);
+            return new YamlRange(-Infinity, Infinity); // Жеееесть, но ОК
         }
         
-        if (rangeStr.includes('..')) {
-            const parts = rangeStr.split('..');
+        // Если в строке точно есть интервал...
+        if (rangeStr.includes('..')) { 
+            const parts = rangeStr.split('..', 2); // Выделяем левую и правую часть интервала
 
-            if (parts.length !== 2) {
-                throw new Error(`Некорректный формат диапазона: ${rangeStr}`);
-            }
+            let begin;
+            let end;
 
-            let begin = parseInt(parts[0]);
-            let end = parseInt(parts[1]);
-
-            if (parts[0] === '*') {
+            // Парсим левую часть интервала
+            if(parts[0].test(/\d+/)) { 
+                begin = parseInt(parts[0]);
+            } else if(parts[0] == "*"){
                 begin = -Infinity;
-            }
-            if (parts[1] === '*') {
-                end = Infinity;
+            } else {
+                throw new Error("Не удается распознать левую часть интервала " + rangeStr);
             }
 
-            if (isNaN(begin) || (isNaN(end))) {
-                throw new Error(`Некорректный формат диапазона: ${rangeStr}`);
+            // Парсим правую часть интервала
+            if(parts[1].test(/\d+/)) { 
+                begin = parseInt(parts[1]);
+            } else if(parts[1] == "*"){
+                begin = -Infinity;
+            } else {
+                throw new Error("Не удается распознать правую часть интервала " + rangeStr);
             }
 
             return new YamlRange(begin, end);
