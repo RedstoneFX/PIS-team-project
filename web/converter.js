@@ -299,7 +299,7 @@ class Grammar {
             let end;
 
             // Парсим левую часть интервала
-            if(parts[0].test(/\d+/)) { 
+            if(/\d+/.test(parts[0])) { 
                 begin = parseInt(parts[0]);
             } else if(parts[0] == "*"){
                 begin = -Infinity;
@@ -308,7 +308,7 @@ class Grammar {
             }
 
             // Парсим правую часть интервала
-            if(parts[1].test(/\d+/)) { 
+            if(/\d+/.test(parts[1])) { 
                 begin = parseInt(parts[1]);
             } else if(parts[1] == "*"){
                 begin = -Infinity;
@@ -325,7 +325,7 @@ class Grammar {
             const modifier = rangeStr.slice(-1);
 
             // Парсим число
-            if(number.test(/\d+/)) { 
+            if(/\d+/.test(number)) { 
                 number = parseInt(number);
             } else {
                 throw new Error("Не удается распознать число в интервале: " + rangeStr);
