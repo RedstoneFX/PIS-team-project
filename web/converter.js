@@ -71,10 +71,13 @@ class Grammar {
      * @returns {Pattern}
      */
     static parsePattern(name, data) {
+        
+        // Сообщаем об ошибке, если паттерн не имеет типа
         if (!data.kind) {
             throw new Error(`Паттерн '${name}' не имеет поля 'kind'`);
         }
 
+        // Считываем данные
         const kind = data.kind.toUpperCase();
         const desc = data.description || '';
         let countInDoc = new YamlRange(0, 0).setUndefined();
@@ -496,10 +499,12 @@ class YamlRange {
 
     setDefined() {
         this.#isDefined = true;
+        return this;
     }
 
     setUndefined() {
         this.#isDefined = false;
+        return this;
     }
 
     isDefined() {
@@ -519,6 +524,7 @@ class YamlRange {
             return;
         }
         this.#begin = value;
+        return this;
     }
 
     setEnd(value) {
@@ -526,6 +532,7 @@ class YamlRange {
             return;
         }
         this.#end = value;
+        return this;
     }
 
     /**
