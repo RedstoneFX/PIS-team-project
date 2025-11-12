@@ -1,15 +1,15 @@
 class UI {
 
     /** @type {HTMLElement} */
-    browser
+    static browser
     /** @type {HTMLElement} */
-    patternParams
+    static patternParams
     /** @type {HTMLElement} */
-    cellParams
+    static cellParams
     /** @type {HTMLElement} */
-    arrayParams
+    static arrayParams
     /** @type {HTMLElement} */
-    componentParams
+    static componentParams
 
     static loadFromGrammar() {
         this.resetUI();
