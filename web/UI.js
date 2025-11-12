@@ -10,6 +10,9 @@ class UI {
     static arrayParams
     /** @type {HTMLElement} */
     static componentParams
+    /** @type {Map<String, Pattern>} */
+    static patternByID = new Map()
+    static last_id = 0;
 
     static loadFromGrammar() {
         this.resetUI();
@@ -29,16 +32,32 @@ class UI {
         let components = document.createElement("div");
 
         title.innerText = name;
+        title.id = `pattern_${this.last_id}`;
+        this.patternByID.set(title.id, pattern);
+        title.onclick = (d) => this.onPatternSelected(d);
 
         newBlock.append(title);
         newBlock.append(components);
         this.browser.append(newBlock);
+
+        this.last_id += 1;
+    }
+
+    /**
+     * Слушатель нажатий на паттерны в браузере
+     * @param {PointerEvent} element 
+     */
+    static onPatternSelected(element) {
+        let pattern = this.patternByID.get(element.target.id);
+        console.log(pattern);
     }
 
     static resetUI() {
         this.clearBrowser();
         this.setPatternParamsEnabled(false);
         this.setComponentParamsEnabled(false);
+        this.patternByID.clear();
+        this.last_id = 0;
     }
 
     static clearBrowser() {
