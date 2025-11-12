@@ -807,13 +807,17 @@ class AreaPattern extends Pattern {
     toYaml() {
         const result = super.toYaml();
         
+        // Если у области есть более одного компонента
         if (this.components && this.components.length > 0) {
            
+            // Добавить компоненты в зависимости от их расположения (inner или outer)
             for (const component of this.components) {
                 if (component.inner) {
+                    // Создать поле inner, если его нет
                     if (!result.inner) result.inner = {};
                     result.inner[component.name] = component.toYaml();
                 } else {
+                    // Создать поле outer, если его нет
                     if (!result.outer) result.outer = {};
                     result.outer[component.name] = component.toYaml();
                 }
