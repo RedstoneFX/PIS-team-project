@@ -104,7 +104,7 @@ class Grammar {
             case 'CELL':
                 return new CellPattern(
                     name,
-                    kind, // TODO: а клетке нужно помнить о том, что она клетка?
+                    kind,
                     desc,
                     countInDoc,
                     size.width,
@@ -116,7 +116,7 @@ class Grammar {
             case 'ARRAY':
                 return new ArrayPattern(
                     name,
-                    kind, // окей, допустим, аррэй может быть разных типов
+                    kind,
                     desc,
                     countInDoc,
                     size.width,
@@ -125,14 +125,13 @@ class Grammar {
                     data.direction?.toUpperCase() || 'ROW',
                     null,
                     this.parseYamlRange(data.gap),
-                    this.parseYamlRange(data.item_count),
-                    false
+                    this.parseYamlRange(data.item_count)
                 );
                 
             case 'ARRAY-IN-CONTEXT':
                 return new ArrayPattern(
                     name,
-                    kind, // окей, допустим, аррэй может быть разных типов
+                    kind,
                     desc,
                     countInDoc,
                     size.width,
@@ -141,8 +140,7 @@ class Grammar {
                     data.direction?.toUpperCase() || 'ROW',
                     null,
                     this.parseYamlRange(data.gap),
-                    this.parseYamlRange(data.item_count),
-                    true
+                    this.parseYamlRange(data.item_count)
                 );
 
             case 'AREA':
@@ -646,7 +644,7 @@ class Component {
 class Pattern {
     /** @type {String} */
     name
-    /** @type {"CELL" | "AREA" | "ARRAY"}  */
+    /** @type {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"}  */
     kind
     /** @type {String} */
     desc
@@ -748,16 +746,13 @@ class ArrayPattern extends Pattern {
     gap
     /** @type {YamlRange} */
     itemCount
-    /** @type {Boolean} */
-    isInContext
 
-    constructor(name, kind, desc, countInDoc, width, height, isRoot, direction, pattern, gap, itemCount, isInContext) {
+    constructor(name, kind, desc, countInDoc, width, height, isRoot, direction, pattern, gap, itemCount) {
         super(name, kind, desc, countInDoc, width, height, isRoot);
         this.direction = direction;
         this.pattern = pattern;
         this.gap = gap;
         this.itemCount = itemCount;
-        this.isInContext = isInContext;
     }
 
     /**
@@ -766,10 +761,6 @@ class ArrayPattern extends Pattern {
      */
     toYaml() {
         const result = super.toYaml();
-
-        if (this.isInContext) {
-            result.kind = 'array-in-context';
-        }
         
         if (this.direction) {
             result.direction = this.direction.toLowerCase();
@@ -783,7 +774,7 @@ class ArrayPattern extends Pattern {
             result.item_count = this.itemCount.toYaml();
         }
 
-        if (this.gap?.isDefined()) {
+        if (this.gap && this.itemCount.isDefined()) {
             result.gap = this.gap.toYaml();
         }
 
