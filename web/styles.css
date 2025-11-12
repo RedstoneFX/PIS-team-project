@@ -124,3 +124,8 @@ details > div {
 #tree-browser > details > ul {
     margin-left: 2rem;
 }
+
+.selected-browser-pattern {
+    font-weight: bold;
+    background-color: #8b849b6a !important;
+}
