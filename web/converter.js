@@ -322,7 +322,7 @@ class Grammar {
      * @returns {Object}
      */
     static parseSize(sizeStr) {
-        if (!sizeStr) return null;
+        if (!sizeStr) return new YamlRange(0, 0).setUndefined(); // Возвращаем пустышку, если размеры не указаны
 
         const parts = sizeStr.trim().split(/\s*x\s*/);
 
