@@ -224,7 +224,7 @@ class Grammar {
      * @returns {Component} 
      */
     static parseComponent(parentName, componentName, componentData, isInner) {
-        const location = this.parseYamlLocation(componentData.location); // Распознаем позицию элемента
+        const location = this.parseYamlLocation(componentData.location, isInner); // Распознаем позицию элемента
 
         // Распознаем поле optional
         let optional = componentData.optional; 
@@ -370,38 +370,56 @@ class Grammar {
     /**
      * Парсит расположение
      * @param {string|Object} locationData 
+     * @param {boolean} isInner 
      * @returns {YamlLocation} 
      */
-    static parseYamlLocation(locationData) {
-        // if (!locationData) return null; // Вернется заглушка
+    static parseYamlLocation(locationData, isInner) {
 
         let padding = new CellOffset(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined());
         let margin = new CellOffset(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined());
 
-        if (typeof locationData === 'string') {
+        // Для внутреннего компонента стандартный промежуток считается нулевым, для внешнего - бесконечным
+        const defaultRange = isInner ? '0' : '*';
+
+        if (typeof locationData === 'string') { // Если расположение задано одной строкой
+
+            // Отделить стороны друг от друга
             const parts = locationData.split(',').map(part => part.trim());
+
+            // Задать соответствующий промежуток для каждой присутствующей стороны
             parts.forEach(part => {
                 switch (part) {
-                    case 'top': padding.top = new YamlRange(0, 0); break;
-                    case 'right': padding.right = new YamlRange(0, 0); break;
-                    case 'bottom': padding.bottom = new YamlRange(0, 0); break;
-                    case 'left': padding.left = new YamlRange(0, 0); break;
+                    case 'top': padding.top = this.parseYamlRange(defaultRange); break;
+                    case 'right': padding.right = this.parseYamlRange(defaultRange); break;
+                    case 'bottom': padding.bottom = this.parseYamlRange(defaultRange); break;
+                    case 'left': padding.left = this.parseYamlRange(defaultRange); break;
                     default: throw Error("Не удается распознать сторону " + part);
                 }
             });
-        } else if (typeof locationData === 'object') {
+
+        } else if (typeof locationData === 'object') { // Иначе если положение задано как пара направление - промежуток
             for (const [key, value] of Object.entries(locationData)) {
                 let side = key.trim();
                 let range = value;
+
+                // Обработка смешанной записи, где только часть заданных направлений имеют стандартный промежуток, а не указанный явно
                 if (typeof value === 'string' && (value.includes('top') || value.includes('bottom')
-                                              || value.includes('left') || value.includes('right'))) {
-                    side = value;
-                    range = 0;
-                } else if (typeof value === 'object') {
-                    [side, range] = Object.entries(value)[0];
+                                              || value.includes('left') || value.includes('right'))) { // Если на месте промежутка оказалось направление
+                    side = value; // Вернуть направление на место
+                    range = defaultRange; // Считать, что промежуток являтся стандартным
+                } else if (typeof value === 'object') { // Иначе если на месте промежутка пара направление - промежуток 
+                    [side, range] = Object.entries(value)[0]; // Распаковать объект
                 }
+
+                // Выбросить ошибку, если итоговая сторона не задаёт направление
+                if (!(side.includes('top') || side.includes('bottom') || side.includes('left') || side.includes('right'))) {
+                    throw Error("Не удается распознать сторону " + part);
+                }
+
+                // Обработать промежуток
                 const offset = this.parseYamlRange(range);
 
+                // Записать промежуток в соответствии с типом и стороной
                 if (side.includes('padding')) {
                     side = side.replace('padding-', '');
                     side = side.replace('-padding', '');
@@ -410,8 +428,10 @@ class Grammar {
                     side = side.replace('margin-', '');
                     side = side.replace('-margin', '');
                     this.setOffset(margin, side, offset);
-                } else {
+                } else if (isInner) {
                     this.setOffset(padding, side, offset);
+                } else {
+                    this.setOffset(margin, side, offset);
                 }
             }
         }
