@@ -28,6 +28,22 @@ class UI {
     static patternCountInDocMin
     /** @type {HTMLSelectElement} */
     static patternCountInDocMax
+    /** @type {HTMLSelectElement} */
+    static patternArrayDirection
+    /** @type {HTMLSelectElement} */
+    static patternArrayPattern
+    /** @type {HTMLSelectElement} */
+    static patternArrayGapMin
+    /** @type {HTMLSelectElement} */
+    static patternArrayGapMax
+    /** @type {HTMLSelectElement} */
+    static patternArrayCountMin
+    /** @type {HTMLSelectElement} */
+    static patternArrayCountMax
+    /** @type {HTMLSelectElement} */
+    static patternCellPattern
+    /** @type {HTMLSelectElement} */
+
 
     /** @type {Map<String, Pattern>} */
     static patternByID = new Map()
@@ -91,6 +107,46 @@ class UI {
             this.loadArrayPatternData(pattern);
             this.setArrayParamsEnabled(true);
         } else this.setGeneralPatternParamsEnabled(true);
+    }
+
+    /**
+     * Загружает в интерфейс специфичные параметры паттерна-клетки
+     * @param {Pattern} pattern 
+     */
+    static loadCellPatternData(pattern) {
+
+    }
+
+    /**
+     * Загружает в интерфейс специфичные параметры паттерна-массива
+     * @param {ArrayPattern} pattern 
+     */
+    static loadArrayPatternData(pattern) {
+        if (pattern.direction == "ROW")
+            this.patternArrayDirection.selectedIndex = 0;
+        else if (pattern.direction == "COL")
+            this.patternArrayDirection.selectedIndex = 1;
+        else if (pattern.direction == "FILL")
+            this.patternArrayDirection.selectedIndex = 2;
+        else alert("Не удалось распознать тип паттерна: " + pattern.kind);
+
+        //pattern.pattern;
+        
+        if (pattern.gap.isDefined()) {
+            this.patternArrayGapMin = pattern.gap.getBegin();
+            this.patternArrayGapMax = pattern.gap.getEnd();
+        } else {
+            this.patternArrayGapMin = null;
+            this.patternArrayGapMax = null;
+        }
+
+        if (pattern.itemCount.isDefined()) {
+            this.patternArrayCountMin = pattern.gap.getBegin();
+            this.patternArrayCountMax = pattern.gap.getEnd();
+        } else {
+            this.patternArrayCountMin = null;
+            this.patternArrayCountMax = null;
+        }
     }
 
     /**
@@ -213,6 +269,13 @@ class UI {
         this.patternHeightMax = document.getElementById("pattern-y-max");
         this.patternCountInDocMin = document.getElementById("pattern-count-min");
         this.patternCountInDocMax = document.getElementById("pattern-count-max");
+        this.patternArrayDirection = document.getElementById("pattern-array-direction");
+        this.patternArrayPattern = document.getElementById("pattern-array-pattern");
+        this.patternArrayGapMin = document.getElementById("pattern-array-gap-min");
+        this.patternArrayGapMax = document.getElementById("pattern-array-gap-max");
+        this.patternArrayCountMin = document.getElementById("pattern-array-count-min");
+        this.patternArrayCountMax = document.getElementById("pattern-array-count-max");
+        this.patternCellPattern = document.getElementById("pattern-cell-pattern");
         this.resetUI();
     }
 }
