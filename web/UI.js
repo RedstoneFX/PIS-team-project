@@ -10,6 +10,25 @@ class UI {
     static arrayParams
     /** @type {HTMLElement} */
     static componentParams
+    /** @type {HTMLSelectElement} */
+    static patternName
+    /** @type {HTMLSelectElement} */
+    static patternKind
+    /** @type {HTMLSelectElement} */
+    static patternDesc
+    /** @type {HTMLSelectElement} */
+    static patternWidthMin
+    /** @type {HTMLSelectElement} */
+    static patternWidthMax
+    /** @type {HTMLSelectElement} */
+    static patternHeightMin
+    /** @type {HTMLSelectElement} */
+    static patternHeightMax
+    /** @type {HTMLSelectElement} */
+    static patternCountInDocMin
+    /** @type {HTMLSelectElement} */
+    static patternCountInDocMax
+
     /** @type {Map<String, Pattern>} */
     static patternByID = new Map()
     static last_id = 0;
@@ -63,9 +82,63 @@ class UI {
      * @param {Pattern} pattern 
      */
     static loadPatternToUI(pattern) {
-        if (pattern instanceof CellPattern) this.setCellParamsEnabled(true);
-        else if (pattern instanceof ArrayPattern) this.setArrayParamsEnabled(true);
-        else this.setGeneralPatternParamsEnabled(true);
+        console.log(pattern);
+        this.loadGeneralPatternData(pattern);
+        if (pattern instanceof CellPattern) {
+            this.loadCellPatternData(pattern);
+            this.setCellParamsEnabled(true);
+        } else if (pattern instanceof ArrayPattern) {
+            this.loadArrayPatternData(pattern);
+            this.setArrayParamsEnabled(true);
+        } else this.setGeneralPatternParamsEnabled(true);
+    }
+
+    /**
+     * Загружает в интерфейс основные параметры паттерна
+     * @param {Pattern} pattern 
+     */
+    static loadGeneralPatternData(pattern) {
+        if (pattern.isInline) {
+            this.patternName.value = "Объявлен в компоненте";
+            this.patternName.disabled = true;
+        } else {
+            this.patternName.disabled = false;
+            this.patternName.value = pattern.name;
+        }
+
+        if (pattern.kind == "CELL")
+            this.patternKind.selectedIndex = 0;
+        else if (pattern.kind == "ARRAY")
+            this.patternKind.selectedIndex = 1;
+        else if (pattern.kind == "AREA")
+            this.patternKind.selectedIndex = 2;
+        else if (pattern.kind == "ARRAY-IN-CONTEXT")
+            this.patternKind.selectedIndex = 3;
+        else alert("Не удалось распознать тип паттерна: " + pattern.kind);
+
+        this.patternDesc.value = pattern.desc;
+
+        if (pattern.width.isDefined()) {
+            this.patternWidthMin.value = pattern.width.getBegin();
+            this.patternWidthMax.value = pattern.width.getEnd();
+        } else {
+            this.patternWidthMin.value = "";
+            this.patternWidthMax.value = "";
+        }
+        if (pattern.height.isDefined()) {
+            this.patternHeightMin.value = pattern.height.getBegin();
+            this.patternHeightMax.value = pattern.height.getEnd();
+        } else {
+            this.patternHeightMin.value = "";
+            this.patternHeightMax.value = "";
+        }
+        if (pattern.countInDoc.isDefined()) {
+            this.patternCountInDocMin.value = pattern.countInDoc.getBegin();
+            this.patternCountInDocMin.value = pattern.countInDoc.getEnd();
+        } else {
+            this.patternCountInDocMin.value = "";
+            this.patternCountInDocMin.value = "";
+        }
     }
 
     static resetUI() {
@@ -131,6 +204,15 @@ class UI {
         this.cellParams = document.getElementById("cell-parameters");
         this.arrayParams = document.getElementById("array-parameters");
         this.componentParams = document.getElementById("component-parameters");
+        this.patternName = document.getElementById("pattern-name");
+        this.patternKind = document.getElementById("pattern-kind");
+        this.patternDesc = document.getElementById("pattern-description");
+        this.patternWidthMin = document.getElementById("pattern-x-min");
+        this.patternWidthMax = document.getElementById("pattern-x-max");
+        this.patternHeightMin = document.getElementById("pattern-y-min");
+        this.patternHeightMax = document.getElementById("pattern-y-max");
+        this.patternCountInDocMin = document.getElementById("pattern-count-min");
+        this.patternCountInDocMax = document.getElementById("pattern-count-max");
         this.resetUI();
     }
 }
