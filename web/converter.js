@@ -352,12 +352,15 @@ class Grammar {
     static parseSize(sizeStr) {
         if (!sizeStr) return new PatternSize(new YamlRange(0, 0).setUndefined(), new YamlRange(0, 0).setUndefined()); // Возвращаем пустышку, если размеры не указаны
 
+        // Удалить пробелы из приведённой к нижнему регистру строки и разделить по "x"
         const parts = sizeStr.toLowerCase().replaceAll(/\s+/g, "") .split("x");
 
+        // Выбросить ошибку, если строка не задаёт размер
         if (parts.length !== 2 || !parts[0] || !parts[1]) {
             throw new Error(`Некорректный формат размера: ${sizeStr}. Ожидается формат "ширина x высота"`);
         }
 
+        // Создать объект
         return new PatternSize(
             this.parseYamlRange(parts[0]),
             this.parseYamlRange(parts[1])
