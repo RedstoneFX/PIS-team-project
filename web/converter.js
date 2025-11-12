@@ -324,7 +324,7 @@ class Grammar {
     static parseSize(sizeStr) {
         if (!sizeStr) return new YamlRange(0, 0).setUndefined(); // Возвращаем пустышку, если размеры не указаны
 
-        const parts = sizeStr.trim().split(/\s*x\s*/);
+        const parts = sizeStr.toLowerCase().replaceAll(" ", "") .split("x");
 
         if (parts.length !== 2 || !parts[0] || !parts[1]) {
             throw new Error(`Некорректный формат размера: ${sizeStr}. Ожидается формат "ширина x высота"`);
