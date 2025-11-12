@@ -31,23 +31,25 @@ class Grammar {
             this.cellTypesFilepath = yamlData.cell_types_filepath;
         }
 
-        // Обход и сохранение паттернов
-        for (const [patternName, patternData] of Object.entries(yamlData.patterns)) {
+        // Создание объектов паттернов
+        for (const [patternName, patternData] of Object.entries(yamlData.patterns)) { // Для каждого паттерна
             try {
-                const pattern = this.parsePattern(patternName, patternData);
-                this.patterns.set(patternName, pattern);
+                const pattern = this.parsePattern(patternName, patternData); // Парсим паттерн из его данных
+                this.patterns.set(patternName, pattern); // Сохраняем паттерн в словарь
 
-                if (pattern.isRoot) {
-                    if (this.rootName) {
+                // Обрабатываем корневой паттерн...
+                if (pattern.isRoot) { // Если паттерн корневой
+                    if (this.rootName) { // Выбрасываем ошибку, если корневой паттерн уже был
                         throw new Error(`Обнаружено несколько корневых паттернов: ${this.rootName} и ${patternName}`);
                     }
-                    this.rootName = patternName;
+                    this.rootName = patternName; // Иначе сохраняем этот паттерн как корневой
                 }
             } catch (error) {
-                throw new Error(`Ошибка создания паттерна "${patternName}": ${error.message}`);
+                throw new Error(`Ошибка создания паттерна "${patternName}": ${error.message}`); // Выводим ошибку, если не удалось спарсить паттерн
             }
         }
 
+        // Связывание паттернов
         for (const [patternName, patternData] of Object.entries(yamlData.patterns)) {
             try {
                 this.setPatternRelations(this.patterns.get(patternName), patternData);
@@ -56,6 +58,7 @@ class Grammar {
             }
         }
 
+        // Сообщить об ошибке, если не найден корневой паттерн
         if (!Grammar.rootName) {
             throw new Error('Не найден корневой паттерн');
         }
