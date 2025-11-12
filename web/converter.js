@@ -243,7 +243,7 @@ class Grammar {
         } else if (componentData.pattern_definition) { // Если данный компонент объявляет паттерн непосредственно...
             const referencedPatternName = `${parentName}__${componentName}`; // Генерируем новое имя для паттерна
             try {
-                referencedPattern = this.parsePattern(referencedPatternName, componentData.pattern_definition); // Распознаем внутренний паттерн
+                referencedPattern = this.parsePattern(referencedPatternName, componentData.pattern_definition).setInlineDefined();  // Распознаем внутренний паттерн
                 this.componentsInlinePatterns.set(referencedPatternName, referencedPattern); // Добавляем паттерн в словарь паттернов для компонентов
                 this.setPatternRelations(referencedPattern, componentData.pattern_definition); // Связываем паттерн
             } catch (error) {
@@ -652,6 +652,8 @@ class Pattern {
     height
     /** @type {boolean} */
     isRoot
+    /** @type {boolean} */
+    isInline
 
     constructor(name, kind, desc, countInDoc, width, height, isRoot) {
         this.name = name;
@@ -661,6 +663,12 @@ class Pattern {
         this.width = width;
         this.height = height;
         this.isRoot = isRoot;
+        this.isInline = false;
+    }
+
+    setInlineDefined() {
+        this.isInline = true;
+        return this;
     }
 
     /**
