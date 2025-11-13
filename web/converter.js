@@ -1,10 +1,6 @@
 class Grammar {
-    /** @type {String[]} */
-    static cellTypes = [];
     /** @type {Map<String, Pattern>} */
     static patterns = new Map();
-    /** @type {Map<String, Pattern>} */
-    static componentsInlinePatterns = new Map();
     /** @type {String} */
     static rootName = null;
     /** @type {String} */
@@ -22,12 +18,7 @@ class Grammar {
             throw new Error("Некорректные данные YAML");
         }
 
-        // Обнуление даных
-        this.cellTypes = [];
-        this.patterns = new Map();
-        this.componentsInlinePatterns = new Map();
-        this.rootName = null;
-        this.cellTypesFilepath = null;
+        this.reset();
 
         // Сохранение пути к файлу с типами ячеек
         if (yamlData.cell_types_filepath) {
@@ -65,6 +56,13 @@ class Grammar {
                 throw new Error(`Ошибка установки связей для паттерна "${name}": ${error.message}`);
             }
         }
+    }
+
+    static reset() {
+        // Обнуление данных
+        this.patterns = new Map();
+        this.rootName = null;
+        this.cellTypesFilepath = null;
     }
 
     /**
