@@ -107,15 +107,14 @@ class Grammar {
         // Если переданно число, то интервал сокращается до точки
         if (typeof rangeStr === 'number') {
             return new YamlRange(rangeStr, rangeStr);
-        }
-
-        // Если переданна не строка, то я хз, что делать
-        if (typeof rangeStr != "string") {
+        } else if (typeof rangeStr !== "string") { // Выбросить ошибку, если интервал не является строкой или числом
             throw new Error("Не удается распознать интервал " + rangeStr);
         }
 
+        // Удалить пробелы
         rangeStr = rangeStr.replaceAll(/\s+/g, "");
 
+        // Вернуть единичный интервал, если в строке только число (одно)
         if (/\d+$/.test(rangeStr)) {
             let i = parseInt(rangeStr);
             return new YamlRange(i, i);
@@ -123,7 +122,7 @@ class Grammar {
 
         // Если передана * - то интервал любой
         if (rangeStr === '*') {
-            return new YamlRange(-Infinity, Infinity); // Жеееесть, но ОК
+            return new YamlRange(-Infinity, Infinity);
         }
 
         // Если в строке точно есть интервал...
@@ -139,16 +138,16 @@ class Grammar {
             } else if (parts[0] == "*") {
                 begin = -Infinity;
             } else {
-                throw new Error("Не удается распознать левую часть интервала " + rangeStr);
+                throw new Error(`Не удается распознать левую часть интервала: '${rangeStr}'.`);
             }
 
             // Парсим правую часть интервала
             if (/\d+$/.test(parts[1])) {
-                begin = parseInt(parts[1]);
+                end = parseInt(parts[1]);
             } else if (parts[1] == "*") {
-                begin = -Infinity;
+                end = Infinity;
             } else {
-                throw new Error("Не удается распознать правую часть интервала " + rangeStr);
+                throw new Error(`Не удается распознать правую часть интервала: '${rangeStr}'.`);
             }
 
             return new YamlRange(begin, end);
@@ -163,9 +162,10 @@ class Grammar {
             if (/\d+$/.test(number)) {
                 number = parseInt(number);
             } else {
-                throw new Error("Не удается распознать число в интервале: " + rangeStr);
+                throw new Error(`Не удается распознать число, задающее интервал: '${rangeStr}'.`);
             }
 
+            // Вернуть интервал с бесконечным концом в зависимости от знака
             if (modifier === '+') {
                 return new YamlRange(number, Infinity);
             } else {
@@ -173,7 +173,7 @@ class Grammar {
             }
         }
 
-        throw new Error("Не удается распознать интервал " + rangeStr);
+        throw new Error(`Не удается распознать интервал: '${rangeStr}'.`);
     }
 
     /**
