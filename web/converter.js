@@ -499,7 +499,7 @@ class Component {
             this.pattern = null;
         } else if (data.pattern_definition) {
             try {
-                this.pattern = new Pattern("", data.pattern_definition).setInlineDefined();
+                this.pattern = Grammar.parsePattern("", data.pattern_definition).setInlineDefined();
             } catch (e) {
                 throw new Error(`Не удается распознать вложнный паттерн в компоненте ${this.name}: ${e.message}`);
             }
