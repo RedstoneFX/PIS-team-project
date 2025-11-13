@@ -511,10 +511,15 @@ class Component {
     }
 
     resolveLinks() {
-        if(!this.#patternName) return;
-        this.pattern = Grammar.patterns.get(this.#patternName);
-        if (!this.pattern)
-            throw new Error(`Не удалось найти паттерн с названием ${this.#patternName} для привязки к компоненту ${this.name}`);
+        if(this.#patternName && !this.pattern) {
+            this.pattern = Grammar.patterns.get(this.#patternName);
+            if (!this.pattern)
+            throw new Error(`Не удалось найти паттерн с названием '${this.#patternName}' для привязки к компоненту '${this.name}'.`);
+        } else if(this.pattern && !this.#patternName) {
+            this.pattern.resolveLinks();
+        } else {
+            throw new Error(`Не удалось установить ссылки для компонента: '${this.name}'.`);
+        }
     }
 
     /**
