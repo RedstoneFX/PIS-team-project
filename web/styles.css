@@ -110,8 +110,11 @@ input.numeric {
     grid-template-columns: auto 4fr;
 }
 
-.selected-browser-pattern {
+.selected-browser-pattern > summary {
     font-weight: bold;
+}
+
+.selected-browser-pattern {
     background-color: #8b849b6a !important;
     transform: translate(1rem);
 }
