@@ -137,7 +137,7 @@ class UI {
 
         // Вставляем информацию о паттерне
         title.innerText = titleName;
-        newBlock.id = this.getIDForPattern(pattern);
+        title.id = this.getIDForPattern(pattern);
         newBlock.classList.add("pattern");
         title.onclick = (d) => this.onPatternSelected(d);
 
@@ -158,9 +158,9 @@ class UI {
     static onPatternSelected(element) {
         if (this.selectedPatternInBrowser)
             this.selectedPatternInBrowser.classList.remove("selected-browser-pattern");
-        this.selectedPatternInBrowser = element.target.parentElement;
+        this.selectedPatternInBrowser = element.target;
         element.target.parentElement.classList.add("selected-browser-pattern");
-        let pattern = this.getPatternByID(element.target.parentElement.id);
+        let pattern = this.getPatternByID(element.target.id);
         this.loadPatternToUI(pattern);
     }
 
