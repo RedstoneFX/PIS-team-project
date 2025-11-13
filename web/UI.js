@@ -85,10 +85,12 @@ class UI {
             newBlock = document.createElement("details");
             title = document.createElement("summary");
             components = document.createElement("div");
+            components.classList.add("components");
 
             // Вставляем информацию о паттерне
             title.innerText = name;
-            title.id = this.IDByPattern.get(pattern);
+            newBlock.id = this.IDByPattern.get(pattern);
+            newBlock.classList.add("pattern");
             title.onclick = (d) => this.onPatternSelected(d);
 
             // генерируем компоненты
@@ -130,9 +132,9 @@ class UI {
     static onPatternSelected(element) {
         if (this.selectedPatternInBrowser)
             this.selectedPatternInBrowser.classList.remove("selected-browser-pattern");
-        this.selectedPatternInBrowser = element.target;
-        element.target.classList.add("selected-browser-pattern");
-        let pattern = this.patternByID.get(element.target.id);
+        this.selectedPatternInBrowser = element.target.parentElement;
+        element.target.parentElement.classList.add("selected-browser-pattern");
+        let pattern = this.patternByID.get(element.target.parentElement.id);
         this.loadPatternToUI(pattern);
     }
 

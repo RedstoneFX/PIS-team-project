@@ -110,17 +110,6 @@ input.numeric {
     grid-template-columns: auto 4fr;
 }
 
-#tree-browser > details > summary {
-    background-color: #a7a0b76a ;
-    transition-duration: 0.5s;
-    transition-timing-function: ease-out;
-    padding-left: 10px;
-}
-
-#tree-browser > details > ul {
-    margin-left: 2rem;
-}
-
 .selected-browser-pattern {
     font-weight: bold;
     background-color: #8b849b6a !important;
@@ -132,7 +121,28 @@ input.numeric {
     grid-template-columns: 1fr auto 1fr;
 }
 
-#tree-browser > details > summary:hover {
+#tree-browser .pattern {
+    background-color: #a7a0b76a;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-out;
+    padding-left: 10px;
+}
+
+#tree-browser .pattern:hover {
     transform: translate(1rem);
+    background-color: #8b849b6a;
+}
+
+#tree-browser .component-ptr {
+    display: list-item;
+    list-style-type: circle;
+    list-style-position: inside;
+}
+
+#tree-browser .components {
+    padding-left: 10px;
+}
+
+#tree-browser .pattern[open] {
     background-color: #8b849b6a;
 }
