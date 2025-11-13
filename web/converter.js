@@ -751,8 +751,8 @@ class AreaPattern extends Pattern {
     }
 
     resolveLinks() {
-        for (let component of this.components) {
-            component.resolveLinks();
+        for (let i = 0; i < this.components.length; ++i) {
+            this.components[i].resolveLinks();
         }
     }
 
