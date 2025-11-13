@@ -108,7 +108,29 @@ class UI {
      * @param {HTMLElement} componentsDiv
      * @param {Component} component
      */
-    static insertComponent(componentsDiv, component) {}
+    static insertComponent(componentsDiv, component) {
+        let componentElement, summmary;
+        if(component.pattern && component.pattern.isInline) {
+            componentElement = document.createElement("details");
+            summmary = document.createElement("summary");
+            summmary.innerText = component.name;
+            componentElement.append(summmary);
+            this.insertPattern(componentElement, component.pattern)
+        } else {
+            componentElement = document.createElement("span");
+            componentElement.classList.add("component-ptr");
+            componentElement.innerText = component.name;
+        }
+        componentsDiv.append(componentElement);
+    }
+
+    /**
+     * @param {HTMLElement} patternsDiv 
+     * @param {Pattern} pattern 
+     */
+    static insertPattern(patternsDiv, pattern){
+
+    }
 
     /**
      * Регенерирует идентификаторы для всех известных паттернов
