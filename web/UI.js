@@ -189,7 +189,7 @@ class UI {
         else if (pattern.direction == "FILL") this.patternArrayDirection.selectedIndex = 2;
         else alert("Не удалось распознать направление массива: " + pattern.direction);
 
-        //pattern.pattern;
+        this.patternArrayPattern.value = this.getIDForPattern(pattern.pattern);
 
         if (pattern.gap.isDefined()) {
             this.patternArrayGapMin = pattern.gap.getBegin();
