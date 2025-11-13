@@ -342,7 +342,7 @@ class YamlLocation {
 
     /**
      * Конвертирует YamlLocation в YAML-представление
-     * @returns {string|Object}
+     * @returns {Object}
      */
     toYaml() {
         const { padding, margin } = this;
