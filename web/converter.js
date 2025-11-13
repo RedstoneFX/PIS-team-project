@@ -646,9 +646,11 @@ class CellPattern extends Pattern {
 
         if (data.content_type) {
             if (typeof data.content_type !== "string") {
-                throw new Error(`Тип данных должен быть строкой.`);
+                throw new Error(`Тип данных ячейки должен быть строкой.`);
             }
             this.contentType = data.content_type;
+        } else {
+            throw new Error(`Не задан тип данных для ячейки '${this.name}'.`);
         }
     }
 
