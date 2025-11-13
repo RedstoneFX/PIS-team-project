@@ -116,6 +116,8 @@ class UI {
         } else {
             componentElement = document.createElement("div");
             componentElement.classList.add("pattern");
+            componentElement.id = this.getIDForPattern(component.pattern);
+            componentElement.onclick = (e) => this.onPatternSelected(e);
             if(titleName != component.pattern.name)
                 componentElement.innerText = `🌌 ${titleName} (${component.pattern.name})`;
             else
@@ -157,12 +159,19 @@ class UI {
      * @param {PointerEvent} element
      */
     static onPatternSelected(element) {
+        this.setBrowserItemSelected(element.target.id);
+    }
+
+    /**
+     * Ставит стили элемента в браузере на "выбранный" и скрывает предыдущий
+     * @param {String} id 
+     */
+    static setBrowserItemSelected(id) {
         if (this.selectedPatternInBrowser)
-            this.selectedPatternInBrowser.classList.remove("selected-browser-pattern");
-        this.selectedPatternInBrowser = element.target;
-        element.target.parentElement.classList.add("selected-browser-pattern");
-        let pattern = this.getPatternByID(element.target.id);
-        this.loadPatternToUI(pattern);
+            this.selectedPatternInBrowser.parentNode.classList.remove("selected-browser-pattern");
+        this.selectedPatternInBrowser = document.getElementById(id);
+        this.selectedPatternInBrowser.parentElement.classList.add("selected-browser-pattern");
+        this.loadPatternToUI(this.getPatternByID(id));
     }
 
     /**
