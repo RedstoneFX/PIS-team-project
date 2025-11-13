@@ -670,11 +670,11 @@ class CellPattern extends Pattern {
 }
 
 class ArrayPattern extends Pattern {
-    /** @type {"ROW" | "COL" | "FILL"} */
+    /** @type {"ROW" | "COLUMN" | "FILL"} */
     direction
     /** @type {Pattern} */
     pattern
-    /** @type {string} */
+    /** @type {String} */
     #patternName
     /** @type {YamlRange} */
     gap
@@ -683,17 +683,45 @@ class ArrayPattern extends Pattern {
 
     constructor(name, data) {
         super(name, data);
-        this.direction = data.direction?.toUpperCase() || "ROW";
-        this.#patternName = data.item_pattern;
-        this.gap = Grammar.parseYamlRange(data.gap);
-        this.itemCount = Grammar.parseYamlRange(data.gap);
+        
+        if (data.direction) {
+            if (!(data.direction.toUpperCase() === "ROW"
+                || data.direction.toUpperCase() === "COLUMN"
+                || data.direction.toUpperCase() === "FILL"))
+                {
+                    throw new Error(`Некорректно задано направление для массива: '${data.direction}'. Допустимые: 'row', 'column', 'fill'.`);
+                }
+            this.direction = data.direction.toUpperCase();
+        } else {
+            throw new Error(`Не задано направление для массива '${this.name}'.`);
+        }
+
+        if (data.item_pattern) {
+            this.#patternName = data.item_pattern;
+        } else {
+            throw new Error(`Не задан паттерн для массива '${this.name}'.`);
+        }
+
+        this.pattern = null;
+
+        if (data.gap) {
+            this.gap = Grammar.parseYamlRange(data.gap);
+        } else {
+            this.gap = new YamlRange(0, 0).setUndefined();
+        }
+
+        if (data.item_count) {
+            this.itemCount = Grammar.parseYamlRange(data.item_count);
+        } else {
+            this.itemCount = new YamlRange(0, 0).setUndefined();
+        }
     }
 
     resolveLinks() {
         if(!this.#patternName) return;
         this.pattern = Grammar.patterns.get(this.#patternName);
         if (!this.pattern)
-            throw new Error(`Не удалось найти паттерн с названием ${this.#patternName}`);
+            throw new Error(`Не удалось найти паттерн с названием '${this.#patternName}' для установления связи с массивом '${this.name}'.`);
     }
 
     /**
