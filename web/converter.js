@@ -639,22 +639,20 @@ class Pattern {
 
 class CellPattern extends Pattern {
     /** @type {String} */
-    #contentTypePatternName
-    /** @type {Pattern} */
     contentType
 
     constructor(name, data) {
         super(name, data);
-        if (data.contentType && typeof data.contentType != "string") throw new Error(`Тип паттерна не является строкой.`);
-        this.#contentTypePatternName = data.contentType;
+
+        if (data.content_type) {
+            if (typeof data.content_type !== "string") {
+                throw new Error(`Тип данных должен быть строкой.`);
+            }
+            this.contentType = data.content_type;
+        }
     }
 
-    resolveLinks() {
-        if(!this.#contentTypePatternName) return;
-        this.contentType = Grammar.patterns.get(this.#contentTypePatternName);
-        if (!this.contentType)
-            throw new Error(`Не удалось найти паттерн с названием ${this.#contentTypePatternName}`);
-    }
+    resolveLinks() {}
 
     /**
      * Конвертирует CellPattern в YAML-объект
@@ -664,7 +662,7 @@ class CellPattern extends Pattern {
         const result = super.toYaml();
 
         if (this.contentType) {
-            result.content_type = this.contentType.name;
+            result.content_type = this.contentType;
         }
 
         return result;
