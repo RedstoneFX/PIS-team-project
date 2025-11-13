@@ -116,8 +116,9 @@ input.numeric {
 }
 
 .selected-browser-pattern {
-    background-color: #8b849b6a !important;
+    background-color: #000000 !important;
     transform: translate(1rem);
+    color: white;
 }
 
 #pattern-count {
