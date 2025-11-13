@@ -40,9 +40,7 @@ class UI {
     /** @type {HTMLSelectElement} */
     static patternArrayCountMax;
     /** @type {HTMLSelectElement} */
-    static patternCellPattern;
-    /** @type {HTMLSelectElement} */
-
+    static patternCellContentType;
     /** @type {Map<String, Pattern>} */
     static patternByID = new Map();
     /** @type {Map<Pattern, String>} */
@@ -175,9 +173,11 @@ class UI {
 
     /**
      * Загружает в интерфейс специфичные параметры паттерна-клетки
-     * @param {Pattern} pattern
+     * @param {CellPattern} pattern
      */
-    static loadCellPatternData(pattern) {}
+    static loadCellPatternData(pattern) {
+        this.patternCellContentType.value = pattern.contentType;
+    }
 
     /**
      * Загружает в интерфейс специфичные параметры паттерна-массива
@@ -331,7 +331,7 @@ class UI {
         this.patternArrayGapMax = document.getElementById("pattern-array-gap-max");
         this.patternArrayCountMin = document.getElementById("pattern-array-count-min");
         this.patternArrayCountMax = document.getElementById("pattern-array-count-max");
-        this.patternCellPattern = document.getElementById("pattern-cell-pattern");
+        this.patternCellContentType = document.getElementById("pattern-cell-content-type");
         this.resetUI();
     }
 }
