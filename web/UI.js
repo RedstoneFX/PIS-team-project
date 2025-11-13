@@ -54,9 +54,30 @@ class UI {
 
     static loadFromGrammar() {
         this.resetUI();
-        this.generatePatternIDs();
         this.generateBrowserTree();
         this.generateSelections();
+    }
+
+    /**
+     * @param {Pattern} pattern 
+     * @returns {string}
+     */
+    static getIDForPattern(pattern) {
+        let id = this.IDByPattern.get(pattern);
+        if (!id) {
+            id = `pattern_${this.last_id++}`;
+            this.IDByPattern.set(pattern, id);
+            this.patternByID.set(id, pattern);
+        }
+        return id;
+    }
+
+    /**
+     * @param {string} id
+     * @returns {Pattern}
+     */
+    static getPatternByID(id) {
+        return this.patternByID.get(id);
     }
 
     static generateSelections() {
@@ -69,10 +90,10 @@ class UI {
                 selection.children[c].remove();
             }
             // Генерируем новые ссылки
-            for (const [id, pattern] of this.patternByID.entries()) {
+            for (const [name, pattern] of Grammar.patterns.entries()) {
                 let newOption = document.createElement("option");
                 newOption.innerText = pattern.name;
-                newOption.value = id;
+                newOption.value = this.getIDForPattern(pattern);
                 selection.append(newOption);
             }
         }
@@ -80,71 +101,47 @@ class UI {
 
     static generateBrowserTree() {
         this.clearBrowser();
-        let newBlock, title, components;
         for (const [name, pattern] of Grammar.patterns.entries()) {
-            newBlock = document.createElement("details");
-            title = document.createElement("summary");
-            components = document.createElement("div");
-            components.classList.add("components");
-
-            // Вставляем информацию о паттерне
-            title.innerText = name;
-            newBlock.id = this.IDByPattern.get(pattern);
-            newBlock.classList.add("pattern");
-            title.onclick = (d) => this.onPatternSelected(d);
-
-            // генерируем компоненты
-            if (pattern.components)
-                for (let component of pattern.components)
-                    this.insertComponent(components, component);
-
-            newBlock.append(title);
-            newBlock.append(components);
-            this.browser.append(newBlock);
+            let patternBlock = this.generatePattern(pattern.name, pattern);
+            this.browser.append(patternBlock);
         }
     }
 
     /**
-     * @param {HTMLElement} componentsDiv
      * @param {Component} component
      */
-    static insertComponent(componentsDiv, component) {
-        let componentElement, summmary;
-        if(component.pattern && component.pattern.isInline) {
-            componentElement = document.createElement("details");
-            summmary = document.createElement("summary");
-            summmary.innerText = component.name;
-            componentElement.append(summmary);
-            this.insertPattern(componentElement, component.pattern)
+    static generateComponent(titleName, component) {
+        let componentElement;
+        if (component.pattern && component.pattern.isInline) {
+            componentElement = this.generatePattern(component.name, component.pattern);
+            componentElement.classList.add("component-inline");
         } else {
             componentElement = document.createElement("span");
-            componentElement.classList.add("component-ptr");
-            componentElement.innerText = component.name;
+            componentElement.classList.add("pattern-ptr");
         }
-        componentsDiv.append(componentElement);
+        return componentElement;
     }
 
-    /**
-     * @param {HTMLElement} patternsDiv 
-     * @param {Pattern} pattern 
-     */
-    static insertPattern(patternsDiv, pattern){
+    static generatePattern(titleName, pattern) {
+        let newBlock = document.createElement("details");
+        let title = document.createElement("summary");
+        let components = document.createElement("div");
+        components.classList.add("components");
 
-    }
+        // Вставляем информацию о паттерне
+        title.innerText = titleName;
+        newBlock.id = this.getIDForPattern(pattern);
+        newBlock.classList.add("pattern");
+        title.onclick = (d) => this.onPatternSelected(d);
 
-    /**
-     * Регенерирует идентификаторы для всех известных паттернов
-     */
-    static generatePatternIDs() {
-        this.IDByPattern.clear();
-        this.patternByID.clear();
-        let id = "";
-        for (const [name, pattern] of Grammar.patterns.entries()) {
-            id = `pattern_${this.last_id}`;
-            this.patternByID.set(id, pattern);
-            this.IDByPattern.set(pattern, id);
-            this.last_id += 1;
-        }
+        // генерируем компоненты
+        if (pattern.components)
+            for (let component of pattern.components)
+                components.append(this.generateComponent(component.name, component));
+
+        newBlock.append(title);
+        newBlock.append(components);
+        return newBlock;
     }
 
     /**
@@ -156,7 +153,7 @@ class UI {
             this.selectedPatternInBrowser.classList.remove("selected-browser-pattern");
         this.selectedPatternInBrowser = element.target.parentElement;
         element.target.parentElement.classList.add("selected-browser-pattern");
-        let pattern = this.patternByID.get(element.target.parentElement.id);
+        let pattern = this.getPatternByID(element.target.parentElement.id);
         this.loadPatternToUI(pattern);
     }
 
