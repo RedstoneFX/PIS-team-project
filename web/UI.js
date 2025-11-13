@@ -114,7 +114,8 @@ class UI {
             componentElement = this.generatePattern(titleName, component.pattern);
             componentElement.classList.add("component-inline");
         } else {
-            componentElement = document.createElement("span");
+            componentElement = document.createElement("div");
+            componentElement.classList.add("pattern");
             if(titleName != component.pattern.name)
                 componentElement.innerText = `🌌 ${titleName} (${component.pattern.name})`;
             else
