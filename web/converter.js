@@ -433,7 +433,7 @@ class YamlRange {
 
     setBegin(value) {
         if (this.getEnd() < value) {
-            return;
+            throw new Error('Конец диапазона не может быть больше начала');
         }
         this.#begin = value;
         return this;
@@ -441,7 +441,7 @@ class YamlRange {
 
     setEnd(value) {
         if (this.getBegin > value) {
-            return;
+            throw new Error('Конец диапазона не может быть больше начала');
         }
         this.#end = value;
         return this;
