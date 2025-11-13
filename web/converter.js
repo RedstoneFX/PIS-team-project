@@ -386,7 +386,6 @@ class YamlLocation {
             this.margin?.right,
             this.margin?.bottom
         ];
-
         return ranges.some(range => range?.isDefined() === true);
     }
 }
