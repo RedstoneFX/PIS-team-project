@@ -1,54 +1,52 @@
 class UI {
-
     /** @type {HTMLElement} */
-    static browser
+    static browser;
     /** @type {HTMLElement} */
-    static patternParams
+    static patternParams;
     /** @type {HTMLElement} */
-    static cellParams
+    static cellParams;
     /** @type {HTMLElement} */
-    static arrayParams
+    static arrayParams;
     /** @type {HTMLElement} */
-    static componentParams
+    static componentParams;
     /** @type {HTMLSelectElement} */
-    static patternName
+    static patternName;
     /** @type {HTMLSelectElement} */
-    static patternKind
+    static patternKind;
     /** @type {HTMLSelectElement} */
-    static patternDesc
+    static patternDesc;
     /** @type {HTMLSelectElement} */
-    static patternWidthMin
+    static patternWidthMin;
     /** @type {HTMLSelectElement} */
-    static patternWidthMax
+    static patternWidthMax;
     /** @type {HTMLSelectElement} */
-    static patternHeightMin
+    static patternHeightMin;
     /** @type {HTMLSelectElement} */
-    static patternHeightMax
+    static patternHeightMax;
     /** @type {HTMLSelectElement} */
-    static patternCountInDocMin
+    static patternCountInDocMin;
     /** @type {HTMLSelectElement} */
-    static patternCountInDocMax
+    static patternCountInDocMax;
     /** @type {HTMLSelectElement} */
-    static patternArrayDirection
+    static patternArrayDirection;
     /** @type {HTMLSelectElement} */
-    static patternArrayPattern
+    static patternArrayPattern;
     /** @type {HTMLSelectElement} */
-    static patternArrayGapMin
+    static patternArrayGapMin;
     /** @type {HTMLSelectElement} */
-    static patternArrayGapMax
+    static patternArrayGapMax;
     /** @type {HTMLSelectElement} */
-    static patternArrayCountMin
+    static patternArrayCountMin;
     /** @type {HTMLSelectElement} */
-    static patternArrayCountMax
+    static patternArrayCountMax;
     /** @type {HTMLSelectElement} */
-    static patternCellPattern
+    static patternCellPattern;
     /** @type {HTMLSelectElement} */
-
 
     /** @type {Map<String, Pattern>} */
-    static patternByID = new Map()
+    static patternByID = new Map();
     /** @type {Map<Pattern, String>} */
-    static IDByPattern = new Map()
+    static IDByPattern = new Map();
     static last_id = 0;
 
     /** @type {HTMLElement} */
@@ -95,7 +93,8 @@ class UI {
 
             // генерируем компоненты
             if (pattern.components)
-                for(let component of pattern.components) this.insertComponent(components, component);
+                for (let component of pattern.components)
+                    this.insertComponent(components, component);
 
             newBlock.append(title);
             newBlock.append(components);
@@ -104,12 +103,10 @@ class UI {
     }
 
     /**
-     * @param {HTMLElement} componentsDiv 
-     * @param {Component} component 
+     * @param {HTMLElement} componentsDiv
+     * @param {Component} component
      */
-    static insertComponent(componentsDiv, component){
-
-    }
+    static insertComponent(componentsDiv, component) {}
 
     /**
      * Регенерирует идентификаторы для всех известных паттернов
@@ -128,10 +125,11 @@ class UI {
 
     /**
      * Слушатель нажатий на паттерны в браузере
-     * @param {PointerEvent} element 
+     * @param {PointerEvent} element
      */
     static onPatternSelected(element) {
-        if (this.selectedPatternInBrowser) this.selectedPatternInBrowser.classList.remove("selected-browser-pattern");
+        if (this.selectedPatternInBrowser)
+            this.selectedPatternInBrowser.classList.remove("selected-browser-pattern");
         this.selectedPatternInBrowser = element.target;
         element.target.classList.add("selected-browser-pattern");
         let pattern = this.patternByID.get(element.target.id);
@@ -140,7 +138,7 @@ class UI {
 
     /**
      * Функция, загружающяя данные из этого паттерна в интерфейс параметров
-     * @param {Pattern} pattern 
+     * @param {Pattern} pattern
      */
     static loadPatternToUI(pattern) {
         console.log(pattern);
@@ -156,27 +154,22 @@ class UI {
 
     /**
      * Загружает в интерфейс специфичные параметры паттерна-клетки
-     * @param {Pattern} pattern 
+     * @param {Pattern} pattern
      */
-    static loadCellPatternData(pattern) {
-
-    }
+    static loadCellPatternData(pattern) {}
 
     /**
      * Загружает в интерфейс специфичные параметры паттерна-массива
-     * @param {ArrayPattern} pattern 
+     * @param {ArrayPattern} pattern
      */
     static loadArrayPatternData(pattern) {
-        if (pattern.direction == "ROW")
-            this.patternArrayDirection.selectedIndex = 0;
-        else if (pattern.direction == "COL")
-            this.patternArrayDirection.selectedIndex = 1;
-        else if (pattern.direction == "FILL")
-            this.patternArrayDirection.selectedIndex = 2;
+        if (pattern.direction == "ROW") this.patternArrayDirection.selectedIndex = 0;
+        else if (pattern.direction == "COL") this.patternArrayDirection.selectedIndex = 1;
+        else if (pattern.direction == "FILL") this.patternArrayDirection.selectedIndex = 2;
         else alert("Не удалось распознать тип паттерна: " + pattern.kind);
 
         //pattern.pattern;
-        
+
         if (pattern.gap.isDefined()) {
             this.patternArrayGapMin = pattern.gap.getBegin();
             this.patternArrayGapMax = pattern.gap.getEnd();
@@ -196,7 +189,7 @@ class UI {
 
     /**
      * Загружает в интерфейс основные параметры паттерна
-     * @param {Pattern} pattern 
+     * @param {Pattern} pattern
      */
     static loadGeneralPatternData(pattern) {
         if (pattern.isInline) {
@@ -207,14 +200,10 @@ class UI {
             this.patternName.value = pattern.name;
         }
 
-        if (pattern.kind == "CELL")
-            this.patternKind.selectedIndex = 0;
-        else if (pattern.kind == "ARRAY")
-            this.patternKind.selectedIndex = 1;
-        else if (pattern.kind == "AREA")
-            this.patternKind.selectedIndex = 2;
-        else if (pattern.kind == "ARRAY-IN-CONTEXT")
-            this.patternKind.selectedIndex = 3;
+        if (pattern.kind == "CELL") this.patternKind.selectedIndex = 0;
+        else if (pattern.kind == "ARRAY") this.patternKind.selectedIndex = 1;
+        else if (pattern.kind == "AREA") this.patternKind.selectedIndex = 2;
+        else if (pattern.kind == "ARRAY-IN-CONTEXT") this.patternKind.selectedIndex = 3;
         else alert("Не удалось распознать тип паттерна: " + pattern.kind);
 
         this.patternDesc.value = pattern.desc;
@@ -258,7 +247,7 @@ class UI {
 
     /**
      * Устанавливает секцию параметров видимой/невидимой
-     * @param {boolean} isEnabled 
+     * @param {boolean} isEnabled
      */
     static setGeneralPatternParamsEnabled(isEnabled) {
         if (isEnabled) {
@@ -274,27 +263,27 @@ class UI {
     }
 
     /**
- * Устанавливает секцию параметров видимой/невидимой
- * @param {boolean} isEnabled 
- */
+     * Устанавливает секцию параметров видимой/невидимой
+     * @param {boolean} isEnabled
+     */
     static setCellParamsEnabled(isEnabled) {
         this.setGeneralPatternParamsEnabled(isEnabled);
         this.cellParams.hidden = !isEnabled;
     }
 
     /**
- * Устанавливает секцию параметров видимой/невидимой
- * @param {boolean} isEnabled 
- */
+     * Устанавливает секцию параметров видимой/невидимой
+     * @param {boolean} isEnabled
+     */
     static setArrayParamsEnabled(isEnabled) {
         this.setGeneralPatternParamsEnabled(isEnabled);
         this.arrayParams.hidden = !isEnabled;
     }
 
     /**
- * Устанавливает секцию параметров видимой/невидимой
- * @param {boolean} isEnabled 
- */
+     * Устанавливает секцию параметров видимой/невидимой
+     * @param {boolean} isEnabled
+     */
     static setComponentParamsEnabled(isEnabled) {
         this.componentParams.hidden = !isEnabled;
         if (isEnabled) this.setGeneralPatternParamsEnabled(false);
