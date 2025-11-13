@@ -187,7 +187,7 @@ class UI {
         if (pattern.direction == "ROW") this.patternArrayDirection.selectedIndex = 0;
         else if (pattern.direction == "COL") this.patternArrayDirection.selectedIndex = 1;
         else if (pattern.direction == "FILL") this.patternArrayDirection.selectedIndex = 2;
-        else alert("Не удалось распознать тип паттерна: " + pattern.kind);
+        else alert("Не удалось распознать направление массива: " + pattern.direction);
 
         //pattern.pattern;
 
