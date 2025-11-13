@@ -46,6 +46,7 @@ input.numeric {
 #tree-browser {
     background-color: #00000017;
     height: auto;
+    overflow-x: hidden;
 }
 
 .parameters-table {
