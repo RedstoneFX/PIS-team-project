@@ -116,9 +116,9 @@ class UI {
         } else {
             componentElement = document.createElement("span");
             if(titleName != component.pattern.name)
-                componentElement.innerText = `${titleName} (${component.pattern.name})`;
+                componentElement.innerText = `🌌 ${titleName} (${component.pattern.name})`;
             else
-                componentElement.innerText = titleName;
+                componentElement.innerText = "🌌" + titleName;
             componentElement.classList.add("pattern-ptr");
         }
         return componentElement;
