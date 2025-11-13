@@ -283,6 +283,8 @@ class Grammar {
             case 'top': offset.top = value; break;
             case 'right': offset.right = value; break;
             case 'bottom': offset.bottom = value; break;
+            default:
+                throw Error(`Неверно задана сторона для отступа: '${side}'. Поддерживаемые стороны: 'top', 'bottom', 'right', 'left'.`);
         }
     }
 
