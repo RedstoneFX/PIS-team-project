@@ -88,14 +88,27 @@ class UI {
             title = document.createElement("summary");
             components = document.createElement("div");
 
+            // Вставляем информацию о паттерне
             title.innerText = name;
             title.id = this.IDByPattern.get(pattern);
             title.onclick = (d) => this.onPatternSelected(d);
+
+            // генерируем компоненты
+            if (pattern.components)
+                for(let component of pattern.components) this.insertComponent(components, component);
 
             newBlock.append(title);
             newBlock.append(components);
             this.browser.append(newBlock);
         }
+    }
+
+    /**
+     * @param {HTMLElement} componentsDiv 
+     * @param {Component} component 
+     */
+    static insertComponent(componentsDiv, component){
+
     }
 
     /**
