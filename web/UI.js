@@ -111,15 +111,24 @@ class UI {
     static generateComponent(titleName, component) {
         let componentElement;
         if (component.pattern && component.pattern.isInline) {
-            componentElement = this.generatePattern(component.name, component.pattern);
+            componentElement = this.generatePattern(titleName, component.pattern);
             componentElement.classList.add("component-inline");
         } else {
             componentElement = document.createElement("span");
+            if(titleName != component.pattern.name)
+                componentElement.innerText = `${titleName} (${component.pattern.name})`;
+            else
+                componentElement.innerText = titleName;
             componentElement.classList.add("pattern-ptr");
         }
         return componentElement;
     }
 
+    /**
+     * @param {String} titleName 
+     * @param {Pattern} pattern 
+     * @returns 
+     */
     static generatePattern(titleName, pattern) {
         let newBlock = document.createElement("details");
         let title = document.createElement("summary");
@@ -134,8 +143,8 @@ class UI {
 
         // генерируем компоненты
         if (pattern.components)
-            for (let component of pattern.components)
-                components.append(this.generateComponent(component.name, component));
+            for (let c = 0; c < pattern.components.length; ++c)
+                components.append(this.generateComponent(pattern.components[c].name, pattern.components[c]));
 
         newBlock.append(title);
         newBlock.append(components);
