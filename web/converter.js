@@ -639,22 +639,22 @@ class Pattern {
 
 class CellPattern extends Pattern {
     /** @type {String} */
-    #contentTypePatternName
-    /** @type {Pattern} */
     contentType
 
     constructor(name, data) {
         super(name, data);
-        if (data.contentType && typeof data.contentType != "string") throw new Error(`Тип паттерна не является строкой.`);
-        this.#contentTypePatternName = data.contentType;
+
+        if (data.content_type) {
+            if (typeof data.content_type !== "string") {
+                throw new Error(`Тип данных ячейки должен быть строкой.`);
+            }
+            this.contentType = data.content_type;
+        } else {
+            throw new Error(`Не задан тип данных для ячейки '${this.name}'.`);
+        }
     }
 
-    resolveLinks() {
-        if(!this.#contentTypePatternName) return;
-        this.contentType = Grammar.patterns.get(this.#contentTypePatternName);
-        if (!this.contentType)
-            throw new Error(`Не удалось найти паттерн с названием ${this.#contentTypePatternName}`);
-    }
+    resolveLinks() {}
 
     /**
      * Конвертирует CellPattern в YAML-объект
@@ -664,7 +664,7 @@ class CellPattern extends Pattern {
         const result = super.toYaml();
 
         if (this.contentType) {
-            result.content_type = this.contentType.name;
+            result.content_type = this.contentType;
         }
 
         return result;
@@ -672,11 +672,11 @@ class CellPattern extends Pattern {
 }
 
 class ArrayPattern extends Pattern {
-    /** @type {"ROW" | "COL" | "FILL"} */
+    /** @type {"ROW" | "COLUMN" | "FILL"} */
     direction
     /** @type {Pattern} */
     pattern
-    /** @type {string} */
+    /** @type {String} */
     #patternName
     /** @type {YamlRange} */
     gap
@@ -685,17 +685,45 @@ class ArrayPattern extends Pattern {
 
     constructor(name, data) {
         super(name, data);
-        this.direction = data.direction?.toUpperCase() || "ROW";
-        this.#patternName = data.item_pattern;
-        this.gap = Grammar.parseYamlRange(data.gap);
-        this.itemCount = Grammar.parseYamlRange(data.gap);
+        
+        if (data.direction) {
+            if (!(data.direction.toUpperCase() === "ROW"
+                || data.direction.toUpperCase() === "COLUMN"
+                || data.direction.toUpperCase() === "FILL"))
+                {
+                    throw new Error(`Некорректно задано направление для массива: '${data.direction}'. Допустимые: 'row', 'column', 'fill'.`);
+                }
+            this.direction = data.direction.toUpperCase();
+        } else {
+            throw new Error(`Не задано направление для массива '${this.name}'.`);
+        }
+
+        if (data.item_pattern) {
+            this.#patternName = data.item_pattern;
+        } else {
+            throw new Error(`Не задан паттерн для массива '${this.name}'.`);
+        }
+
+        this.pattern = null;
+
+        if (data.gap) {
+            this.gap = Grammar.parseYamlRange(data.gap);
+        } else {
+            this.gap = new YamlRange(0, 0).setUndefined();
+        }
+
+        if (data.item_count) {
+            this.itemCount = Grammar.parseYamlRange(data.item_count);
+        } else {
+            this.itemCount = new YamlRange(0, 0).setUndefined();
+        }
     }
 
     resolveLinks() {
         if(!this.#patternName) return;
         this.pattern = Grammar.patterns.get(this.#patternName);
         if (!this.pattern)
-            throw new Error(`Не удалось найти паттерн с названием ${this.#patternName}`);
+            throw new Error(`Не удалось найти паттерн с названием '${this.#patternName}' для установления связи с массивом '${this.name}'.`);
     }
 
     /**
