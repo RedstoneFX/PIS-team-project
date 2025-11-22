@@ -338,7 +338,8 @@ class UI {
 
     static clearBrowser() {
         for (let i = this.browser.children.length - 1; i >= 0; --i)
-            this.browser.children[i].remove();
+            if (this.browser.children[i].id != "browser-tools")
+                this.browser.children[i].remove();
     }
 
     /**

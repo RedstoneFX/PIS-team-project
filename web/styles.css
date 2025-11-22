@@ -87,22 +87,23 @@ input.numeric {
     border-bottom-color: black;
     border-bottom-style: solid;
 }
+
 #top-bar button {
     border-radius: 0;
     margin: 0;
 }
 
-#parameters details > summary {
+#parameters details>summary {
     background-color: #a7a0b76a;
     padding: 5px;
 }
 
-#parameters details[open] > summary {
+#parameters details[open]>summary {
     background-color: black;
     color: white;
 }
 
-#parameters details[open] > div {
+#parameters details[open]>div {
     margin: 10px;
 }
 
@@ -111,7 +112,7 @@ input.numeric {
     grid-template-columns: auto 4fr;
 }
 
-.selected-browser-pattern > summary {
+.selected-browser-pattern>summary {
     font-weight: bold;
 }
 
@@ -133,7 +134,8 @@ input.numeric {
     padding-left: 10px;
 }
 
-#tree-browser .browser-item:hover {
+#tree-browser .browser-item:hover,
+button:hover {
     background-color: #8b849b6a;
 }
 
@@ -145,6 +147,12 @@ input.numeric {
     background-color: #8b849b6a;
 }
 
-#tree-browser .component-list > details > summary {
-    list-style-type: disc; 
+#tree-browser .component-list>details>summary {
+    list-style-type: disc;
+}
+
+#browser-tools {
+    display: grid;
+    padding: 0.1rem;
+    grid-template-columns: 1fr 1fr;
 }
