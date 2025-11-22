@@ -211,12 +211,28 @@ class UI {
 
     /**
      * Слушатель нажатий на элементы бразуера
-     * @param {PointerEvent} element
+     * @param {PointerEvent} event
      */
     static onBrowserItemClicked(event) {
         console.log(UI_STORAGE.getDataFromElement(event.target));
         this.highlightBrowserElement(event.target);
-        this.loadSelectedDataToUI(UI_STORAGE.getDataFromElement(event.target));
+        let data = UI_STORAGE.getDataFromElement(event.target);
+        this.loadSelectedDataToUI(data);
+        this.updateBrowserControllsFor(data);
+    }
+
+    /**
+     * Включает и выключает кнопки в панели управления браузера, соответствующие действиям с переданным элементом
+     * @param {Object} data 
+     */
+    static updateBrowserControllsFor(data) {
+        if (data instanceof AreaPattern) {
+            this.createComponentDefinitionButton.disabled = false;
+            this.createComponentLinkButton.disabled = false;
+        } else {
+            this.createComponentDefinitionButton.disabled = true;
+            this.createComponentLinkButton.disabled = true;
+        }
     }
 
     /**
@@ -390,6 +406,8 @@ class UI {
      */
     static setComponentParamsEnabled(isEnabled) {
         this.componentParams.hidden = !isEnabled;
+        this.createComponentDefinitionButton.disabled = true;
+        this.createComponentLinkButton.disabled = true;
         if (isEnabled) this.setGeneralPatternParamsEnabled(false);
     }
 
