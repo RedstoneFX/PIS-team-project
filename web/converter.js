@@ -107,15 +107,14 @@ class Grammar {
         // Если переданно число, то интервал сокращается до точки
         if (typeof rangeStr === 'number') {
             return new YamlRange(rangeStr, rangeStr);
-        }
-
-        // Если переданна не строка, то я хз, что делать
-        if (typeof rangeStr != "string") {
+        } else if (typeof rangeStr !== "string") { // Выбросить ошибку, если интервал не является строкой или числом
             throw new Error("Не удается распознать интервал " + rangeStr);
         }
 
+        // Удалить пробелы
         rangeStr = rangeStr.replaceAll(/\s+/g, "");
 
+        // Вернуть единичный интервал, если в строке только число (одно)
         if (/\d+$/.test(rangeStr)) {
             let i = parseInt(rangeStr);
             return new YamlRange(i, i);
@@ -123,7 +122,7 @@ class Grammar {
 
         // Если передана * - то интервал любой
         if (rangeStr === '*') {
-            return new YamlRange(-Infinity, Infinity); // Жеееесть, но ОК
+            return new YamlRange(-Infinity, Infinity);
         }
 
         // Если в строке точно есть интервал...
@@ -139,16 +138,16 @@ class Grammar {
             } else if (parts[0] == "*") {
                 begin = -Infinity;
             } else {
-                throw new Error("Не удается распознать левую часть интервала " + rangeStr);
+                throw new Error(`Не удается распознать левую часть интервала: '${rangeStr}'.`);
             }
 
             // Парсим правую часть интервала
             if (/\d+$/.test(parts[1])) {
-                begin = parseInt(parts[1]);
+                end = parseInt(parts[1]);
             } else if (parts[1] == "*") {
-                begin = -Infinity;
+                end = Infinity;
             } else {
-                throw new Error("Не удается распознать правую часть интервала " + rangeStr);
+                throw new Error(`Не удается распознать правую часть интервала: '${rangeStr}'.`);
             }
 
             return new YamlRange(begin, end);
@@ -163,9 +162,10 @@ class Grammar {
             if (/\d+$/.test(number)) {
                 number = parseInt(number);
             } else {
-                throw new Error("Не удается распознать число в интервале: " + rangeStr);
+                throw new Error(`Не удается распознать число, задающее интервал: '${rangeStr}'.`);
             }
 
+            // Вернуть интервал с бесконечным концом в зависимости от знака
             if (modifier === '+') {
                 return new YamlRange(number, Infinity);
             } else {
@@ -173,7 +173,7 @@ class Grammar {
             }
         }
 
-        throw new Error("Не удается распознать интервал " + rangeStr);
+        throw new Error(`Не удается распознать интервал: '${rangeStr}'.`);
     }
 
     /**
@@ -283,6 +283,8 @@ class Grammar {
             case 'top': offset.top = value; break;
             case 'right': offset.right = value; break;
             case 'bottom': offset.bottom = value; break;
+            default:
+                throw Error(`Неверно задана сторона для отступа: '${side}'. Поддерживаемые стороны: 'top', 'bottom', 'right', 'left'.`);
         }
     }
 
@@ -340,7 +342,7 @@ class YamlLocation {
 
     /**
      * Конвертирует YamlLocation в YAML-представление
-     * @returns {string|Object}
+     * @returns {Object}
      */
     toYaml() {
         const { padding, margin } = this;
@@ -431,7 +433,7 @@ class YamlRange {
 
     setBegin(value) {
         if (this.getEnd() < value) {
-            return;
+            throw new Error('Конец диапазона не может быть больше начала');
         }
         this.#begin = value;
         return this;
@@ -439,7 +441,7 @@ class YamlRange {
 
     setEnd(value) {
         if (this.getBegin > value) {
-            return;
+            throw new Error('Конец диапазона не может быть больше начала');
         }
         this.#end = value;
         return this;
@@ -509,10 +511,15 @@ class Component {
     }
 
     resolveLinks() {
-        if(!this.#patternName) return;
-        this.pattern = Grammar.patterns.get(this.#patternName);
-        if (!this.pattern)
-            throw new Error(`Не удалось найти паттерн с названием ${this.#patternName} для привязки к компоненту ${this.name}`);
+        if(this.#patternName && !this.pattern) {
+            this.pattern = Grammar.patterns.get(this.#patternName);
+            if (!this.pattern)
+            throw new Error(`Не удалось найти паттерн с названием '${this.#patternName}' для привязки к компоненту '${this.name}'.`);
+        } else if(this.pattern && !this.#patternName) {
+            this.pattern.resolveLinks();
+        } else {
+            throw new Error(`Не удалось установить ссылки для компонента: '${this.name}'.`);
+        }
     }
 
     /**
@@ -632,22 +639,22 @@ class Pattern {
 
 class CellPattern extends Pattern {
     /** @type {String} */
-    #contentTypePatternName
-    /** @type {Pattern} */
     contentType
 
     constructor(name, data) {
         super(name, data);
-        if (data.contentType && typeof data.contentType != "string") throw new Error(`Тип паттерна не является строкой.`);
-        this.#contentTypePatternName = data.contentType;
+
+        if (data.content_type) {
+            if (typeof data.content_type !== "string") {
+                throw new Error(`Тип данных ячейки должен быть строкой.`);
+            }
+            this.contentType = data.content_type;
+        } else {
+            throw new Error(`Не задан тип данных для ячейки '${this.name}'.`);
+        }
     }
 
-    resolveLinks() {
-        if(!this.#contentTypePatternName) return;
-        this.contentType = Grammar.patterns.get(this.#contentTypePatternName);
-        if (!this.contentType)
-            throw new Error(`Не удалось найти паттерн с названием ${this.#contentTypePatternName}`);
-    }
+    resolveLinks() {}
 
     /**
      * Конвертирует CellPattern в YAML-объект
@@ -657,7 +664,7 @@ class CellPattern extends Pattern {
         const result = super.toYaml();
 
         if (this.contentType) {
-            result.content_type = this.contentType.name;
+            result.content_type = this.contentType;
         }
 
         return result;
@@ -665,11 +672,11 @@ class CellPattern extends Pattern {
 }
 
 class ArrayPattern extends Pattern {
-    /** @type {"ROW" | "COL" | "FILL"} */
+    /** @type {"ROW" | "COLUMN" | "FILL"} */
     direction
     /** @type {Pattern} */
     pattern
-    /** @type {string} */
+    /** @type {String} */
     #patternName
     /** @type {YamlRange} */
     gap
@@ -678,17 +685,45 @@ class ArrayPattern extends Pattern {
 
     constructor(name, data) {
         super(name, data);
-        this.direction = data.direction?.toUpperCase() || "ROW";
-        this.#patternName = data.item_pattern;
-        this.gap = Grammar.parseYamlRange(data.gap);
-        this.itemCount = Grammar.parseYamlRange(data.gap);
+        
+        if (data.direction) {
+            if (!(data.direction.toUpperCase() === "ROW"
+                || data.direction.toUpperCase() === "COLUMN"
+                || data.direction.toUpperCase() === "FILL"))
+                {
+                    throw new Error(`Некорректно задано направление для массива: '${data.direction}'. Допустимые: 'row', 'column', 'fill'.`);
+                }
+            this.direction = data.direction.toUpperCase();
+        } else {
+            throw new Error(`Не задано направление для массива '${this.name}'.`);
+        }
+
+        if (data.item_pattern) {
+            this.#patternName = data.item_pattern;
+        } else {
+            throw new Error(`Не задан паттерн для массива '${this.name}'.`);
+        }
+
+        this.pattern = null;
+
+        if (data.gap) {
+            this.gap = Grammar.parseYamlRange(data.gap);
+        } else {
+            this.gap = new YamlRange(0, 0).setUndefined();
+        }
+
+        if (data.item_count) {
+            this.itemCount = Grammar.parseYamlRange(data.item_count);
+        } else {
+            this.itemCount = new YamlRange(0, 0).setUndefined();
+        }
     }
 
     resolveLinks() {
         if(!this.#patternName) return;
         this.pattern = Grammar.patterns.get(this.#patternName);
         if (!this.pattern)
-            throw new Error(`Не удалось найти паттерн с названием ${this.#patternName}`);
+            throw new Error(`Не удалось найти паттерн с названием '${this.#patternName}' для установления связи с массивом '${this.name}'.`);
     }
 
     /**
@@ -744,8 +779,8 @@ class AreaPattern extends Pattern {
     }
 
     resolveLinks() {
-        for (let component of this.components) {
-            component.resolveLinks();
+        for (let i = 0; i < this.components.length; ++i) {
+            this.components[i].resolveLinks();
         }
     }
 

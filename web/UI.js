@@ -1,3 +1,58 @@
+class UI_STORAGE {
+    /** @type {Map<String, Object>} */
+    static itemByID = new Map();
+    /** @type {Map<Object, String>} */
+    static IDByItem = new Map();
+    static last_id = 0;
+
+    /**
+     * Находит ID данных или генерирует новый
+     * @param {data} data 
+     * @returns 
+     */
+    static getUniqueID(data) {
+        let id = this.IDByItem.get(data);
+        if (id == null) {
+            id = "" + this.last_id++;
+            this.IDByItem.set(data, id);
+            this.itemByID.set(id, data);
+        }
+        return id;
+    }
+
+    /**
+     * Привязывает данные к элементу
+     * @param {HTMLElement} element 
+     * @param {Object} data 
+     */
+    static bindDataToElement(element, data) {
+        let id = this.getUniqueID(data);
+        data.UNIQUE_UI_ID = id;
+        element.setAttribute("data-id", id);
+    }
+
+    /**
+     * Извлекает привязанные к элементу данные
+     * @param {Element} element
+     * @returns {Object} 
+     */
+    static getDataFromElement(element) {
+        let id = element.getAttribute("data-id");
+        if (id == null) return null;
+        let data = this.itemByID.get(id);
+        if (data == null) // Если это случилось, то выясняйте, почему этот элемент интерфейса до сих пор привязан несуществующим данным.
+            throw new Error("Не удалось определить паттерн, привязанный к элементу: " + element);
+        return data;
+    }
+
+    static reset() {
+        this.IDByItem.clear();
+        this.itemByID.clear();
+        this.last_id = 0;
+    }
+}
+
+
 class UI {
     /** @type {HTMLElement} */
     static browser;
@@ -40,49 +95,20 @@ class UI {
     /** @type {HTMLSelectElement} */
     static patternArrayCountMax;
     /** @type {HTMLSelectElement} */
-    static patternCellPattern;
-    /** @type {HTMLSelectElement} */
-
-    /** @type {Map<String, Pattern>} */
-    static patternByID = new Map();
-    /** @type {Map<Pattern, String>} */
-    static IDByPattern = new Map();
-    static last_id = 0;
-
+    static patternCellContentType;
     /** @type {HTMLElement} */
-    static selectedPatternInBrowser;
+    static previousSelectedElement;
 
     static loadFromGrammar() {
+        UI_STORAGE.reset();
         this.resetUI();
         this.generateBrowserTree();
-        this.generateSelections();
+        this.regenerateSelections();
     }
 
-    /**
-     * @param {Pattern} pattern 
-     * @returns {string}
-     */
-    static getIDForPattern(pattern) {
-        let id = this.IDByPattern.get(pattern);
-        if (!id) {
-            id = `pattern_${this.last_id++}`;
-            this.IDByPattern.set(pattern, id);
-            this.patternByID.set(id, pattern);
-        }
-        return id;
-    }
-
-    /**
-     * @param {string} id
-     * @returns {Pattern}
-     */
-    static getPatternByID(id) {
-        return this.patternByID.get(id);
-    }
-
-    static generateSelections() {
+    static regenerateSelections() {
         // Для каджого селектора...
-        let selections = document.getElementsByClassName("pattern-select");
+        let selections = document.getElementsByClassName("pattern-selection");
         for (let i = selections.length - 1; i >= 0; --i) {
             let selection = selections.item(i);
             // Удаляем все известные ссылки
@@ -93,7 +119,7 @@ class UI {
             for (const [name, pattern] of Grammar.patterns.entries()) {
                 let newOption = document.createElement("option");
                 newOption.innerText = pattern.name;
-                newOption.value = this.getIDForPattern(pattern);
+                newOption.value = UI_STORAGE.getUniqueID(pattern);
                 selection.append(newOption);
             }
         }
@@ -102,82 +128,134 @@ class UI {
     static generateBrowserTree() {
         this.clearBrowser();
         for (const [name, pattern] of Grammar.patterns.entries()) {
-            let patternBlock = this.generatePattern(pattern.name, pattern);
+            let patternBlock = this.createBrowserElementForPattern(pattern.name, pattern);
             this.browser.append(patternBlock);
         }
     }
 
     /**
-     * @param {Component} component
+     * @param {String} displayName - имя, отображаемое в браузере
+     * @param {Component} component - компонент, который нужно привязать
      */
-    static generateComponent(titleName, component) {
+    static generateBrowserElementForComponent(displayName, component) {
         let componentElement;
-        if (component.pattern && component.pattern.isInline) {
-            componentElement = this.generatePattern(component.name, component.pattern);
-            componentElement.classList.add("component-inline");
-        } else {
-            componentElement = document.createElement("span");
-            componentElement.classList.add("pattern-ptr");
+        if (component.pattern && component.pattern.isInline) { // Если у компонента внутри есть объявление паттерна...
+            componentElement = document.createElement("details");
+            let title = document.createElement("summary");
+            let innerPattern = this.createBrowserElementForPattern("pattern-difinition", component.pattern);
+            title.innerText = displayName;
+            componentElement.classList.add("browser-item");
+            componentElement.appendChild(title);
+            componentElement.appendChild(innerPattern);
+            UI_STORAGE.bindDataToElement(title, component);
+            title.onclick = (e) => this.onBrowserItemClicked(e);
+        } else { // Иначе (если это обычный компонент)
+            componentElement = document.createElement("details");
+            let title = document.createElement("summary");
+            let innerPattern = this.createBrowserLinkForPattern(component.pattern.name, component.pattern);
+            title.innerText = displayName;
+            componentElement.classList.add("browser-item");
+            componentElement.appendChild(title);
+            componentElement.appendChild(innerPattern);
+            UI_STORAGE.bindDataToElement(title, component);
+            title.onclick = (e) => this.onBrowserItemClicked(e);
         }
+        // Возвращаем сгенерированный элемент дерева
         return componentElement;
     }
 
-    static generatePattern(titleName, pattern) {
-        let newBlock = document.createElement("details");
+    static createBrowserLinkForPattern(displayName, pattern) {
+        let element = document.createElement("div");
+        element.innerText = "🌌 " + displayName;
+        element.classList.add("browser-item");
+        element.classList.add("pattern-pointer");
+        element.onclick = (e) => this.onBrowserLinkClicked(e);
+        UI_STORAGE.bindDataToElement(element, pattern);
+        return element;
+    }
+
+    /**
+     * @param {String} displayName 
+     * @param {Pattern} pattern 
+     * @returns {HTMLElement}
+     */
+    static createBrowserElementForPattern(displayName, pattern) {
+        let patternElement = document.createElement("details");
         let title = document.createElement("summary");
         let components = document.createElement("div");
-        components.classList.add("components");
+        components.classList.add("component-list");
 
         // Вставляем информацию о паттерне
-        title.innerText = titleName;
-        newBlock.id = this.getIDForPattern(pattern);
-        newBlock.classList.add("pattern");
-        title.onclick = (d) => this.onPatternSelected(d);
+        title.innerText = displayName;
+        UI_STORAGE.bindDataToElement(title, pattern);
+        patternElement.classList.add("browser-item");
+        title.onclick = (e) => this.onBrowserItemClicked(e);
 
         // генерируем компоненты
         if (pattern.components)
-            for (let component of pattern.components)
-                components.append(this.generateComponent(component.name, component));
+            for (let c = 0; c < pattern.components.length; ++c)
+                components.append(this.generateBrowserElementForComponent(pattern.components[c].name, pattern.components[c]));
 
-        newBlock.append(title);
-        newBlock.append(components);
-        return newBlock;
+        patternElement.append(title);
+        patternElement.append(components);
+        return patternElement;
     }
 
     /**
-     * Слушатель нажатий на паттерны в браузере
+     * Слушатель нажатий на элементы бразуера
      * @param {PointerEvent} element
      */
-    static onPatternSelected(element) {
-        if (this.selectedPatternInBrowser)
-            this.selectedPatternInBrowser.classList.remove("selected-browser-pattern");
-        this.selectedPatternInBrowser = element.target.parentElement;
-        element.target.parentElement.classList.add("selected-browser-pattern");
-        let pattern = this.getPatternByID(element.target.parentElement.id);
-        this.loadPatternToUI(pattern);
+    static onBrowserItemClicked(event) {
+        console.log(UI_STORAGE.getDataFromElement(event.target));
+        this.highlightBrowserElement(event.target);
+        this.loadSelectedDataToUI(UI_STORAGE.getDataFromElement(event.target));
     }
 
     /**
-     * Функция, загружающяя данные из этого паттерна в интерфейс параметров
-     * @param {Pattern} pattern
+     * Выделяет выбранный элемент в браузере
+     * @param {HTMLElement} element 
      */
-    static loadPatternToUI(pattern) {
-        console.log(pattern);
-        this.loadGeneralPatternData(pattern);
-        if (pattern instanceof CellPattern) {
-            this.loadCellPatternData(pattern);
-            this.setCellParamsEnabled(true);
-        } else if (pattern instanceof ArrayPattern) {
-            this.loadArrayPatternData(pattern);
-            this.setArrayParamsEnabled(true);
-        } else this.setGeneralPatternParamsEnabled(true);
+    static highlightBrowserElement(element) {
+        let currentElement = element;
+        if (!currentElement.classList.contains("browser-item"))
+            currentElement = element.parentElement;
+        if (this.previousSelectedElement)
+            this.previousSelectedElement.classList.remove("selected-browser-pattern");
+        this.previousSelectedElement = currentElement;
+        currentElement.classList.add("selected-browser-pattern");
+    }
+
+    /**
+     * Функция, загружающяя данные из паттерна или компонента в интерфейс параметров
+     * @param {Object} data
+     */
+    static loadSelectedDataToUI(data) {
+        if (data instanceof Pattern) {
+            this.loadGeneralPatternData(data);
+            if (data instanceof CellPattern) {
+                this.loadCellPatternData(data);
+                this.setCellParamsEnabled(true);
+            } else if (data instanceof ArrayPattern) {
+                this.loadArrayPatternData(data);
+                this.setArrayParamsEnabled(true);
+            } else this.setGeneralPatternParamsEnabled(true);
+        } else if (data instanceof Component) {
+            this.loadComponentData(data);
+            this.setComponentParamsEnabled(true);
+        }
+    }
+
+    static loadComponentData(data) {
+
     }
 
     /**
      * Загружает в интерфейс специфичные параметры паттерна-клетки
-     * @param {Pattern} pattern
+     * @param {CellPattern} pattern
      */
-    static loadCellPatternData(pattern) {}
+    static loadCellPatternData(pattern) {
+        this.patternCellContentType.value = pattern.contentType;
+    }
 
     /**
      * Загружает в интерфейс специфичные параметры паттерна-массива
@@ -185,11 +263,11 @@ class UI {
      */
     static loadArrayPatternData(pattern) {
         if (pattern.direction == "ROW") this.patternArrayDirection.selectedIndex = 0;
-        else if (pattern.direction == "COL") this.patternArrayDirection.selectedIndex = 1;
+        else if (pattern.direction == "COL" || pattern.direction == "COLUMN") this.patternArrayDirection.selectedIndex = 1;
         else if (pattern.direction == "FILL") this.patternArrayDirection.selectedIndex = 2;
-        else alert("Не удалось распознать тип паттерна: " + pattern.kind);
+        else alert("Не удалось распознать направление массива: " + pattern.direction);
 
-        //pattern.pattern;
+        this.patternArrayPattern.value = UI_STORAGE.getUniqueID(pattern.pattern);
 
         if (pattern.gap.isDefined()) {
             this.patternArrayGapMin = pattern.gap.getBegin();
@@ -256,9 +334,6 @@ class UI {
         this.clearBrowser();
         this.setGeneralPatternParamsEnabled(false);
         this.setComponentParamsEnabled(false);
-        this.patternByID.clear();
-        this.IDByPattern.clear();
-        this.last_id = 0;
     }
 
     static clearBrowser() {
@@ -331,7 +406,7 @@ class UI {
         this.patternArrayGapMax = document.getElementById("pattern-array-gap-max");
         this.patternArrayCountMin = document.getElementById("pattern-array-count-min");
         this.patternArrayCountMax = document.getElementById("pattern-array-count-max");
-        this.patternCellPattern = document.getElementById("pattern-cell-pattern");
+        this.patternCellContentType = document.getElementById("pattern-cell-content-type");
         this.resetUI();
     }
 }
