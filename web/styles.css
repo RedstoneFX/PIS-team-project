@@ -123,11 +123,11 @@ input.numeric {
     grid-template-columns: auto 4fr;
 }
 
-.selected-browser-pattern>summary {
+.selected-browser-item>summary {
     font-weight: bold;
 }
 
-.selected-browser-pattern {
+.selected-browser-item {
     background-color: #000000 !important;
     margin-left: 1rem;
     color: white;

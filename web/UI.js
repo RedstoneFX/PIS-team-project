@@ -228,9 +228,9 @@ class UI {
         if (!currentElement.classList.contains("browser-item"))
             currentElement = element.parentElement;
         if (this.previousSelectedElement)
-            this.previousSelectedElement.classList.remove("selected-browser-pattern");
+            this.previousSelectedElement.classList.remove("selected-browser-item");
         this.previousSelectedElement = currentElement;
-        currentElement.classList.add("selected-browser-pattern");
+        currentElement.classList.add("selected-browser-item");
     }
 
     /**
