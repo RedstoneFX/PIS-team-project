@@ -150,19 +150,28 @@ class UI {
             UI_STORAGE.bindDataToElement(title, component);
             title.onclick = (e) => this.onBrowserItemClicked(e);
         } else { // Иначе (если это обычный компонент)
-            componentElement = document.createElement("div"); // Создаем пустой компонент копмпонент
+            componentElement = document.createElement("details");
+            let title = document.createElement("summary");
+            let innerPattern = this.createBrowserLinkForPattern(component.pattern.name, component.pattern);
+            title.innerText = displayName;
             componentElement.classList.add("browser-item");
-            UI_STORAGE.bindDataToElement(componentElement, component); // Привязываем паттерн к компоненту
-            componentElement.onclick = (e) => this.onBrowserItemClicked(e); // Привязываем обработчик нажатия на элемент дерева
-
-            // Генерируем отображаемое название
-            if (displayName != component.pattern.name)
-                componentElement.innerText = `🌌 ${displayName} (${component.pattern.name})`;
-            else
-                componentElement.innerText = "🌌" + displayName;
+            componentElement.appendChild(title);
+            componentElement.appendChild(innerPattern);
+            UI_STORAGE.bindDataToElement(title, component);
+            title.onclick = (e) => this.onBrowserItemClicked(e);
         }
         // Возвращаем сгенерированный элемент дерева
         return componentElement;
+    }
+
+    static createBrowserLinkForPattern(displayName, pattern) {
+        let element = document.createElement("div");
+        element.innerText = "🌌 " + displayName;
+        element.classList.add("browser-item");
+        element.classList.add("pattern-pointer");
+        element.onclick = (e) => this.onBrowserLinkClicked(e);
+        UI_STORAGE.bindDataToElement(element, pattern);
+        return element;
     }
 
     /**
@@ -193,7 +202,7 @@ class UI {
     }
 
     /**
-     * Слушатель нажатий на элементы бразуере в браузере
+     * Слушатель нажатий на элементы бразуера
      * @param {PointerEvent} element
      */
     static onBrowserItemClicked(event) {
