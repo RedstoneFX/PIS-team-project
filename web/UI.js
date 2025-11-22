@@ -48,7 +48,7 @@ class UI {
     static last_id = 0;
 
     /** @type {HTMLElement} */
-    static selectedPatternInBrowser;
+    static previousSelectedElement;
 
     static loadFromGrammar() {
         this.resetUI();
@@ -56,14 +56,10 @@ class UI {
         this.generateSelections();
     }
 
-    /**
-     * @param {Pattern} pattern 
-     * @returns {string}
-     */
-    static getIDForPattern(pattern) {
+    static getPatternID(pattern) {
         let id = this.IDByPattern.get(pattern);
-        if (!id) {
-            id = `pattern_${this.last_id++}`;
+        if (id == null) {
+            id = "" + this.last_id++;
             this.IDByPattern.set(pattern, id);
             this.patternByID.set(id, pattern);
         }
@@ -71,11 +67,27 @@ class UI {
     }
 
     /**
-     * @param {string} id
-     * @returns {Pattern}
+     * Привязывает ссылку на патерн к элементу интерфейса
+     * @param {HTMLElement} element 
+     * @param {Pattern} pattern 
      */
-    static getPatternByID(id) {
-        return this.patternByID.get(id);
+    static bindPatternToElement(element, pattern) {
+        let id = this.getPatternID(pattern);
+        element.setAttribute("pattern", id);
+    }
+
+    /**
+     * Извлекает привязанный к элементу паттерн, либо возвращает null, если паттерн не привязан.
+     * @param {Element} element
+     * @returns {Pattern} 
+     */
+    static getPatternFromElement(element) {
+        let id = element.getAttribute("pattern");
+        if (id == null) return null;
+        let pattern = this.patternByID.get(id);
+        if (pattern == null) // Если это случилось, то выясняйте, почему этот элемент интерфейса до сих пор привязан к удаленному паттерну.
+            throw new Error("Не удалось определить паттерн, привязанный к элементу: " + element);
+        return pattern;
     }
 
     static generateSelections() {
@@ -91,7 +103,7 @@ class UI {
             for (const [name, pattern] of Grammar.patterns.entries()) {
                 let newOption = document.createElement("option");
                 newOption.innerText = pattern.name;
-                newOption.value = this.getIDForPattern(pattern);
+                newOption.value = this.getPatternID(pattern);
                 selection.append(newOption);
             }
         }
@@ -100,7 +112,7 @@ class UI {
     static generateBrowserTree() {
         this.clearBrowser();
         for (const [name, pattern] of Grammar.patterns.entries()) {
-            let patternBlock = this.generatePattern(pattern.name, pattern);
+            let patternBlock = this.generatePattern(pattern.name, pattern); // TODO: изменить название метода generatePattern
             this.browser.append(patternBlock);
         }
     }
@@ -110,20 +122,25 @@ class UI {
      */
     static generateComponent(titleName, component) {
         let componentElement;
-        if (component.pattern && component.pattern.isInline) {
-            componentElement = this.generatePattern(titleName, component.pattern);
+        if (component.pattern && component.pattern.isInline) { // Если у компонент - inline-паттерн (Не помню, разьве тогда можно отбросить остальные данные компонента?)
+            componentElement = this.generatePattern(titleName, component.pattern); // генерируем под-паттерн вместо компонента
             componentElement.classList.add("component-inline");
-        } else {
-            componentElement = document.createElement("div");
-            componentElement.classList.add("pattern");
-            componentElement.id = this.getIDForPattern(component.pattern);
-            componentElement.onclick = (e) => this.onPatternSelected(e);
-            if(titleName != component.pattern.name)
+        } else { // Иначе (если это обычный компонент)
+            componentElement = document.createElement("div"); // Генерируем копмпонент
+            componentElement.classList.add("pattern"); // TODO: непонятный класс: что за pattern?
+            this.bindPatternToElement(componentElement, component.pattern) // Привязываем паттерн к компоненту.
+            componentElement.onclick = (e) => this.onPatternSelected(e); // Привязываем обработчик нажатия на элемент дерева
+
+            // Генерируем название компонента
+            if (titleName != component.pattern.name)
                 componentElement.innerText = `🌌 ${titleName} (${component.pattern.name})`;
             else
                 componentElement.innerText = "🌌" + titleName;
+
+            // Отмечаем компонент как
             componentElement.classList.add("pattern-ptr");
         }
+        // Возвращаем сгенерированный компонент.
         return componentElement;
     }
 
@@ -140,9 +157,9 @@ class UI {
 
         // Вставляем информацию о паттерне
         title.innerText = titleName;
-        title.id = this.getIDForPattern(pattern);
-        newBlock.classList.add("pattern");
-        title.onclick = (d) => this.onPatternSelected(d);
+        this.bindPatternToElement(title, pattern);
+        newBlock.classList.add("pattern"); // TODO: непонятный класс: что за pattern?
+        title.onclick = (d) => this.onPatternSelected(d); // Привязываем обработчик нажатия на элемент дерева
 
         // генерируем компоненты
         if (pattern.components)
@@ -158,20 +175,20 @@ class UI {
      * Слушатель нажатий на паттерны в браузере
      * @param {PointerEvent} element
      */
-    static onPatternSelected(element) {
-        this.setBrowserItemSelected(element.target.id);
+    static onPatternSelected(event) {
+        this.highlightBrowserLement(event.target);
+        this.loadPatternToUI(this.getPatternFromElement(event.target));
     }
 
     /**
-     * Ставит стили элемента в браузере на "выбранный" и скрывает предыдущий
-     * @param {String} id 
+     * Выделяет выбранный элемент в браузере
+     * @param {HTMLElement} element 
      */
-    static setBrowserItemSelected(id) {
-        if (this.selectedPatternInBrowser)
-            this.selectedPatternInBrowser.parentNode.classList.remove("selected-browser-pattern");
-        this.selectedPatternInBrowser = document.getElementById(id);
-        this.selectedPatternInBrowser.parentElement.classList.add("selected-browser-pattern");
-        this.loadPatternToUI(this.getPatternByID(id));
+    static highlightBrowserLement(element) {
+        if (this.previousSelectedElement)
+            this.previousSelectedElement.classList.remove("selected-browser-pattern");
+        this.previousSelectedElement = element;
+        element.classList.add("selected-browser-pattern");
     }
 
     /**
@@ -208,7 +225,7 @@ class UI {
         else if (pattern.direction == "FILL") this.patternArrayDirection.selectedIndex = 2;
         else alert("Не удалось распознать направление массива: " + pattern.direction);
 
-        this.patternArrayPattern.value = this.getIDForPattern(pattern.pattern);
+        this.patternArrayPattern.value = this.getPatternID(pattern);
 
         if (pattern.gap.isDefined()) {
             this.patternArrayGapMin = pattern.gap.getBegin();
