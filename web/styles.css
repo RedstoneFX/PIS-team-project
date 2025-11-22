@@ -43,10 +43,20 @@ input.numeric {
 }
 
 #parameters,
-#tree-browser {
+#browser-panel {
     background-color: #00000017;
     height: auto;
     overflow-x: hidden;
+}
+
+#browser-panel {
+    overflow-y: hidden;
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+#tree-browser {
+    overflow-y: auto;
 }
 
 .parameters-table {
@@ -69,6 +79,7 @@ input.numeric {
     grid-template-columns: 2fr 4fr 20rem;
     width: 100vw;
     grid-template-rows: auto;
+    overflow: hidden;
 }
 
 #pattern-size {
@@ -118,7 +129,7 @@ input.numeric {
 
 .selected-browser-pattern {
     background-color: #000000 !important;
-    transform: translate(1rem);
+    margin-left: 1rem;
     color: white;
 }
 

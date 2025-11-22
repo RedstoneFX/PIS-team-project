@@ -96,6 +96,14 @@ class UI {
     static patternArrayCountMax;
     /** @type {HTMLSelectElement} */
     static patternCellContentType;
+    /** @type {HTMLButtonElement} */
+    static createPatternButton;
+    /** @type {HTMLButtonElement} */
+    static deleteSelectedButton;
+    /** @type {HTMLButtonElement} */
+    static createComponentLinkButton;
+    /** @type {HTMLButtonElement} */
+    static createComponentDefinitionButton;
     /** @type {HTMLElement} */
     static previousSelectedElement;
 
@@ -338,8 +346,7 @@ class UI {
 
     static clearBrowser() {
         for (let i = this.browser.children.length - 1; i >= 0; --i)
-            if (this.browser.children[i].id != "browser-tools")
-                this.browser.children[i].remove();
+            this.browser.children[i].remove();
     }
 
     /**
@@ -408,6 +415,10 @@ class UI {
         this.patternArrayCountMin = document.getElementById("pattern-array-count-min");
         this.patternArrayCountMax = document.getElementById("pattern-array-count-max");
         this.patternCellContentType = document.getElementById("pattern-cell-content-type");
+        this.createPatternButton = document.getElementById("create-pattern-button");
+        this.deleteSelectedButton = document.getElementById("delete-selected-button");
+        this.createComponentLinkButton = document.getElementById("create-component-link-button");
+        this.createComponentDefinitionButton = document.getElementById("create-component-definition-button");
         this.resetUI();
     }
 }
