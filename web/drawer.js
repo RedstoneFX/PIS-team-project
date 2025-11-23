@@ -6,7 +6,7 @@ class drawer {
     static exampleVariable1;
     /** @type {Number} */
     static exampleVariable2;
-    /** @type {HTMLElement} */
+    /** @type {HTMLCanvasElement} */
     static canvas;
 
     static init() {

@@ -168,3 +168,9 @@ button:hover {
     padding: 0.1rem;
     grid-template-columns: 1fr 1fr;
 }
+
+#canvas-stretcher {
+    display: grid;
+    justify-items: center;
+    align-items: center;
+}
