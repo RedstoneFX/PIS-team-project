@@ -156,7 +156,7 @@ class UI {
     /** @type {HTMLElement} */
     static previousSelectedElement;
 
-    /** @type {Pattern | Component}*/
+    /** @type {CellPattern | ArrayPattern | AreaPattern | Component} */
     static selectedItem;
 
     static loadFromGrammar() {
@@ -656,7 +656,7 @@ class UI {
             }
 
             // Устанавливаем размер
-            if(value == 1) e.target.value = "";
+            if (value == 1) e.target.value = "";
             dimSize.setBegin(value);
         } else {
             // Сообщаем о недопустимом вводе, если введенное число меньше минимума (если интервал задан)
@@ -669,7 +669,7 @@ class UI {
             }
 
             // Устанавливаем размер
-            if(value == Infinity) e.target.value = "";
+            if (value == Infinity) e.target.value = "";
             dimSize.setEnd(value);
         }
 
@@ -764,6 +764,13 @@ class UI {
         }
     }
 
+    static onCellTypeChange(e) {
+        if (/^\s*$/g.test(e.target.value)) {
+            alert("Вид данных не может быть пустым!");
+            e.target.value = this.selectedItem.contentType;
+        } else this.selectedItem.contentType = e.target.value;
+    }
+
 
     static init() {
         this.browser = document.getElementById("tree-browser");
@@ -827,5 +834,6 @@ class UI {
         this.patternHeightMax.addEventListener("change", (e) => this.onPatternSizeChanged(e, false, false));
         this.patternCountInDocMin.addEventListener("change", (e) => this.onCountInDocChange(e, true));
         this.patternCountInDocMax.addEventListener("change", (e) => this.onCountInDocChange(e, false));
+        this.patternCellContentType.addEventListener("change", (e) => this.onCellTypeChange(e));
     }
 }
