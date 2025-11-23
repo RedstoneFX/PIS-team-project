@@ -278,6 +278,29 @@ class UI {
         });
     }
 
+    static isNameReserved(name) {
+        for (let [key, pattern] of Grammar.patterns.entries()) {
+            if (key == name || pattern.name == name) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Слушатель нажатий на кнопку создания паттена
+     * @param {PointerEvent} event
+     */
+    static onCreatePatternClicked(event) {
+        let name = "NewPattern_";
+        let i = 0;
+        while (this.isNameReserved(name + i)) ++i;
+        name = name + i;
+
+        let newPattern = new Pattern(name, { kind: "cell", size: "1 x 1" });
+        Grammar.patterns.set(name, newPattern);
+        this.browser.append(this.createBrowserElementForPattern(newPattern.name, newPattern));
+        this.selectBrowserElementByData(newPattern);
+    }
+
     /**
      * Включает и выключает кнопки в панели управления браузера, соответствующие действиям с переданным элементом
      * @param {Object} data 
@@ -530,6 +553,7 @@ class UI {
         this.patternArrayCountMax = document.getElementById("pattern-array-count-max");
         this.patternCellContentType = document.getElementById("pattern-cell-content-type");
         this.createPatternButton = document.getElementById("create-pattern-button");
+        this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
         this.deleteSelectedButton = document.getElementById("delete-selected-button");
         this.deleteSelectedButton.onclick = () => this.deleteCurrentItem();
         this.createComponentLinkButton = document.getElementById("create-component-link-button");
