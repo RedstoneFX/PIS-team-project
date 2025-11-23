@@ -483,31 +483,87 @@ class Component {
     /** @type {boolean} */
     optional
     /** @type {boolean} */
-    inner
+    isInner
 
-    constructor(name, data, isInner) {
-        this.name = name;
+    constructor() {
+        if (arguments.length === 3) {
+            let componentName = arguments[0];
+            let data = arguments[1];
+            let isInner = arguments[3];
 
-        this.location = Grammar.parseYamlLocation(data.location, isInner); // Распознаем позицию элемента
+            this.name = componentName;
+            this.isInner = isInner;
 
-        // Распознаем поле optional
-        let optional = data.optional;
-        if (optional === null || optional == undefined) optional = false;
-        if (!(optional === true || optional === false)) throw new Error("Не удалось распознать поле optional у компонента " + this.name);
+            this.location = Grammar.parseYamlLocation(data.location, isInner); // Распознаем позицию элемента
 
-        // Запоминаем имя паттерна
-        if (data.pattern) {
-            this.#patternName = data.pattern;
-            this.pattern = null;
-        } else if (data.pattern_definition) {
-            try {
-                this.pattern = Grammar.parsePattern("", data.pattern_definition).setInlineDefined();
-            } catch (e) {
-                throw new Error(`Не удается распознать вложнный паттерн в компоненте ${this.name}: ${e.message}`);
+            // Распознаем поле optional
+            let optional = data.optional;
+            if (optional === null || optional == undefined) optional = false;
+            if (!(optional === true || optional === false)) throw new Error("Не удалось распознать поле optional у компонента " + this.name);
+
+            // Запоминаем имя паттерна
+            if (data.pattern) {
+                this.#patternName = data.pattern;
+                this.pattern = null;
+            } else if (data.pattern_definition) {
+                try {
+                    this.pattern = Grammar.parsePattern("", data.pattern_definition).setInlineDefined();
+                } catch (e) {
+                    throw new Error(`Не удается распознать вложнный паттерн в компоненте ${this.name}: ${e.message}`);
+                }
+            } else {
+                throw new Error(`Компонент "${this.name}" должен содержать pattern или pattern_definition`);
             }
-        } else {
-            throw new Error(`Компонент "${this.name}" должен содержать pattern или pattern_definition`);
+        } else if (arguments.length === 5) {
+            let componentName = arguments[0];
+            let pattern = arguments[1];
+            let location = arguments[2];
+            let optional = arguments[3];
+            let isInner = arguments[4];
+
+            if (typeof componentName != 'string') {
+                throw new Error(`Имя паттерна должно быть строкой`);
+            }
+            this.name = componentName;
+
+            if (!(pattern instanceof Pattern)) {
+                throw new Error(`Компонент должен иметь ссылку на свой паттерн`);
+            }
+            this.pattern = pattern;
+            this.#patternName = pattern.name;
+
+            if (!(location instanceof YamlLocation)) {
+                throw new Error(`Расположение должно быть задано соответствующим объектом`);
+            }
+            this.location = location;
+
+            if (typeof optional != 'boolean') {
+                throw new Error(`optional должно быть логическим значением`);
+            }
+            this.optional = optional;
+
+            if (typeof isInner != 'boolean') {
+                throw new Error(`isInner должно быть логическим значением`);
+            }
+            this.isInner = isInner;
         }
+    }
+
+    /**
+     * 
+     * @param {String} componentName 
+     * @param {Pattern} pattern 
+     * @param {YamlLocation} location 
+     * @param {Boolean} optional 
+     * @param {Boolean} isInner 
+     * @returns {Component}
+     */
+    static fromDataStructure(componentName, pattern, location, optional, isInner) {
+        return new Component(componentName, pattern, location, optional, isInner);
+    }
+
+    static fromYaml(componentName, data, isInner) {
+        return new Component(componentName, data, isInner);
     }
 
     resolveLinks() {
@@ -959,25 +1015,65 @@ class AreaPattern extends Pattern {
     /** @type {Component[]} */
     components
 
-    constructor(name, data) {
-        super(name, data);
+    constructor() {
+        if (arguments.length === 2) {
+            let patternName = arguments[0];
+            let data = arguments[1];
+            super(patternName, data);
 
-        // Спарсить компоненты
-        this.components = [];
+            // Спарсить компоненты
+            this.components = [];
 
-        if (data.inner) { // Если... У области есть внутренняя часть?? 
-            for (const [componentName, componentData] of Object.entries(data.inner)) { // Для каждого внутреннего компонента...
-                const component = new Component(componentName, componentData, true); // Распознаем компонент
-                this.components.push(component);
+            if (data.inner) { // Если область имеет внутренние компоненты
+                for (const [componentName, componentData] of Object.entries(data.inner)) { // Для каждого внутреннего компонента...
+                    const component = new Component(componentName, componentData, true); // Распознаем компонент
+                    this.components.push(component);
+                }
             }
-        }
 
-        if (data.outer) { // Если... У области есть внешняя часть?? 
-            for (const [componentName, componentData] of Object.entries(data.outer)) { // Для каждого внешнего компонента...
-                const component = new Component(componentName, componentData, false); // Распознаем компонент
-                this.components.push(component);
+            if (data.outer) { // Если область имеет внешние компоненты
+                for (const [componentName, componentData] of Object.entries(data.outer)) { // Для каждого внешнего компонента...
+                    const component = new Component(componentName, componentData, false); // Распознаем компонент
+                    this.components.push(component);
+                }
             }
+
+        } else if (arguments.length === 8) {
+            let patternName = arguments[0];
+            let kind = arguments[1];
+            let desc = arguments[2];
+            let countInDoc = arguments[3];
+            let width = arguments[4];
+            let height = arguments[5];
+            let isRoot = arguments[6];
+            let isInline = arguments[7];
+            super(patternName, kind, desc, countInDoc, width, height, isRoot, isInline);
+
+            this.components = [];
+            
+        } else {
+            throw new Error(`Передано неверное количество аргументов для конструктора CellPattern`);
         }
+    }
+
+    /**
+     * @param {String} patternName 
+     * @param {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} kind 
+     * @param {String} desc 
+     * @param {YamlRange} countInDoc 
+     * @param {YamlRange} width 
+     * @param {YamlRange} height 
+     * @param {Boolean} isRoot 
+     * @param {Boolean} isInline 
+     * @param {String} contentType 
+     * @returns {AreaPattern}
+     */
+    static fromDataStructure(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, contentType) {
+        return new AreaPattern(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, contentType);
+    }
+
+    static fromYaml(patternName, data) {
+        return new AreaPattern(patternName, data);
     }
 
     resolveLinks() {
@@ -998,7 +1094,7 @@ class AreaPattern extends Pattern {
 
             // Добавить компоненты в зависимости от их расположения (inner или outer)
             for (const component of this.components) {
-                if (component.inner) {
+                if (component.isInner) {
                     // Создать поле inner, если его нет
                     if (!result.inner) result.inner = {};
                     result.inner[component.name] = component.toYaml();
