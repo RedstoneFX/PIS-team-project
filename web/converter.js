@@ -478,6 +478,8 @@ class Component {
     pattern
     /** @type {String} */
     #patternName
+    /** @type {ArrayPattern} */
+    parentPattern
     /** @type {YamlLocation} */
     location
     /** @type {boolean} */
@@ -486,12 +488,14 @@ class Component {
     isInner
 
     constructor() {
-        if (arguments.length === 3) {
+        if (arguments.length === 4) {
             let componentName = arguments[0];
             let data = arguments[1];
+            let parentPattern = arguments[2];
             let isInner = arguments[3];
 
             this.name = componentName;
+            this.parentPattern = parentPattern;
             this.isInner = isInner;
 
             this.location = Grammar.parseYamlLocation(data.location, isInner); // Распознаем позицию элемента
@@ -514,12 +518,13 @@ class Component {
             } else {
                 throw new Error(`Компонент "${this.name}" должен содержать pattern или pattern_definition`);
             }
-        } else if (arguments.length === 5) {
+        } else if (arguments.length === 6) {
             let componentName = arguments[0];
             let pattern = arguments[1];
-            let location = arguments[2];
-            let optional = arguments[3];
-            let isInner = arguments[4];
+            let parentPattern = arguments[2];
+            let location = arguments[3];
+            let optional = arguments[4];
+            let isInner = arguments[5];
 
             if (typeof componentName != 'string') {
                 throw new Error(`Имя паттерна должно быть строкой`);
@@ -531,6 +536,11 @@ class Component {
             }
             this.pattern = pattern;
             this.#patternName = pattern.name;
+
+            if (!(parentPattern instanceof ArrayPattern)) {
+                throw new Error(`Компонент должен иметь ссылку на паттерн (область), в котором содержится`);
+            }
+            this.parentPattern = parentPattern;
 
             if (!(location instanceof YamlLocation)) {
                 throw new Error(`Расположение должно быть задано соответствующим объектом`);
@@ -553,17 +563,18 @@ class Component {
      * 
      * @param {String} componentName 
      * @param {Pattern} pattern 
+     * @param {ArrayPattern} parentPattern 
      * @param {YamlLocation} location 
      * @param {Boolean} optional 
      * @param {Boolean} isInner 
      * @returns {Component}
      */
-    static fromDataStructure(componentName, pattern, location, optional, isInner) {
-        return new Component(componentName, pattern, location, optional, isInner);
+    static fromDataStructure(componentName, pattern, parentPattern, location, optional, isInner) {
+        return new Component(componentName, pattern, parentPattern, location, optional, isInner);
     }
 
-    static fromYaml(componentName, data, isInner) {
-        return new Component(componentName, data, isInner);
+    static fromYaml(componentName, data, parentPattern, isInner) {
+        return new Component(componentName, data, parentPattern, isInner);
     }
 
     resolveLinks() {
@@ -1026,14 +1037,14 @@ class AreaPattern extends Pattern {
 
             if (data.inner) { // Если область имеет внутренние компоненты
                 for (const [componentName, componentData] of Object.entries(data.inner)) { // Для каждого внутреннего компонента...
-                    const component = new Component(componentName, componentData, true); // Распознаем компонент
+                    const component = Component.fromYaml(componentName, componentData, this, true); // Распознаем компонент
                     this.components.push(component);
                 }
             }
 
             if (data.outer) { // Если область имеет внешние компоненты
                 for (const [componentName, componentData] of Object.entries(data.outer)) { // Для каждого внешнего компонента...
-                    const component = new Component(componentName, componentData, false); // Распознаем компонент
+                    const component = Component.fromYaml(componentName, componentData, this, false); // Распознаем компонент
                     this.components.push(component);
                 }
             }
