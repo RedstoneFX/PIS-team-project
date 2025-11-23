@@ -613,7 +613,15 @@ class UI {
         // Сообщаем о недопустимом вводе, если введено что-то кроме цифр
         if (!/^\d*$/g.test(e.target.value)) {
             alert("Введенное значение не является целым числом!");
-            e.target.value = dimSize.getBegin();
+            if (isMin) {
+                let v = dimSize.getBegin();
+                if (v == 1) e.target.value = "";
+                else e.target.value = v;
+            } else {
+                let v = dimSize.getEnd();
+                if (v == Infinity) e.target.value = "";
+                else e.target.value = v;
+            }
             return;
         }
 
