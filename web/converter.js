@@ -115,7 +115,7 @@ class Grammar {
         rangeStr = rangeStr.replaceAll(/\s+/g, "");
 
         // Вернуть единичный интервал, если в строке только число (одно)
-        if (/\d+$/.test(rangeStr)) {
+        if (/^\d+$/.test(rangeStr)) {
             let i = parseInt(rangeStr);
             return new YamlRange(i, i);
         }
