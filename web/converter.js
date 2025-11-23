@@ -821,40 +821,104 @@ class ArrayPattern extends Pattern {
     /** @type {YamlRange} */
     itemCount
 
-    constructor(name, data) {
-        super(name, data);
+    constructor() {
+        const allowedDirection = ["ROW", "COLUMN", "FILL"];
         
-        if (data.direction) {
-            if (!(data.direction.toUpperCase() === "ROW"
-                || data.direction.toUpperCase() === "COLUMN"
-                || data.direction.toUpperCase() === "FILL"))
-                {
-                    throw new Error(`Некорректно задано направление для массива: '${data.direction}'. Допустимые: 'row', 'column', 'fill'.`);
-                }
-            this.direction = data.direction.toUpperCase();
-        } else {
-            throw new Error(`Не задано направление для массива '${this.name}'.`);
-        }
+        if (arguments.length == 2) {    
+            let patternName = arguments[0];
+            let data = arguments[1];   
+            super(patternName, data);
+        
+            if (data.direction) {
+                if (!(allowedDirection.includes(data.direction.toUpperCase())))
+                    {
+                        throw new Error(`Некорректно задано направление для массива: '${data.direction}'. Допустимые: 'row', 'column', 'fill'.`);
+                    }
+                this.direction = data.direction.toUpperCase();
+            } else {
+                throw new Error(`Не задано направление для массива '${this.name}'.`);
+            }
 
-        if (data.item_pattern) {
-            this.#patternName = data.item_pattern;
-        } else {
-            throw new Error(`Не задан паттерн для массива '${this.name}'.`);
-        }
+            if (data.item_pattern) {
+                this.#patternName = data.item_pattern;
+            } else {
+                throw new Error(`Не задан паттерн для массива '${this.name}'.`);
+            }
 
-        this.pattern = null;
+            this.pattern = null;
 
-        if (data.gap) {
-            this.gap = Grammar.parseYamlRange(data.gap);
-        } else {
-            this.gap = new YamlRange(0, 0).setUndefined();
-        }
+            if (data.gap) {
+                this.gap = Grammar.parseYamlRange(data.gap);
+            } else {
+                this.gap = new YamlRange(0, 0).setUndefined();
+            }
 
-        if (data.item_count) {
-            this.itemCount = Grammar.parseYamlRange(data.item_count);
+            if (data.item_count) {
+                this.itemCount = Grammar.parseYamlRange(data.item_count);
+            } else {
+                this.itemCount = new YamlRange(0, 0).setUndefined();
+            }
+        } else if (arguments.length === 12) {
+            let patternName = arguments[0];
+            let kind = arguments[1];
+            let desc = arguments[2];
+            let countInDoc = arguments[3];
+            let width = arguments[4];
+            let height = arguments[5];
+            let isRoot = arguments[6];
+            let isInline = arguments[7];
+            let direction = arguments[8];
+            let pattern = arguments[9];
+            let gap = arguments[10];
+            let itemCount = arguments[11];
+            super(patternName, kind, desc, countInDoc, width, height, isRoot, isInline);
+
+            if (!(typeof direction === 'string' && allowedDirection.includes(direction.toUpperCase()))) {
+                throw new Error(`Неизвестное направление: ${direction}. Поддерживаемые: ROW, COLUMN, FILL`);
+            }
+            this.direction = direction.toUpperCase();
+
+            if (!(pattern instanceof Pattern)) {
+                throw new Error(`Массив должен иметь ссылку на паттерн находящихся в нём элементов`);
+            }
+            this.pattern = pattern;
+            this.#patternName = pattern.name;
+
+            if (!(gap instanceof YamlRange)) {
+                throw new Error(`Промежуток между элементами массива должен быть задан диапазоном`);
+            }
+            this.gap = gap;
+
+            if (!(itemCount instanceof YamlRange)) {
+                throw new Error(`Количество элементов массива должно быть задано диапазоном`);
+            }
+            this.itemCount = itemCount;
         } else {
-            this.itemCount = new YamlRange(0, 0).setUndefined();
+            throw new Error(`Передано неверное количество аргументов для конструктора ArrayPattern`);
         }
+    }
+
+    /**
+     * @param {String} patternName 
+     * @param {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} kind 
+     * @param {String} desc 
+     * @param {YamlRange} countInDoc 
+     * @param {YamlRange} width 
+     * @param {YamlRange} height 
+     * @param {Boolean} isRoot 
+     * @param {Boolean} isInline 
+     * @param {"ROW" | "COLUMN" | "FILL"} direction 
+     * @param {Pattern} pattern 
+     * @param {YamlRange} gap
+     * @param {YamlRange} itemCount  
+     * @returns {Pattern}
+     */
+    static fromDataStructure(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, direction, pattern, gap, itemCount) {
+        return new ArrayPattern(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, direction, pattern, gap, itemCount);
+    }
+
+    static fromYaml(patternName, data) {
+        return new ArrayPattern(patternName, data);
     }
 
     resolveLinks() {
