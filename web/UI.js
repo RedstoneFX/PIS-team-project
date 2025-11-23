@@ -225,7 +225,7 @@ class UI {
         element.innerText = "🌌 " + displayName;
         element.classList.add("browser-item");
         element.classList.add("pattern-pointer");
-        element.onclick = (e) => this.onBrowserLinkClicked(e);
+        element.onclick = (e) => this.onBrowserItemClicked(e);
         UI_STORAGE.bindDataToElement(element, pattern);
         return element;
     }
@@ -262,20 +262,11 @@ class UI {
      * @param {PointerEvent} event
      */
     static onBrowserItemClicked(event) {
-        console.log(UI_STORAGE.getDataFromElement(event.target));
-        this.highlightBrowserElement(event.target);
         let data = UI_STORAGE.getDataFromElement(event.target);
-        this.selectedItem = data;
-        this.loadSelectedDataToUI(data);
-        this.updateBrowserControllsFor(data);
+        this.selectBrowserElementByData(data);
     }
 
-    /**
-     * Слушатель нажатий на ссылки в бразуере
-     * @param {PointerEvent} event
-     */
-    static onBrowserLinkClicked(event) {
-        let data = UI_STORAGE.getDataFromElement(event.target);
+    static selectBrowserElementByData(data) {
         let originalElements = UI_STORAGE.getElementsByData(data);
         originalElements.forEach(element => {
             if (element.tagName == "SUMMARY") {
