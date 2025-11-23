@@ -605,6 +605,51 @@ class UI {
         this.selectedItem.desc = this.patternDesc.value;
     }
 
+    static onPatternWidthMinChanged(e) {
+        // Сообщаем о недопустимом вводе, если введено что-то кроме цифр
+        if (!/^\d*$/g.test(e.target.value)) {
+            alert("Введенное значение не является целым числом!");
+            e.target.value = this.selectedItem.width.getBegin();
+            return;
+        }
+
+        // Считываем новое значение
+        let value;
+        if (e.target.value == "") value = 1;
+        else value = e.target.value - 0;
+
+        // Сообщаяем о недопустимом вводе, если введено число <= 0 или > 100
+        if (value <= e.target.min) {
+            alert("Введенное значение выходит за рамки допустимого!");
+            e.target.value = this.selectedItem.width.getBegin();
+            return;
+        }
+
+        // Сообщаем о недопустимом вводе, если введенное число больше максимума (если интервал задан)
+        if (value > this.selectedItem.width.getEnd() && this.selectedItem.width.isDefined()) {
+            alert("Минимум не может быть больше максимума!");
+            e.target.value = this.selectedItem.width.getBegin();
+            return;
+        }
+
+        // Снимаем определение размера, если минимум 1, а максимум infinity
+        if (value == 1 && this.selectedItem.width.getEnd() == Infinity) {
+            this.selectedItem.width.setUndefined();
+            e.target.value = "";
+            return;
+        }
+
+        // Указываем бесконечный максимум, если интервал не был задан (на случай, если там есть остатки от предыдущего размера)
+        if (!this.selectedItem.width.isDefined()) {
+            this.selectedItem.width.setDefined();
+            this.selectedItem.width.setEnd(Infinity);
+        }
+
+        // Устанавливаем размер
+        this.selectedItem.width.setBegin(value);
+    }
+
+
     static init() {
         this.browser = document.getElementById("tree-browser");
         this.patternParams = document.getElementById("pattern-parameters");
@@ -661,5 +706,6 @@ class UI {
 
         this.patternName.addEventListener("change", (e) => this.onPatternNameChange(e));
         this.patternDesc.addEventListener("change", (e) => this.onPatternDescChanged(e));
+        this.patternWidthMin.addEventListener("change", (e) => this.onPatternWidthMinChanged(e));
     }
 }
