@@ -587,6 +587,23 @@ class Pattern {
         this.isInline = false;
     }
 
+    /**
+     * Меняет название паттерна
+     * @param {String} new_name 
+     */
+    rename(new_name) {
+        if (Grammar.patterns.has(new_name)) {
+            throw new Error(`Паттерн с названием ${new_name} уже существует`);
+        }
+        if (!Grammar.patterns.has(this.name)) {
+            throw new Error(`Паттерн с названием ${this.name} не хранится в словаре`);
+        }
+
+        Grammar.patterns.delete(this.name);
+        Grammar.patterns.set(new_name, this);
+        this.name = new_name;
+    }
+
     resolveLinks() {
         // У обычного паттерна нет ссылок
     }
