@@ -569,8 +569,8 @@ class Pattern {
 
     constructor() {
         if (arguments.length === 2) {
-            patternName = arguments[0];
-            data = arguments[1];
+            let patternName = arguments[0];
+            let data = arguments[1];
 
             this.name = patternName;
             this.kind = data.kind.toUpperCase();
@@ -592,14 +592,14 @@ class Pattern {
             this.isInline = false;
 
         } else if (arguments.length === 8) {
-            patternName = arguments[0];
-            kind = arguments[1];
-            desc = arguments[2];
-            countInDoc = arguments[3];
-            width = arguments[4];
-            height = arguments[5];
-            isRoot = arguments[6];
-            isInline = arguments[7];
+            let patternName = arguments[0];
+            let kind = arguments[1];
+            let desc = arguments[2];
+            let countInDoc = arguments[3];
+            let width = arguments[4];
+            let height = arguments[5];
+            let isRoot = arguments[6];
+            let isInline = arguments[7];
 
             if (typeof patternName != 'string') {
                 throw new Error(`Имя паттерна должно быть строкой`);
@@ -621,25 +621,25 @@ class Pattern {
             }
             this.countInDoc = countInDoc;
 
-            if (!(this.width instanceof YamlRange)) {
+            if (!(width instanceof YamlRange)) {
                 throw new Error(`Ширина паттерна должна быть задана диапазоном`);
             }
-            this.width = this.width;
+            this.width = width;
 
-            if (!(this.height instanceof YamlRange)) {
+            if (!(height instanceof YamlRange)) {
                 throw new Error(`Высота паттерна должна быть задана диапазоном`);
             }
-            this.height = this.height;
+            this.height = height;
 
             if (typeof isRoot != 'boolean') {
                  throw new Error(`isRoot должно быть логическим значением`);
             }
-            this.isRoot = this.isRoot;
+            this.isRoot = isRoot;
 
             if (typeof isInline != 'boolean') {
                  throw new Error(`isInline должно быть логическим значением`);
             }
-            this.isInline = this.isInline;
+            this.isInline = isInline;
 
         } else {
             throw new Error(`Передано неверное количество аргументов для конструктора Pattern`);
@@ -736,17 +736,60 @@ class CellPattern extends Pattern {
     /** @type {String} */
     contentType
 
-    constructor(name, data) {
-        super(name, data);
+    constructor() {
+        if (arguments.length === 2) {
+            let patternName = arguments[0];
+            let data = arguments[1];
+            super(patternName, data);
 
-        if (data.content_type) {
-            if (typeof data.content_type !== "string") {
-                throw new Error(`Тип данных ячейки должен быть строкой.`);
+            if (data.content_type) {
+                if (typeof data.content_type !== "string") {
+                    throw new Error(`Тип данных ячейки должен быть строкой.`);
+                }
+                this.contentType = data.content_type;
+            } else {
+                throw new Error(`Не задан тип данных для ячейки '${this.name}'.`);
             }
-            this.contentType = data.content_type;
+        } else if (arguments.length === 9) {
+            let patternName = arguments[0];
+            let kind = arguments[1];
+            let desc = arguments[2];
+            let countInDoc = arguments[3];
+            let width = arguments[4];
+            let height = arguments[5];
+            let isRoot = arguments[6];
+            let isInline = arguments[7];
+            let contentType = arguments[8];
+            super(patternName, kind, desc, countInDoc, width, height, isRoot, isInline);
+
+            if (typeof contentType != 'string') {
+                throw new Error(`Тип содержимого паттерна должен быть строкой`);
+            }
+            this.contentType = contentType;
+            
         } else {
-            throw new Error(`Не задан тип данных для ячейки '${this.name}'.`);
+            throw new Error(`Передано неверное количество аргументов для конструктора CellPattern`);
         }
+    }
+
+    /**
+     * @param {String} patternName 
+     * @param {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} kind 
+     * @param {String} desc 
+     * @param {YamlRange} countInDoc 
+     * @param {YamlRange} width 
+     * @param {YamlRange} height 
+     * @param {Boolean} isRoot 
+     * @param {Boolean} isInline 
+     * @param {String} contentType 
+     * @returns {CellPattern}
+     */
+    static fromDataStructure(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, contentType) {
+        return new CellPattern(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, contentType);
+    }
+
+    static fromYaml(patternName, data) {
+        return new CellPattern(patternName, data);
     }
 
     resolveLinks() {}
@@ -778,40 +821,104 @@ class ArrayPattern extends Pattern {
     /** @type {YamlRange} */
     itemCount
 
-    constructor(name, data) {
-        super(name, data);
+    constructor() {
+        const allowedDirection = ["ROW", "COLUMN", "FILL"];
         
-        if (data.direction) {
-            if (!(data.direction.toUpperCase() === "ROW"
-                || data.direction.toUpperCase() === "COLUMN"
-                || data.direction.toUpperCase() === "FILL"))
-                {
-                    throw new Error(`Некорректно задано направление для массива: '${data.direction}'. Допустимые: 'row', 'column', 'fill'.`);
-                }
-            this.direction = data.direction.toUpperCase();
-        } else {
-            throw new Error(`Не задано направление для массива '${this.name}'.`);
-        }
+        if (arguments.length == 2) {    
+            let patternName = arguments[0];
+            let data = arguments[1];   
+            super(patternName, data);
+        
+            if (data.direction) {
+                if (!(allowedDirection.includes(data.direction.toUpperCase())))
+                    {
+                        throw new Error(`Некорректно задано направление для массива: '${data.direction}'. Допустимые: 'row', 'column', 'fill'.`);
+                    }
+                this.direction = data.direction.toUpperCase();
+            } else {
+                throw new Error(`Не задано направление для массива '${this.name}'.`);
+            }
 
-        if (data.item_pattern) {
-            this.#patternName = data.item_pattern;
-        } else {
-            throw new Error(`Не задан паттерн для массива '${this.name}'.`);
-        }
+            if (data.item_pattern) {
+                this.#patternName = data.item_pattern;
+            } else {
+                throw new Error(`Не задан паттерн для массива '${this.name}'.`);
+            }
 
-        this.pattern = null;
+            this.pattern = null;
 
-        if (data.gap) {
-            this.gap = Grammar.parseYamlRange(data.gap);
-        } else {
-            this.gap = new YamlRange(0, 0).setUndefined();
-        }
+            if (data.gap) {
+                this.gap = Grammar.parseYamlRange(data.gap);
+            } else {
+                this.gap = new YamlRange(0, 0).setUndefined();
+            }
 
-        if (data.item_count) {
-            this.itemCount = Grammar.parseYamlRange(data.item_count);
+            if (data.item_count) {
+                this.itemCount = Grammar.parseYamlRange(data.item_count);
+            } else {
+                this.itemCount = new YamlRange(0, 0).setUndefined();
+            }
+        } else if (arguments.length === 12) {
+            let patternName = arguments[0];
+            let kind = arguments[1];
+            let desc = arguments[2];
+            let countInDoc = arguments[3];
+            let width = arguments[4];
+            let height = arguments[5];
+            let isRoot = arguments[6];
+            let isInline = arguments[7];
+            let direction = arguments[8];
+            let pattern = arguments[9];
+            let gap = arguments[10];
+            let itemCount = arguments[11];
+            super(patternName, kind, desc, countInDoc, width, height, isRoot, isInline);
+
+            if (!(typeof direction === 'string' && allowedDirection.includes(direction.toUpperCase()))) {
+                throw new Error(`Неизвестное направление: ${direction}. Поддерживаемые: ROW, COLUMN, FILL`);
+            }
+            this.direction = direction.toUpperCase();
+
+            if (!(pattern instanceof Pattern)) {
+                throw new Error(`Массив должен иметь ссылку на паттерн находящихся в нём элементов`);
+            }
+            this.pattern = pattern;
+            this.#patternName = pattern.name;
+
+            if (!(gap instanceof YamlRange)) {
+                throw new Error(`Промежуток между элементами массива должен быть задан диапазоном`);
+            }
+            this.gap = gap;
+
+            if (!(itemCount instanceof YamlRange)) {
+                throw new Error(`Количество элементов массива должно быть задано диапазоном`);
+            }
+            this.itemCount = itemCount;
         } else {
-            this.itemCount = new YamlRange(0, 0).setUndefined();
+            throw new Error(`Передано неверное количество аргументов для конструктора ArrayPattern`);
         }
+    }
+
+    /**
+     * @param {String} patternName 
+     * @param {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} kind 
+     * @param {String} desc 
+     * @param {YamlRange} countInDoc 
+     * @param {YamlRange} width 
+     * @param {YamlRange} height 
+     * @param {Boolean} isRoot 
+     * @param {Boolean} isInline 
+     * @param {"ROW" | "COLUMN" | "FILL"} direction 
+     * @param {Pattern} pattern 
+     * @param {YamlRange} gap
+     * @param {YamlRange} itemCount  
+     * @returns {Pattern}
+     */
+    static fromDataStructure(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, direction, pattern, gap, itemCount) {
+        return new ArrayPattern(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, direction, pattern, gap, itemCount);
+    }
+
+    static fromYaml(patternName, data) {
+        return new ArrayPattern(patternName, data);
     }
 
     resolveLinks() {
