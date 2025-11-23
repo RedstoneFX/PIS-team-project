@@ -107,6 +107,9 @@ class UI {
     /** @type {HTMLElement} */
     static previousSelectedElement;
 
+    /** @type {Pattern | Component}*/
+    static selectedItem;
+
     static loadFromGrammar() {
         UI_STORAGE.reset();
         this.resetUI();
@@ -217,6 +220,7 @@ class UI {
         console.log(UI_STORAGE.getDataFromElement(event.target));
         this.highlightBrowserElement(event.target);
         let data = UI_STORAGE.getDataFromElement(event.target);
+        this.selectedItem = data;
         this.loadSelectedDataToUI(data);
         this.updateBrowserControllsFor(data);
     }
@@ -233,6 +237,7 @@ class UI {
             this.createComponentDefinitionButton.disabled = true;
             this.createComponentLinkButton.disabled = true;
         }
+        this.deleteSelectedButton.disabled = data == null;
     }
 
     /**
@@ -411,6 +416,18 @@ class UI {
         if (isEnabled) this.setGeneralPatternParamsEnabled(false);
     }
 
+    /**
+     * Удаляет выбранный объект
+     */
+    static deleteCurrentItem() {
+        this.updateBrowserControllsFor(null);
+        if (this.currentElement instanceof Pattern) {
+
+        } else if (this.currentElement instanceof Component) {
+        }
+        Grammar.deletePattern(pattern);
+    }
+
     static init() {
         this.browser = document.getElementById("tree-browser");
         this.patternParams = document.getElementById("pattern-parameters");
@@ -435,6 +452,7 @@ class UI {
         this.patternCellContentType = document.getElementById("pattern-cell-content-type");
         this.createPatternButton = document.getElementById("create-pattern-button");
         this.deleteSelectedButton = document.getElementById("delete-selected-button");
+        this.deleteSelectedButton.onclick = () => this.deleteCurrentItem();
         this.createComponentLinkButton = document.getElementById("create-component-link-button");
         this.createComponentDefinitionButton = document.getElementById("create-component-definition-button");
         this.resetUI();
