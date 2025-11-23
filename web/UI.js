@@ -571,6 +571,36 @@ class UI {
         compsElementsList.appendChild(this.generateBrowserElementForComponent(name, comp));
     }
 
+    static onPatternNameChange(e) {
+        let newName = this.patternName.value;
+
+        if (/\s/g.test(newName)) {
+            alert("Имя паттерна не может содержать пробельные символы.");
+            this.patternName.value = this.selectedItem.name;
+            return;
+        }
+
+        if (newName === "") {
+            alert("Имя паттерна не должно быть пустым!");
+            this.patternName.value = this.selectedItem.name;
+            return;
+        }
+
+        for (let [key, pattern] of Grammar.patterns.entries()) {
+            if (pattern.name == newName) {
+                alert("Уже существует паттерн с таким именем!");
+                this.patternName.value = this.selectedItem.name;
+                return;
+            }
+        }
+        if (this.selectedItem instanceof Pattern) {
+            UI_STORAGE.getElementsByData(this.selectedItem).forEach(element => {
+                element.innerText = newName;
+            });
+            this.selectedItem.rename(newName);
+        } else throw new Error("Выбранный элемент не является паттерном!");
+    }
+
     static init() {
         this.browser = document.getElementById("tree-browser");
         this.patternParams = document.getElementById("pattern-parameters");
@@ -624,5 +654,7 @@ class UI {
         this.componentBottomPaddingMin = document.getElementById("bottom-padding-min");
         this.componentBottomPaddingMax = document.getElementById("bottom-padding-max");
         this.resetUI();
+
+        this.patternName.addEventListener("change", (e) => this.onPatternNameChange(e));
     }
 }
