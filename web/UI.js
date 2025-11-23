@@ -453,10 +453,10 @@ class UI {
         }
         if (pattern.countInDoc.isDefined()) {
             this.patternCountInDocMin.value = pattern.countInDoc.getBegin();
-            this.patternCountInDocMin.value = pattern.countInDoc.getEnd();
+            this.patternCountInDocMax.value = pattern.countInDoc.getEnd();
         } else {
             this.patternCountInDocMin.value = "";
-            this.patternCountInDocMin.value = "";
+            this.patternCountInDocMax.value = "";
         }
     }
 
