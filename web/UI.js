@@ -114,6 +114,10 @@ class UI {
     static createComponentLinkButton;
     /** @type {HTMLButtonElement} */
     static createComponentDefinitionButton;
+    /** @type {HTMLInputElement} */
+    static newComponentName;
+    /** @type {HTMLInputElement} */
+    static newComponentPattern;
 
     /** @type {HTMLInputElement} */
     static componentLeftMarginMin;
@@ -530,6 +534,14 @@ class UI {
         Grammar.deletePattern(pattern);
     }
 
+    static onCreateComponentDefinitionClicked() {
+
+    }
+
+    static onCreateComponentLinkClicked() {
+
+    }
+
     static init() {
         this.browser = document.getElementById("tree-browser");
         this.patternParams = document.getElementById("pattern-parameters");
@@ -558,8 +570,12 @@ class UI {
         this.deleteSelectedButton = document.getElementById("delete-selected-button");
         this.deleteSelectedButton.onclick = () => this.deleteCurrentItem();
         this.createComponentLinkButton = document.getElementById("create-component-link-button");
+        this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
         this.createComponentDefinitionButton = document.getElementById("create-component-definition-button");
+        this.createComponentDefinitionButton.onclick = () => this.onCreateComponentDefinitionClicked();
         this.componentLocationList = document.getElementById("component-location-list");
+        this.newComponentName = document.getElementById("new-component-name");
+        this.newComponentPattern = document.getElementById("new-component-pattern");
 
         this.componentLeftMarginMin = document.getElementById("left-margin-min");
         this.componentLeftMarginMax = document.getElementById("left-margin-max");
