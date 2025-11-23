@@ -112,14 +112,16 @@
             <details id="area-parameters">
                 <summary>Параметры вида AREA</summary>
                 <div class="parameters-table">
-                    <label>Компоненты</label>
+                    <span>Создать компонент</span>
                     <span></span>
-                    <select id="new-component-pattern-selection" class="pattern-selection">
+                    <label>Название комп.</label>
+                    <input type="text" id="new-component-name" />
+                    <label>Ссылка на</label>
+                    <select id="new-component-pattern" class="pattern-selection">
                         <option value="">-</option>
                     </select>
-                    <button id="create-component-link-button">Привязать паттерн как компонент</button>
-                    <span></span>
-                    <button id="create-component-definition-button">Создать компонент с объявлением</button>
+                    <button id="create-component-link-button">Компонент-ссылка</button>
+                    <button id="create-component-definition-button">Компонент-объявление</button>
                 </div>
             </details>
 
