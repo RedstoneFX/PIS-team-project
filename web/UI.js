@@ -541,7 +541,7 @@ class UI {
         }
         if (name == "") {
             alert("Название компонента не может быть пустой строкой!");
-            return false;   
+            return false;
         }
         for (let i = 0; i < this.selectedItem.components.length; ++i) {
             if (this.selectedItem.components.at(i).name == name) {
@@ -549,6 +549,7 @@ class UI {
                 return false;
             }
         }
+        return true;
     }
 
     static onCreateComponentDefinitionClicked() {
@@ -559,6 +560,15 @@ class UI {
     static onCreateComponentLinkClicked() {
         let name = this.newComponentName.value;
         if (!this.validateComponentName(name)) return;
+        let linkedPattern = UI_STORAGE.itemByID.get(this.newComponentPattern.value);
+
+        let comp = new Component(name, { pattern: linkedPattern.name }, false);
+        comp.resolveLinks();
+
+        this.selectedItem.components.push(comp);
+
+        let compsElementsList = this.previousSelectedElement.lastElementChild;
+        compsElementsList.appendChild(this.generateBrowserElementForComponent(name, comp));
     }
 
     static init() {
