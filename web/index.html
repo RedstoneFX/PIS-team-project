@@ -116,24 +116,26 @@
                 <div>
                     <label>Позиционирование</label>
                     <div id="component-location">
-                        <div id="component-location-direction-item">
-                            <button class="remove-component-location-btn">[X]</button>
-                            <select id="component-location-direction">
-                                <option value="left">Левый</option>
-                                <option value="top">Верхний</option>
-                                <option value="right">Правый</option>
-                                <option value="bottom">Нижний</option>
-                            </select>
-                            <select id="component-location-padding-margin">
-                                <option value="padding">padding</option>
-                                <option value="margin">margin</option>
-                            </select>
-                            <input type="number" class="numeric" id="component-location-min" min="0" max="100"
-                                placeholder="-inf" /><input type="number" class="numeric" id="component-location-max"
-                                min="0" max="100" placeholder="+inf" />
+                        <div id="component-location-list">
+                            <div id="component-location-item">
+                                <button class="remove-component-location-btn">[X]</button>
+                                <select id="component-location-direction">
+                                    <option value="left">Левый</option>
+                                    <option value="top">Верхний</option>
+                                    <option value="right">Правый</option>
+                                    <option value="bottom">Нижний</option>
+                                </select>
+                                <select id="component-location-padding-margin">
+                                    <option value="padding">padding</option>
+                                    <option value="margin">margin</option>
+                                </select>
+                                <input type="number" class="numeric" id="component-location-min" min="0" max="100"
+                                    placeholder="-inf" /><input type="number" class="numeric"
+                                    id="component-location-max" min="0" max="100" placeholder="+inf" />
+                            </div>
                         </div>
                         <div id="component-location-add-segment">
-                            <button class="add-component-location-btn">[+]</button>
+                            <button class="add-component-location-button">[+]</button>
                             <div></div>
                         </div>
                     </div>

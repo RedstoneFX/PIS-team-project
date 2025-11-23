@@ -105,6 +105,8 @@ class UI {
     /** @type {HTMLButtonElement} */
     static createComponentDefinitionButton;
     /** @type {HTMLElement} */
+    static componentLocationList;
+    /** @type {HTMLElement} */
     static previousSelectedElement;
 
     /** @type {Pattern | Component}*/
@@ -455,6 +457,7 @@ class UI {
         this.deleteSelectedButton.onclick = () => this.deleteCurrentItem();
         this.createComponentLinkButton = document.getElementById("create-component-link-button");
         this.createComponentDefinitionButton = document.getElementById("create-component-definition-button");
+        this.componentLocationList = document.getElementById("component-location-list");
         this.resetUI();
     }
 }
