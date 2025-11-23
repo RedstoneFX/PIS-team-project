@@ -567,24 +567,102 @@ class Pattern {
     /** @type {boolean} */
     isInline
 
-    constructor(name, data) {
-        this.name = name;
-        this.kind = data.kind.toUpperCase();
-        this.desc = data.description || "";
+    constructor() {
+        if (arguments.length === 2) {
+            patternName = arguments[0];
+            data = arguments[1];
 
-        this.countInDoc = new YamlRange(0, 0).setUndefined();
-        if (data.count_in_document) this.countInDoc = Grammar.parseYamlRange(data.count_in_document);
+            this.name = patternName;
+            this.kind = data.kind.toUpperCase();
+            this.desc = data.description || "";
 
-        let size = Grammar.parseSize(data.size);
-        this.width = size.width;
-        this.height = size.height;
+            this.countInDoc = new YamlRange(0, 0).setUndefined();
+            if (data.count_in_document) this.countInDoc = Grammar.parseYamlRange(data.count_in_document);
 
-        this.isRoot = data.root;
-        if (this.isRoot === null || this.isRoot == undefined) this.isRoot = false;
-        if (!(this.isRoot === true || this.isRoot === false))
-            throw new Error(`Паттерн ${name} имеет непонятное значение root (${data.root})`);
+            let size = Grammar.parseSize(data.size);
+            this.width = size.width;
+            this.height = size.height;
 
-        this.isInline = false;
+            this.isRoot = data.root;
+            if (this.isRoot === null || this.isRoot == undefined) this.isRoot = false;
+            if (!(this.isRoot === true || this.isRoot === false)) {
+                throw new Error(`Паттерн ${patternName} имеет непонятное значение root (${data.root})`);
+            }
+
+            this.isInline = false;
+
+        } else if (arguments.length === 8) {
+            patternName = arguments[0];
+            kind = arguments[1];
+            desc = arguments[2];
+            countInDoc = arguments[3];
+            width = arguments[4];
+            height = arguments[5];
+            isRoot = arguments[6];
+            isInline = arguments[7];
+
+            if (typeof patternName != 'string') {
+                throw new Error(`Имя паттерна должно быть строкой`);
+            }
+            this.name = patternName;
+
+            if (!(typeof kind === 'string' && ["CELL", "AREA", "ARRAY", "ARRAY-IN-CONTEXT"].includes(kind.toUpperCase()))) {
+                throw new Error(`Неизвестный тип паттерна: ${kind}. Поддерживаемые: CELL, AREA, ARRAY, ARRAY-IN-CONTEXT`);
+            }
+            this.kind = kind.toUpperCase();
+
+            if (typeof desc != 'string') {
+                throw new Error(`Описание паттерна должно быть строкой`);
+            }
+            this.desc = desc;
+
+            if (!(countInDoc instanceof YamlRange)) {
+                throw new Error(`Количество паттернов в документе должно быть задано диапазоном`);
+            }
+            this.countInDoc = countInDoc;
+
+            if (!(this.width instanceof YamlRange)) {
+                throw new Error(`Ширина паттерна должна быть задана диапазоном`);
+            }
+            this.width = this.width;
+
+            if (!(this.height instanceof YamlRange)) {
+                throw new Error(`Высота паттерна должна быть задана диапазоном`);
+            }
+            this.height = this.height;
+
+            if (typeof isRoot != 'boolean') {
+                 throw new Error(`isRoot должно быть логическим значением`);
+            }
+            this.isRoot = this.isRoot;
+
+            if (typeof isInline != 'boolean') {
+                 throw new Error(`isInline должно быть логическим значением`);
+            }
+            this.isInline = this.isInline;
+
+        } else {
+            throw new Error(`Передано неверное количество аргументов для конструктора Pattern`);
+        }
+    }
+
+    static fromYaml(patternName, data) {
+        return new Pattern(patternName, data);
+    }
+
+    /**
+     * @param {String} patternName 
+     * @param {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} kind 
+     * @param {String} desc 
+     * @param {YamlRange} countInDoc 
+     * @param {YamlRange} width 
+     * @param {YamlRange} height 
+     * @param {Boolean} isRoot 
+     * @param {Boolean} isInline 
+     * @returns {Pattern}
+     */
+    static fromDataStructure(patternName, kind, desc, countInDoc, width, height, isRoot, isInline) {
+        return new Pattern(patternName, kind, desc, countInDoc, width, height, isRoot, isInline);
     }
 
     /**
