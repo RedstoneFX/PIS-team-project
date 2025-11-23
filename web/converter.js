@@ -621,12 +621,12 @@ class Pattern {
             }
             this.countInDoc = countInDoc;
 
-            if (!(this.width instanceof YamlRange)) {
+            if (!(width instanceof YamlRange)) {
                 throw new Error(`Ширина паттерна должна быть задана диапазоном`);
             }
             this.width = width;
 
-            if (!(this.height instanceof YamlRange)) {
+            if (!(height instanceof YamlRange)) {
                 throw new Error(`Высота паттерна должна быть задана диапазоном`);
             }
             this.height = height;
