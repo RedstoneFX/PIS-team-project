@@ -4,6 +4,8 @@ class UI_STORAGE {
     /** @type {Map<Object, String>} */
     static IDByItem = new Map();
     static last_id = 0;
+    /** @type {Map<object, HTMLElement[]} */
+    static elementByID = new Map();
 
     /**
      * Находит ID данных или генерирует новый
@@ -29,6 +31,13 @@ class UI_STORAGE {
         let id = this.getUniqueID(data);
         data.UNIQUE_UI_ID = id;
         element.setAttribute("data-id", id);
+        if (this.elementByID.get(id) == null)
+            this.elementByID.set(id, [element]);
+        else this.elementByID.get(id).push(element);
+    }
+
+    static getElementsByData(data) {
+        return this.elementByID.get(this.getUniqueID(data));
     }
 
     /**
@@ -48,6 +57,7 @@ class UI_STORAGE {
     static reset() {
         this.IDByItem.clear();
         this.itemByID.clear();
+        this.elementByID.clear();
         this.last_id = 0;
     }
 }
@@ -104,8 +114,46 @@ class UI {
     static createComponentLinkButton;
     /** @type {HTMLButtonElement} */
     static createComponentDefinitionButton;
+
+    /** @type {HTMLInputElement} */
+    static componentLeftMarginMin;
+    /** @type {HTMLInputElement} */
+    static componentLeftMarginMax;
+    /** @type {HTMLInputElement} */
+    static componentTopMarginMin;
+    /** @type {HTMLInputElement} */
+    static componentTopMarginMax;
+    /** @type {HTMLInputElement} */
+    static componentRightMarginMin;
+    /** @type {HTMLInputElement} */
+    static componentRightMarginMax;
+    /** @type {HTMLInputElement} */
+    static componentBottomMarginMin;
+    /** @type {HTMLInputElement} */
+    static componentBottomMarginMax;
+
+    /** @type {HTMLInputElement} */
+    static componentLeftPaddingMin;
+    /** @type {HTMLInputElement} */
+    static componentLeftPaddingMax;
+    /** @type {HTMLInputElement} */
+    static componentTopPaddingMin;
+    /** @type {HTMLInputElement} */
+    static componentTopPaddingMax;
+    /** @type {HTMLInputElement} */
+    static componentRightPaddingMin;
+    /** @type {HTMLInputElement} */
+    static componentRightPaddingMax;
+    /** @type {HTMLInputElement} */
+    static componentBottomPaddingMin;
+    /** @type {HTMLInputElement} */
+    static componentBottomPaddingMax;
+
     /** @type {HTMLElement} */
     static previousSelectedElement;
+
+    /** @type {Pattern | Component}*/
+    static selectedItem;
 
     static loadFromGrammar() {
         UI_STORAGE.reset();
@@ -177,7 +225,7 @@ class UI {
         element.innerText = "🌌 " + displayName;
         element.classList.add("browser-item");
         element.classList.add("pattern-pointer");
-        element.onclick = (e) => this.onBrowserLinkClicked(e);
+        element.onclick = (e) => this.onBrowserItemClicked(e);
         UI_STORAGE.bindDataToElement(element, pattern);
         return element;
     }
@@ -211,12 +259,38 @@ class UI {
 
     /**
      * Слушатель нажатий на элементы бразуера
-     * @param {PointerEvent} element
+     * @param {PointerEvent} event
      */
     static onBrowserItemClicked(event) {
-        console.log(UI_STORAGE.getDataFromElement(event.target));
-        this.highlightBrowserElement(event.target);
-        this.loadSelectedDataToUI(UI_STORAGE.getDataFromElement(event.target));
+        let data = UI_STORAGE.getDataFromElement(event.target);
+        this.selectBrowserElementByData(data);
+    }
+
+    static selectBrowserElementByData(data) {
+        let originalElements = UI_STORAGE.getElementsByData(data);
+        originalElements.forEach(element => {
+            if (element.tagName == "SUMMARY") {
+                this.highlightBrowserElement(element);
+                this.selectedItem = data;
+                this.loadSelectedDataToUI(data);
+                this.updateBrowserControllsFor(data);
+            }
+        });
+    }
+
+    /**
+     * Включает и выключает кнопки в панели управления браузера, соответствующие действиям с переданным элементом
+     * @param {Object} data 
+     */
+    static updateBrowserControllsFor(data) {
+        if (data instanceof AreaPattern) {
+            this.createComponentDefinitionButton.disabled = false;
+            this.createComponentLinkButton.disabled = false;
+        } else {
+            this.createComponentDefinitionButton.disabled = true;
+            this.createComponentLinkButton.disabled = true;
+        }
+        this.deleteSelectedButton.disabled = data == null;
     }
 
     /**
@@ -253,8 +327,34 @@ class UI {
         }
     }
 
-    static loadComponentData(data) {
+    /**
+     * Загружает в интерфейс специфичные параметры компонента
+     * @param {Component} component 
+     */
+    static loadComponentData(component) {
+        this.loadLocationDirection(component.location.margin.left, this.componentLeftMarginMin, this.componentLeftMarginMax);
+        this.loadLocationDirection(component.location.margin.top, this.componentTopMarginMin, this.componentTopMarginMax);
+        this.loadLocationDirection(component.location.margin.right, this.componentRightMarginMin, this.componentRightMarginMax);
+        this.loadLocationDirection(component.location.margin.bottom, this.componentBottomMarginMin, this.componentBottomMarginMax);
+        this.loadLocationDirection(component.location.padding.left, this.componentLeftPaddingMin, this.componentLeftPaddingMax);
+        this.loadLocationDirection(component.location.padding.top, this.componentTopPaddingMin, this.componentTopPaddingMax);
+        this.loadLocationDirection(component.location.padding.right, this.componentRightPaddingMin, this.componentRightPaddingMax);
+        this.loadLocationDirection(component.location.padding.bottom, this.componentBottomPaddingMin, this.componentBottomPaddingMax);
+    }
 
+    /**
+     * Загружает направление позиции компонента в параметры компонента.
+     * @param {YamlRange} direction 
+     * @param {HTMLInputElement} min
+     * @param {HTMLInputElement} max 
+     */
+    static loadLocationDirection(direction, min, max) {
+        if (!direction.isDefined() || direction.getBegin() == -Infinity)
+            min.value = "";
+        else min.value = direction.getBegin();
+        if (!direction.isDefined() || direction.getEnd() == +Infinity)
+            max.value = "";
+        else max.value = direction.getEnd();
     }
 
     /**
@@ -390,7 +490,21 @@ class UI {
      */
     static setComponentParamsEnabled(isEnabled) {
         this.componentParams.hidden = !isEnabled;
+        this.createComponentDefinitionButton.disabled = true;
+        this.createComponentLinkButton.disabled = true;
         if (isEnabled) this.setGeneralPatternParamsEnabled(false);
+    }
+
+    /**
+     * Удаляет выбранный объект
+     */
+    static deleteCurrentItem() {
+        this.updateBrowserControllsFor(null);
+        if (this.currentElement instanceof Pattern) {
+
+        } else if (this.currentElement instanceof Component) {
+        }
+        Grammar.deletePattern(pattern);
     }
 
     static init() {
@@ -417,8 +531,28 @@ class UI {
         this.patternCellContentType = document.getElementById("pattern-cell-content-type");
         this.createPatternButton = document.getElementById("create-pattern-button");
         this.deleteSelectedButton = document.getElementById("delete-selected-button");
+        this.deleteSelectedButton.onclick = () => this.deleteCurrentItem();
         this.createComponentLinkButton = document.getElementById("create-component-link-button");
         this.createComponentDefinitionButton = document.getElementById("create-component-definition-button");
+        this.componentLocationList = document.getElementById("component-location-list");
+
+        this.componentLeftMarginMin = document.getElementById("left-margin-min");
+        this.componentLeftMarginMax = document.getElementById("left-margin-max");
+        this.componentTopMarginMin = document.getElementById("top-margin-min");
+        this.componentTopMarginMax = document.getElementById("top-margin-max");
+        this.componentRightMarginMin = document.getElementById("right-margin-min");
+        this.componentRightMarginMax = document.getElementById("right-margin-max");
+        this.componentBottomMarginMin = document.getElementById("bottom-margin-min");
+        this.componentBottomMarginMax = document.getElementById("bottom-margin-max");
+
+        this.componentLeftPaddingMin = document.getElementById("left-padding-min");
+        this.componentLeftPaddingMax = document.getElementById("left-padding-max");
+        this.componentTopPaddingMin = document.getElementById("top-padding-min");
+        this.componentTopPaddingMax = document.getElementById("top-padding-max");
+        this.componentRightPaddingMin = document.getElementById("right-padding-min");
+        this.componentRightPaddingMax = document.getElementById("right-padding-max");
+        this.componentBottomPaddingMin = document.getElementById("bottom-padding-min");
+        this.componentBottomPaddingMax = document.getElementById("bottom-padding-max");
         this.resetUI();
     }
 }
