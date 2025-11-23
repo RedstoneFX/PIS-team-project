@@ -685,6 +685,85 @@ class UI {
         }
     }
 
+    /** */
+    static onCountInDocChange(e, isMin) {
+
+        let countInDoc = this.selectedItem.countInDoc;
+
+        // Сообщаем о недопустимом вводе, если введено что-то кроме цифр
+        if (!/^\d*$/g.test(e.target.value)) {
+            alert("Введенное значение не является целым числом!");
+            if (isMin) {
+                let v = countInDoc.getBegin();
+                if (v == 0) e.target.value = "";
+                else e.target.value = v;
+            } else {
+                let v = countInDoc.getEnd();
+                if (v == Infinity) e.target.value = "";
+                else e.target.value = v;
+            }
+            return;
+        }
+
+        // Считываем новое значение
+        let value;
+        if (e.target.value != "") value = e.target.value - 0;
+        else if (isMin) value = 0;
+        else value = Infinity;
+
+        // Сообщаяем о недопустимом вводе, если введено число < 1
+        if (value < e.target.min) {
+            alert("Размер не может быть меньше 1!");
+            e.target.value = countInDoc.getBegin();
+            return;
+        }
+
+        // Сбрасываем значения размера, если они не были заданы до этого
+        if (!countInDoc.isDefined()) {
+            countInDoc.setDefined();
+            countInDoc.setEnd(Infinity);
+            countInDoc.setBegin(0);
+        }
+
+        // Если изменяется минимум...
+        if (isMin) {
+
+            // Сообщаем об ошибке, если максимум меньше
+            if (value > countInDoc.getEnd()) {
+                alert("Минимум не может быть больше максимума!");
+                if (countInDoc.getBegin() == 0)
+                    e.target.value = "";
+                else e.target.value = countInDoc.getBegin();
+                return;
+            }
+
+            // Иначе сохнаняем данные
+            if (value == 0) e.target.value = "";
+            countInDoc.setBegin(value);
+
+        } else { // Иначе если изменяется максимум...
+            // Сообщаем об ошибке, если минимум больше максимума
+            if (value < countInDoc.getBegin()) {
+                alert("максимум не может быть меньше минимума!");
+                if (countInDoc.getEnd() == Infinity)
+                    e.target.value = "";
+                else e.target.value = countInDoc.getEnd();
+                return;
+            }
+
+            // Иначе сохнаняем данные
+            if (value == Infinity) e.target.value = "";
+            countInDoc.setEnd(value);
+        }
+
+        // Снимаем определения , если минимум 0, а максимум 1
+        if (countInDoc.getBegin() == 0 && countInDoc.getEnd() == Infinity) {
+            countInDoc.setUndefined();
+            this.patternWidthMin.value = "";
+            this.patternWidthMax.value = "";
+        }
+    }
+
 
     static init() {
         this.browser = document.getElementById("tree-browser");
@@ -746,5 +825,7 @@ class UI {
         this.patternWidthMax.addEventListener("change", (e) => this.onPatternSizeChanged(e, false, true));
         this.patternHeightMin.addEventListener("change", (e) => this.onPatternSizeChanged(e, true, false));
         this.patternHeightMax.addEventListener("change", (e) => this.onPatternSizeChanged(e, false, false));
+        this.patternCountInDocMin.addEventListener("change", (e) => this.onCountInDocChange(e, true));
+        this.patternCountInDocMax.addEventListener("change", (e) => this.onCountInDocChange(e, false));
     }
 }
