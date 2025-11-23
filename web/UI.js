@@ -271,6 +271,23 @@ class UI {
     }
 
     /**
+     * Слушатель нажатий на ссылки в бразуере
+     * @param {PointerEvent} event
+     */
+    static onBrowserLinkClicked(event) {
+        let data = UI_STORAGE.getDataFromElement(event.target);
+        let originalElements = UI_STORAGE.getElementsByData(data);
+        originalElements.forEach(element => {
+            if (element.tagName == "SUMMARY") {
+                this.highlightBrowserElement(element);
+                this.selectedItem = data;
+                this.loadSelectedDataToUI(data);
+                this.updateBrowserControllsFor(data);
+            }
+        });
+    }
+
+    /**
      * Включает и выключает кнопки в панели управления браузера, соответствующие действиям с переданным элементом
      * @param {Object} data 
      */
