@@ -569,8 +569,8 @@ class Pattern {
 
     constructor() {
         if (arguments.length === 2) {
-            patternName = arguments[0];
-            data = arguments[1];
+            let patternName = arguments[0];
+            let data = arguments[1];
 
             this.name = patternName;
             this.kind = data.kind.toUpperCase();
@@ -592,14 +592,14 @@ class Pattern {
             this.isInline = false;
 
         } else if (arguments.length === 8) {
-            patternName = arguments[0];
-            kind = arguments[1];
-            desc = arguments[2];
-            countInDoc = arguments[3];
-            width = arguments[4];
-            height = arguments[5];
-            isRoot = arguments[6];
-            isInline = arguments[7];
+            let patternName = arguments[0];
+            let kind = arguments[1];
+            let desc = arguments[2];
+            let countInDoc = arguments[3];
+            let width = arguments[4];
+            let height = arguments[5];
+            let isRoot = arguments[6];
+            let isInline = arguments[7];
 
             if (typeof patternName != 'string') {
                 throw new Error(`Имя паттерна должно быть строкой`);
@@ -624,22 +624,22 @@ class Pattern {
             if (!(this.width instanceof YamlRange)) {
                 throw new Error(`Ширина паттерна должна быть задана диапазоном`);
             }
-            this.width = this.width;
+            this.width = width;
 
             if (!(this.height instanceof YamlRange)) {
                 throw new Error(`Высота паттерна должна быть задана диапазоном`);
             }
-            this.height = this.height;
+            this.height = height;
 
             if (typeof isRoot != 'boolean') {
                  throw new Error(`isRoot должно быть логическим значением`);
             }
-            this.isRoot = this.isRoot;
+            this.isRoot = isRoot;
 
             if (typeof isInline != 'boolean') {
                  throw new Error(`isInline должно быть логическим значением`);
             }
-            this.isInline = this.isInline;
+            this.isInline = isInline;
 
         } else {
             throw new Error(`Передано неверное количество аргументов для конструктора Pattern`);
