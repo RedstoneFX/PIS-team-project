@@ -71,8 +71,12 @@ input.numeric {
     margin-left: 1rem;
 }
 
-.component-location > span {
+.component-location>span {
     text-align: right;
+}
+
+.pattern-pointer::before {
+    content: "🌌 ";
 }
 
 #the-editor {

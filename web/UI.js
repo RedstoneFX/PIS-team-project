@@ -226,7 +226,7 @@ class UI {
 
     static createBrowserLinkForPattern(displayName, pattern) {
         let element = document.createElement("div");
-        element.innerText = "🌌 " + displayName;
+        element.innerText = displayName;
         element.classList.add("browser-item");
         element.classList.add("pattern-pointer");
         element.onclick = (e) => this.onBrowserItemClicked(e);
