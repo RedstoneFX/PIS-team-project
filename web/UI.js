@@ -104,8 +104,41 @@ class UI {
     static createComponentLinkButton;
     /** @type {HTMLButtonElement} */
     static createComponentDefinitionButton;
-    /** @type {HTMLElement} */
-    static componentLocationList;
+
+    /** @type {HTMLInputElement} */
+    static componentLeftMarginMin;
+    /** @type {HTMLInputElement} */
+    static componentLeftMarginMax;
+    /** @type {HTMLInputElement} */
+    static componentTopMarginMin;
+    /** @type {HTMLInputElement} */
+    static componentTopMarginMax;
+    /** @type {HTMLInputElement} */
+    static componentRightMarginMin;
+    /** @type {HTMLInputElement} */
+    static componentRightMarginMax;
+    /** @type {HTMLInputElement} */
+    static componentBottomMarginMin;
+    /** @type {HTMLInputElement} */
+    static componentBottomMarginMax;
+
+    /** @type {HTMLInputElement} */
+    static componentLeftPaddingMin;
+    /** @type {HTMLInputElement} */
+    static componentLeftPaddingMax;
+    /** @type {HTMLInputElement} */
+    static componentTopPaddingMin;
+    /** @type {HTMLInputElement} */
+    static componentTopPaddingMax;
+    /** @type {HTMLInputElement} */
+    static componentRightPaddingMin;
+    /** @type {HTMLInputElement} */
+    static componentRightPaddingMax;
+    /** @type {HTMLInputElement} */
+    static componentBottomPaddingMin;
+    /** @type {HTMLInputElement} */
+    static componentBottomPaddingMax;
+
     /** @type {HTMLElement} */
     static previousSelectedElement;
 
@@ -276,8 +309,34 @@ class UI {
         }
     }
 
-    static loadComponentData(data) {
+    /**
+     * Загружает в интерфейс специфичные параметры компонента
+     * @param {Component} component 
+     */
+    static loadComponentData(component) {
+        this.loadLocationDirection(component.location.margin.left, this.componentLeftMarginMin, this.componentLeftMarginMax);
+        this.loadLocationDirection(component.location.margin.top, this.componentTopMarginMin, this.componentTopMarginMax);
+        this.loadLocationDirection(component.location.margin.right, this.componentRightMarginMin, this.componentRightMarginMax);
+        this.loadLocationDirection(component.location.margin.bottom, this.componentBottomMarginMin, this.componentBottomMarginMax);
+        this.loadLocationDirection(component.location.padding.left, this.componentLeftPaddingMin, this.componentLeftPaddingMax);
+        this.loadLocationDirection(component.location.padding.top, this.componentTopPaddingMin, this.componentTopPaddingMax);
+        this.loadLocationDirection(component.location.padding.right, this.componentRightPaddingMin, this.componentRightPaddingMax);
+        this.loadLocationDirection(component.location.padding.bottom, this.componentBottomPaddingMin, this.componentBottomPaddingMax);
+    }
 
+    /**
+     * Загружает направление позиции компонента в параметры компонента.
+     * @param {YamlRange} direction 
+     * @param {HTMLInputElement} min
+     * @param {HTMLInputElement} max 
+     */
+    static loadLocationDirection(direction, min, max) {
+        if (!direction.isDefined() || direction.getBegin() == -Infinity)
+            min.value = "";
+        else min.value = direction.getBegin();
+        if (!direction.isDefined() || direction.getEnd() == +Infinity)
+            max.value = "";
+        else max.value = direction.getEnd();
     }
 
     /**
@@ -458,6 +517,24 @@ class UI {
         this.createComponentLinkButton = document.getElementById("create-component-link-button");
         this.createComponentDefinitionButton = document.getElementById("create-component-definition-button");
         this.componentLocationList = document.getElementById("component-location-list");
+
+        this.componentLeftMarginMin = document.getElementById("left-margin-min");
+        this.componentLeftMarginMax = document.getElementById("left-margin-max");
+        this.componentTopMarginMin = document.getElementById("top-margin-min");
+        this.componentTopMarginMax = document.getElementById("top-margin-max");
+        this.componentRightMarginMin = document.getElementById("right-margin-min");
+        this.componentRightMarginMax = document.getElementById("right-margin-max");
+        this.componentBottomMarginMin = document.getElementById("bottom-margin-min");
+        this.componentBottomMarginMax = document.getElementById("bottom-margin-max");
+
+        this.componentLeftPaddingMin = document.getElementById("left-padding-min");
+        this.componentLeftPaddingMax = document.getElementById("left-padding-max");
+        this.componentTopPaddingMin = document.getElementById("top-padding-min");
+        this.componentTopPaddingMax = document.getElementById("top-padding-max");
+        this.componentRightPaddingMin = document.getElementById("right-padding-min");
+        this.componentRightPaddingMax = document.getElementById("right-padding-max");
+        this.componentBottomPaddingMin = document.getElementById("bottom-padding-min");
+        this.componentBottomPaddingMax = document.getElementById("bottom-padding-max");
         this.resetUI();
     }
 }

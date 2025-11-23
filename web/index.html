@@ -115,29 +115,54 @@
                 <summary>Параметры компонента</summary>
                 <div>
                     <label>Позиционирование</label>
-                    <div id="component-location">
-                        <div id="component-location-list">
-                            <div id="component-location-item">
-                                <button class="remove-component-location-btn">[X]</button>
-                                <select id="component-location-direction">
-                                    <option value="left">Левый</option>
-                                    <option value="top">Верхний</option>
-                                    <option value="right">Правый</option>
-                                    <option value="bottom">Нижний</option>
-                                </select>
-                                <select id="component-location-padding-margin">
-                                    <option value="padding">padding</option>
-                                    <option value="margin">margin</option>
-                                </select>
-                                <input type="number" class="numeric" id="component-location-min" min="0" max="100"
-                                    placeholder="-inf" /><input type="number" class="numeric"
-                                    id="component-location-max" min="0" max="100" placeholder="+inf" />
-                            </div>
-                        </div>
-                        <div id="component-location-add-segment">
-                            <button class="add-component-location-button">[+]</button>
-                            <div></div>
-                        </div>
+                    <div class="component-location">
+
+                        <span>left-margin</span>
+                        <input type="number" class="numeric" id="left-margin-min" min="0" max="100"
+                            placeholder="-inf" />
+                        <input type="number" class="numeric" id="left-margin-max" min="0" max="100"
+                            placeholder="+inf" />
+
+                        <span>top-margin</span>
+                        <input type="number" class="numeric" id="top-margin-min" min="0" max="100" placeholder="-inf" />
+                        <input type="number" class="numeric" id="top-margin-max" min="0" max="100" placeholder="+inf" />
+
+                        <span>right-margin</span>
+                        <input type="number" class="numeric" id="right-margin-min" min="0" max="100"
+                            placeholder="-inf" />
+                        <input type="number" class="numeric" id="right-margin-max" min="0" max="100"
+                            placeholder="+inf" />
+
+                        <span>bottom-margin</span>
+                        <input type="number" class="numeric" id="bottom-margin-min" min="0" max="100"
+                            placeholder="-inf" />
+                        <input type="number" class="numeric" id="bottom-margin-max" min="0" max="100"
+                            placeholder="+inf" />
+
+                        <span>left-padding</span>
+                        <input type="number" class="numeric" id="left-padding-min" min="0" max="100"
+                            placeholder="-inf" />
+                        <input type="number" class="numeric" id="left-padding-max" min="0" max="100"
+                            placeholder="+inf" />
+
+                        <span>top-padding</span>
+                        <input type="number" class="numeric" id="top-padding-min" min="0" max="100"
+                            placeholder="-inf" />
+                        <input type="number" class="numeric" id="top-padding-max" min="0" max="100"
+                            placeholder="+inf" />
+
+                        <span>right-padding</span>
+                        <input type="number" class="numeric" id="right-padding-min" min="0" max="100"
+                            placeholder="-inf" />
+                        <input type="number" class="numeric" id="right-padding-max" min="0" max="100"
+                            placeholder="+inf" />
+
+                        <span>bottom-padding</span>
+                        <input type="number" class="numeric" id="bottom-padding-min" min="0" max="100"
+                            placeholder="-inf" />
+                        <input type="number" class="numeric" id="bottom-padding-max" min="0" max="100"
+                            placeholder="+inf" />
+
                     </div>
                 </div>
             </details>

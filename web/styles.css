@@ -64,14 +64,15 @@ input.numeric {
     grid-template-columns: auto 1fr;
 }
 
-#component-location {
+.component-location {
     display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 0.3rem;
+    margin-left: 1rem;
 }
 
-#component-location-direction-item {
-    display: grid;
-    grid-template-columns: auto 1fr 1fr 1fr 1fr;
-    list-style: inside circle;
+.component-location > span {
+    text-align: right;
 }
 
 #the-editor {
