@@ -4,6 +4,8 @@ class UI_STORAGE {
     /** @type {Map<Object, String>} */
     static IDByItem = new Map();
     static last_id = 0;
+    /** @type {Map<object, HTMLElement[]} */
+    static elementByID = new Map();
 
     /**
      * Находит ID данных или генерирует новый
@@ -29,6 +31,13 @@ class UI_STORAGE {
         let id = this.getUniqueID(data);
         data.UNIQUE_UI_ID = id;
         element.setAttribute("data-id", id);
+        if (this.elementByID.get(id) == null)
+            this.elementByID.set(id, [element]);
+        else this.elementByID.get(id).push(element);
+    }
+
+    static getElementsByData(data) {
+        return this.elementByID.get(this.getUniqueID(data));
     }
 
     /**
@@ -48,6 +57,7 @@ class UI_STORAGE {
     static reset() {
         this.IDByItem.clear();
         this.itemByID.clear();
+        this.elementByID.clear();
         this.last_id = 0;
     }
 }
