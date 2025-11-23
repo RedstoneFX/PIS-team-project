@@ -24,5 +24,39 @@ class drawer {
         if (pattern instanceof CellPattern) this.drawCellPattern(pattern);
         else if (pattern instanceof ArrayPattern) this.drawArrayPattern(pattern);
         else if (pattern instanceof AreaPattern) this.drawAreaPattern(pattern);
+        else throw new Error("Нельзя отрисовать данный объект!");
+    }
+
+    /**
+     * Отрисовать паттерн-клетку
+     * @param {CellPattern} pattern 
+     */
+    static drawCellPattern(pattern) {
+
+    }
+
+    /**
+     * Отрисовать паттерн-клетку
+     * @param {ArrayPattern} pattern 
+     */
+    static drawArrayPattern(pattern) {
+
+    }
+
+    /**
+     * Отрисовать паттерн-клетку
+     * @param {AreaPattern} pattern 
+     */
+    static drawAreaPattern(pattern) {
+
+    }
+
+    /**
+     * Отрисовать компонент
+     * @param {Comment} component 
+     * @param {AreaPattern} parentPattern 
+     */
+    static drawComponent(component, parentPattern) {
+
     }
 }
