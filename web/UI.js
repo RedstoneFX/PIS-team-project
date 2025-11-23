@@ -179,7 +179,7 @@ class UI {
             for (const [name, pattern] of Grammar.patterns.entries()) {
                 let newOption = document.createElement("option");
                 newOption.innerText = pattern.name;
-                newOption.value = UI_STORAGE.getUniqueID(pattern);
+                UI_STORAGE.bindDataToElement(newOption, pattern, "value");
                 selection.append(newOption);
             }
         }
