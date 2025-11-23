@@ -605,7 +605,7 @@ class UI {
         this.selectedItem.desc = this.patternDesc.value;
     }
 
-    static onPatternWidthMinChanged(e) {
+    static onPatternWidthChanged(e, isMin) {
         // Сообщаем о недопустимом вводе, если введено что-то кроме цифр
         if (!/^\d*$/g.test(e.target.value)) {
             alert("Введенное значение не является целым числом!");
@@ -615,8 +615,9 @@ class UI {
 
         // Считываем новое значение
         let value;
-        if (e.target.value == "") value = 1;
-        else value = e.target.value - 0;
+        if (e.target.value != "") value = e.target.value - 0;
+        else if(isMin) value = 1;
+        else value = Infinity;
 
         // Сообщаяем о недопустимом вводе, если введено число <= 0 или > 100
         if (value < e.target.min) {
@@ -625,29 +626,51 @@ class UI {
             return;
         }
 
-        // Сообщаем о недопустимом вводе, если введенное число больше максимума (если интервал задан)
-        if (value > this.selectedItem.width.getEnd() && this.selectedItem.width.isDefined()) {
-            alert("Минимум не может быть больше максимума!");
-            e.target.value = this.selectedItem.width.getBegin();
-            return;
+        if (isMin) {
+            // Сообщаем о недопустимом вводе, если введенное число больше максимума (если интервал задан)
+            if (value > this.selectedItem.width.getEnd() && this.selectedItem.width.isDefined()) {
+                alert("Минимум не может быть больше максимума!");
+                e.target.value = this.selectedItem.width.getBegin();
+                return;
+            }
+
+            // Указываем бесконечный максимум, если интервал не был задан (на случай, если там есть остатки от предыдущего размера)
+            if (!this.selectedItem.width.isDefined()) {
+                this.selectedItem.width.setDefined();
+                this.selectedItem.width.setEnd(Infinity);
+                this.selectedItem.width.setBegin(1);
+            }
+
+            // Устанавливаем размер
+            this.selectedItem.width.setBegin(value);
+        } else {
+            // Сообщаем о недопустимом вводе, если введенное число меньше минимума (если интервал задан)
+            if (value < this.selectedItem.width.getBegin() && this.selectedItem.width.isDefined()) {
+                alert("Максимум не может быть меньше минимума!");
+                if (this.selectedItem.width.getEnd() == Infinity)
+                    e.target.value = "";
+                else this.selectedItem.width.getEnd();
+                return;
+            }
+
+            // Указываем 1 в минимум, если интервал не был задан (на случай, если там есть остатки от предыдущего размера)
+            if (!this.selectedItem.width.isDefined()) {
+                this.selectedItem.width.setDefined();
+                this.selectedItem.width.setEnd(Infinity);
+                this.selectedItem.width.setBegin(1);
+            }
+
+            // Устанавливаем размер
+            this.selectedItem.width.setEnd(value);
         }
 
         // Снимаем определение размера, если минимум 1, а максимум infinity
-        if (value == 1 && this.selectedItem.width.getEnd() == Infinity) {
+        if (this.selectedItem.width.getBegin() == 1 && this.selectedItem.width.getEnd() == Infinity) {
             this.selectedItem.width.setUndefined();
-            e.target.value = "";
+            this.patternWidthMin.value = "";
+            this.patternWidthMax.value = "";
             return;
         }
-
-        // Указываем бесконечный максимум, если интервал не был задан (на случай, если там есть остатки от предыдущего размера)
-        if (!this.selectedItem.width.isDefined()) {
-            this.selectedItem.width.setDefined();
-            this.selectedItem.width.setBegin(1);
-            this.selectedItem.width.setEnd(Infinity);
-        }
-
-        // Устанавливаем размер
-        this.selectedItem.width.setBegin(value);
     }
 
 
@@ -707,6 +730,7 @@ class UI {
 
         this.patternName.addEventListener("change", (e) => this.onPatternNameChange(e));
         this.patternDesc.addEventListener("change", (e) => this.onPatternDescChanged(e));
-        this.patternWidthMin.addEventListener("change", (e) => this.onPatternWidthMinChanged(e));
+        this.patternWidthMin.addEventListener("change", (e) => this.onPatternWidthChanged(e, true));
+        this.patternWidthMax.addEventListener("change", (e) => this.onPatternWidthChanged(e, false));
     }
 }
