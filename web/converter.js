@@ -475,48 +475,103 @@ class Component {
     /** @type {String} */
     name
     /** @type {Pattern} */
-    pattern
+    parentPattern
     /** @type {String} */
-    #patternName
+    #parentPatternName
     /** @type {YamlLocation} */
     location
     /** @type {boolean} */
     optional
     /** @type {boolean} */
-    inner
+    isInner
 
-    constructor(name, data, isInner) {
-        this.name = name;
+    constructor() {
+        if (arguments.length === 3) {
+            let componentName = arguments[0];
+            let data = arguments[1];
+            let isInner = arguments[3];
 
-        this.location = Grammar.parseYamlLocation(data.location, isInner); // Распознаем позицию элемента
+            this.name = componentName;
+            this.isInner = isInner;
 
-        // Распознаем поле optional
-        let optional = data.optional;
-        if (optional === null || optional == undefined) optional = false;
-        if (!(optional === true || optional === false)) throw new Error("Не удалось распознать поле optional у компонента " + this.name);
+            this.location = Grammar.parseYamlLocation(data.location, isInner); // Распознаем позицию элемента
 
-        // Запоминаем имя паттерна
-        if (data.pattern) {
-            this.#patternName = data.pattern;
-            this.pattern = null;
-        } else if (data.pattern_definition) {
-            try {
-                this.pattern = Grammar.parsePattern("", data.pattern_definition).setInlineDefined();
-            } catch (e) {
-                throw new Error(`Не удается распознать вложнный паттерн в компоненте ${this.name}: ${e.message}`);
+            // Распознаем поле optional
+            let optional = data.optional;
+            if (optional === null || optional == undefined) optional = false;
+            if (!(optional === true || optional === false)) throw new Error("Не удалось распознать поле optional у компонента " + this.name);
+
+            // Запоминаем имя паттерна
+            if (data.pattern) {
+                this.#parentPatternName = data.pattern;
+                this.parentPattern = null;
+            } else if (data.pattern_definition) {
+                try {
+                    this.parentPattern = Grammar.parsePattern("", data.pattern_definition).setInlineDefined();
+                } catch (e) {
+                    throw new Error(`Не удается распознать вложнный паттерн в компоненте ${this.name}: ${e.message}`);
+                }
+            } else {
+                throw new Error(`Компонент "${this.name}" должен содержать pattern или pattern_definition`);
             }
-        } else {
-            throw new Error(`Компонент "${this.name}" должен содержать pattern или pattern_definition`);
+        } else if (arguments.length === 5) {
+            let componentName = arguments[0];
+            let parentPattern = arguments[1];
+            let location = arguments[2];
+            let optional = arguments[3];
+            let isInner = arguments[4];
+
+            if (typeof componentName != 'string') {
+                throw new Error(`Имя паттерна должно быть строкой`);
+            }
+            this.name = componentName;
+
+            if (!(parentPattern instanceof Pattern)) {
+                throw new Error(`Компонент должен иметь ссылку на паттерн, в котором он находится`);
+            }
+            this.parentPattern = parentPattern;
+            this.#parentPatternName = parentPattern.name;
+
+            if (!(location instanceof YamlLocation)) {
+                throw new Error(`Расположение должно быть задано соответствующим объектом`);
+            }
+            this.location = location;
+
+            if (typeof optional != 'boolean') {
+                throw new Error(`optional должно быть логическим значением`);
+            }
+            this.optional = optional;
+
+            if (typeof isInner != 'boolean') {
+                throw new Error(`isInner должно быть логическим значением`);
+            }
+            this.isInner = isInner;
         }
     }
 
+    /**
+     * @param {String} componentName 
+     * @param {Pattern} parentPattern 
+     * @param {YamlLocation} location 
+     * @param {Boolean} optional 
+     * @param {Boolean} isInner 
+     * @returns {Component}
+     */
+    static fromDataStructure(componentName, parentPattern, location, optional, isInner) {
+        return new Component(componentName, parentPattern, location, optional, isInner);
+    }
+
+    static fromYaml(componentName, data, isInner) {
+        return new Component(componentName, data, isInner);
+    }
+
     resolveLinks() {
-        if(this.#patternName && !this.pattern) {
-            this.pattern = Grammar.patterns.get(this.#patternName);
-            if (!this.pattern)
-            throw new Error(`Не удалось найти паттерн с названием '${this.#patternName}' для привязки к компоненту '${this.name}'.`);
-        } else if(this.pattern && !this.#patternName) {
-            this.pattern.resolveLinks();
+        if(this.#parentPatternName && !this.parentPattern) {
+            this.parentPattern = Grammar.patterns.get(this.#parentPatternName);
+            if (!this.parentPattern)
+            throw new Error(`Не удалось найти паттерн с названием '${this.#parentPatternName}' для привязки к компоненту '${this.name}'.`);
+        } else if(this.parentPattern && !this.#parentPatternName) {
+            this.parentPattern.resolveLinks();
         } else {
             throw new Error(`Не удалось установить ссылки для компонента: '${this.name}'.`);
         }
@@ -529,9 +584,9 @@ class Component {
     toYaml() {
         const result = {};
 
-        if (this.pattern) {
-            if (this.pattern.isInline) {
-                result.pattern_definition = this.pattern.toYaml();
+        if (this.parentPattern) {
+            if (this.parentPattern.isInline) {
+                result.pattern_definition = this.parentPattern.toYaml();
             } else {
                 result.pattern = this.pattern.name;
             }
@@ -1038,7 +1093,7 @@ class AreaPattern extends Pattern {
 
             // Добавить компоненты в зависимости от их расположения (inner или outer)
             for (const component of this.components) {
-                if (component.inner) {
+                if (component.isInner) {
                     // Создать поле inner, если его нет
                     if (!result.inner) result.inner = {};
                     result.inner[component.name] = component.toYaml();
