@@ -736,17 +736,60 @@ class CellPattern extends Pattern {
     /** @type {String} */
     contentType
 
-    constructor(name, data) {
-        super(name, data);
+    constructor() {
+        if (arguments.length === 2) {
+            let patternName = arguments[0];
+            let data = arguments[1];
+            super(patternName, data);
 
-        if (data.content_type) {
-            if (typeof data.content_type !== "string") {
-                throw new Error(`Тип данных ячейки должен быть строкой.`);
+            if (data.content_type) {
+                if (typeof data.content_type !== "string") {
+                    throw new Error(`Тип данных ячейки должен быть строкой.`);
+                }
+                this.contentType = data.content_type;
+            } else {
+                throw new Error(`Не задан тип данных для ячейки '${this.name}'.`);
             }
-            this.contentType = data.content_type;
+        } else if (arguments.length === 9) {
+            let patternName = arguments[0];
+            let kind = arguments[1];
+            let desc = arguments[2];
+            let countInDoc = arguments[3];
+            let width = arguments[4];
+            let height = arguments[5];
+            let isRoot = arguments[6];
+            let isInline = arguments[7];
+            let contentType = arguments[8];
+            super(patternName, kind, desc, countInDoc, width, height, isRoot, isInline);
+
+            if (typeof contentType != 'string') {
+                throw new Error(`Тип содержимого паттерна должен быть строкой`);
+            }
+            this.contentType = contentType;
+            
         } else {
-            throw new Error(`Не задан тип данных для ячейки '${this.name}'.`);
+            throw new Error(`Передано неверное количество аргументов для конструктора CellPattern`);
         }
+    }
+
+    /**
+     * @param {String} patternName 
+     * @param {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} kind 
+     * @param {String} desc 
+     * @param {YamlRange} countInDoc 
+     * @param {YamlRange} width 
+     * @param {YamlRange} height 
+     * @param {Boolean} isRoot 
+     * @param {Boolean} isInline 
+     * @param {String} contentType 
+     * @returns {CellPattern}
+     */
+    static fromDataStructure(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, contentType) {
+        return new CellPattern(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, contentType);
+    }
+
+    static fromYaml(patternName, data) {
+        return new CellPattern(patternName, data);
     }
 
     resolveLinks() {}
