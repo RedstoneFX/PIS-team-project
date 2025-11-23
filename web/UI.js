@@ -27,10 +27,10 @@ class UI_STORAGE {
      * @param {HTMLElement} element 
      * @param {Object} data 
      */
-    static bindDataToElement(element, data) {
+    static bindDataToElement(element, data, attrName = "data-id") {
         let id = this.getUniqueID(data);
         data.UNIQUE_UI_ID = id;
-        element.setAttribute("data-id", id);
+        element.setAttribute(attrName, id);
         if (this.elementByID.get(id) == null)
             this.elementByID.set(id, [element]);
         else this.elementByID.get(id).push(element);
@@ -45,8 +45,8 @@ class UI_STORAGE {
      * @param {Element} element
      * @returns {Object} 
      */
-    static getDataFromElement(element) {
-        let id = element.getAttribute("data-id");
+    static getDataFromElement(element, attrName = "data-id") {
+        let id = element.getAttribute(attrName);
         if (id == null) return null;
         let data = this.itemByID.get(id);
         if (data == null) // Если это случилось, то выясняйте, почему этот элемент интерфейса до сих пор привязан несуществующим данным.
