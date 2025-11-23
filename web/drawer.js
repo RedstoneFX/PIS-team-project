@@ -12,12 +12,12 @@ class drawer {
     static init() {
         this.exampleVariable1 = 1;
         this.exampleVariable2 = 2;
-        this.canvas = document.getElementById("canvas");
-        paper.setup(canvas);
+        this.canvas = document.getElementById("illustration");
+        paper.setup(this.canvas);
     }
 
     /**
-     * Метод, который будет вызван 
+     * Метод, который будет вызван для отрисовки паттерна неизвестного вида
      * @param {Pattern} pattern 
      */
     static drawPattern(pattern) {
