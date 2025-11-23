@@ -601,6 +601,10 @@ class UI {
         } else throw new Error("Выбранный элемент не является паттерном!");
     }
 
+    static onPatternDescChanged(e) {
+        this.selectedItem.desc = this.patternDesc.value;
+    }
+
     static init() {
         this.browser = document.getElementById("tree-browser");
         this.patternParams = document.getElementById("pattern-parameters");
@@ -656,5 +660,6 @@ class UI {
         this.resetUI();
 
         this.patternName.addEventListener("change", (e) => this.onPatternNameChange(e));
+        this.patternDesc.addEventListener("change", (e) => this.onPatternDescChanged(e));
     }
 }
