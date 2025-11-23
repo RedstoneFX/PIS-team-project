@@ -14,6 +14,7 @@ function loadFromLocalStorage() {
 
 function onPageLoaded() {
     let testData = YAML.load(request("cnf/grammar_root.yml"));
+    drawer.init();
     UI.init();
 
     try {
