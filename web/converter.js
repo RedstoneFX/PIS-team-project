@@ -475,9 +475,9 @@ class Component {
     /** @type {String} */
     name
     /** @type {Pattern} */
-    parentPattern
+    pattern
     /** @type {String} */
-    #parentPatternName
+    #patternName
     /** @type {YamlLocation} */
     location
     /** @type {boolean} */
@@ -503,11 +503,11 @@ class Component {
 
             // Запоминаем имя паттерна
             if (data.pattern) {
-                this.#parentPatternName = data.pattern;
-                this.parentPattern = null;
+                this.#patternName = data.pattern;
+                this.pattern = null;
             } else if (data.pattern_definition) {
                 try {
-                    this.parentPattern = Grammar.parsePattern("", data.pattern_definition).setInlineDefined();
+                    this.pattern = Grammar.parsePattern("", data.pattern_definition).setInlineDefined();
                 } catch (e) {
                     throw new Error(`Не удается распознать вложнный паттерн в компоненте ${this.name}: ${e.message}`);
                 }
@@ -516,7 +516,7 @@ class Component {
             }
         } else if (arguments.length === 5) {
             let componentName = arguments[0];
-            let parentPattern = arguments[1];
+            let pattern = arguments[1];
             let location = arguments[2];
             let optional = arguments[3];
             let isInner = arguments[4];
@@ -526,11 +526,11 @@ class Component {
             }
             this.name = componentName;
 
-            if (!(parentPattern instanceof Pattern)) {
-                throw new Error(`Компонент должен иметь ссылку на паттерн, в котором он находится`);
+            if (!(pattern instanceof Pattern)) {
+                throw new Error(`Компонент должен иметь ссылку на свой паттерн`);
             }
-            this.parentPattern = parentPattern;
-            this.#parentPatternName = parentPattern.name;
+            this.pattern = pattern;
+            this.#patternName = pattern.name;
 
             if (!(location instanceof YamlLocation)) {
                 throw new Error(`Расположение должно быть задано соответствующим объектом`);
@@ -550,15 +550,16 @@ class Component {
     }
 
     /**
+     * 
      * @param {String} componentName 
-     * @param {Pattern} parentPattern 
+     * @param {Pattern} pattern 
      * @param {YamlLocation} location 
      * @param {Boolean} optional 
      * @param {Boolean} isInner 
      * @returns {Component}
      */
-    static fromDataStructure(componentName, parentPattern, location, optional, isInner) {
-        return new Component(componentName, parentPattern, location, optional, isInner);
+    static fromDataStructure(componentName, pattern, location, optional, isInner) {
+        return new Component(componentName, pattern, location, optional, isInner);
     }
 
     static fromYaml(componentName, data, isInner) {
@@ -566,12 +567,12 @@ class Component {
     }
 
     resolveLinks() {
-        if(this.#parentPatternName && !this.parentPattern) {
-            this.parentPattern = Grammar.patterns.get(this.#parentPatternName);
-            if (!this.parentPattern)
-            throw new Error(`Не удалось найти паттерн с названием '${this.#parentPatternName}' для привязки к компоненту '${this.name}'.`);
-        } else if(this.parentPattern && !this.#parentPatternName) {
-            this.parentPattern.resolveLinks();
+        if(this.#patternName && !this.pattern) {
+            this.pattern = Grammar.patterns.get(this.#patternName);
+            if (!this.pattern)
+            throw new Error(`Не удалось найти паттерн с названием '${this.#patternName}' для привязки к компоненту '${this.name}'.`);
+        } else if(this.pattern && !this.#patternName) {
+            this.pattern.resolveLinks();
         } else {
             throw new Error(`Не удалось установить ссылки для компонента: '${this.name}'.`);
         }
@@ -584,9 +585,9 @@ class Component {
     toYaml() {
         const result = {};
 
-        if (this.parentPattern) {
-            if (this.parentPattern.isInline) {
-                result.pattern_definition = this.parentPattern.toYaml();
+        if (this.pattern) {
+            if (this.pattern.isInline) {
+                result.pattern_definition = this.pattern.toYaml();
             } else {
                 result.pattern = this.pattern.name;
             }
