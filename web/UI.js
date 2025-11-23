@@ -306,13 +306,6 @@ class UI {
      * @param {Object} data 
      */
     static updateBrowserControllsFor(data) {
-        if (data instanceof AreaPattern) {
-            this.createComponentDefinitionButton.disabled = false;
-            this.createComponentLinkButton.disabled = false;
-        } else {
-            this.createComponentDefinitionButton.disabled = true;
-            this.createComponentLinkButton.disabled = true;
-        }
         this.deleteSelectedButton.disabled = data == null;
     }
 
@@ -343,6 +336,8 @@ class UI {
             } else if (data instanceof ArrayPattern) {
                 this.loadArrayPatternData(data);
                 this.setArrayParamsEnabled(true);
+            } else if (data instanceof AreaPattern) {
+                this.setAreaParamsEnabled(true);
             } else this.setGeneralPatternParamsEnabled(true);
         } else if (data instanceof Component) {
             this.loadComponentData(data);
@@ -481,11 +476,13 @@ class UI {
             this.patternParams.hidden = false;
             this.cellParams.hidden = true;
             this.arrayParams.hidden = true;
+            this.areaParams.hidden = true;
             this.componentParams.hidden = true;
         } else {
             this.patternParams.hidden = true;
             this.cellParams.hidden = true;
             this.arrayParams.hidden = true;
+            this.areaParams.hidden = true;
         }
     }
 
@@ -507,14 +504,17 @@ class UI {
         this.arrayParams.hidden = !isEnabled;
     }
 
+    static setAreaParamsEnabled(isEnabled) {
+        this.setGeneralPatternParamsEnabled(isEnabled);
+        this.areaParams.hidden = !isEnabled;
+    }
+
     /**
      * Устанавливает секцию параметров видимой/невидимой
      * @param {boolean} isEnabled
      */
     static setComponentParamsEnabled(isEnabled) {
         this.componentParams.hidden = !isEnabled;
-        this.createComponentDefinitionButton.disabled = true;
-        this.createComponentLinkButton.disabled = true;
         if (isEnabled) this.setGeneralPatternParamsEnabled(false);
     }
 
@@ -535,6 +535,7 @@ class UI {
         this.patternParams = document.getElementById("pattern-parameters");
         this.cellParams = document.getElementById("cell-parameters");
         this.arrayParams = document.getElementById("array-parameters");
+        this.areaParams = document.getElementById("area-parameters");
         this.componentParams = document.getElementById("component-parameters");
         this.patternName = document.getElementById("pattern-name");
         this.patternKind = document.getElementById("pattern-kind");
