@@ -959,25 +959,65 @@ class AreaPattern extends Pattern {
     /** @type {Component[]} */
     components
 
-    constructor(name, data) {
-        super(name, data);
+    constructor() {
+        if (arguments.length === 2) {
+            let patternName = arguments[0];
+            let data = arguments[1];
+            super(patternName, data);
 
-        // Спарсить компоненты
-        this.components = [];
+            // Спарсить компоненты
+            this.components = [];
 
-        if (data.inner) { // Если... У области есть внутренняя часть?? 
-            for (const [componentName, componentData] of Object.entries(data.inner)) { // Для каждого внутреннего компонента...
-                const component = new Component(componentName, componentData, true); // Распознаем компонент
-                this.components.push(component);
+            if (data.inner) { // Если область имеет внутренние компоненты
+                for (const [componentName, componentData] of Object.entries(data.inner)) { // Для каждого внутреннего компонента...
+                    const component = new Component(componentName, componentData, true); // Распознаем компонент
+                    this.components.push(component);
+                }
             }
-        }
 
-        if (data.outer) { // Если... У области есть внешняя часть?? 
-            for (const [componentName, componentData] of Object.entries(data.outer)) { // Для каждого внешнего компонента...
-                const component = new Component(componentName, componentData, false); // Распознаем компонент
-                this.components.push(component);
+            if (data.outer) { // Если область имеет внешние компоненты
+                for (const [componentName, componentData] of Object.entries(data.outer)) { // Для каждого внешнего компонента...
+                    const component = new Component(componentName, componentData, false); // Распознаем компонент
+                    this.components.push(component);
+                }
             }
+
+        } else if (arguments.length === 8) {
+            let patternName = arguments[0];
+            let kind = arguments[1];
+            let desc = arguments[2];
+            let countInDoc = arguments[3];
+            let width = arguments[4];
+            let height = arguments[5];
+            let isRoot = arguments[6];
+            let isInline = arguments[7];
+            super(patternName, kind, desc, countInDoc, width, height, isRoot, isInline);
+
+            this.components = [];
+            
+        } else {
+            throw new Error(`Передано неверное количество аргументов для конструктора CellPattern`);
         }
+    }
+
+    /**
+     * @param {String} patternName 
+     * @param {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} kind 
+     * @param {String} desc 
+     * @param {YamlRange} countInDoc 
+     * @param {YamlRange} width 
+     * @param {YamlRange} height 
+     * @param {Boolean} isRoot 
+     * @param {Boolean} isInline 
+     * @param {String} contentType 
+     * @returns {AreaPattern}
+     */
+    static fromDataStructure(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, contentType) {
+        return new AreaPattern(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, contentType);
+    }
+
+    static fromYaml(patternName, data) {
+        return new AreaPattern(patternName, data);
     }
 
     resolveLinks() {
