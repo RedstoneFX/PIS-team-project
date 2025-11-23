@@ -656,6 +656,7 @@ class UI {
             }
 
             // Устанавливаем размер
+            if(value == 1) e.target.value = "";
             dimSize.setBegin(value);
         } else {
             // Сообщаем о недопустимом вводе, если введенное число меньше минимума (если интервал задан)
@@ -668,6 +669,7 @@ class UI {
             }
 
             // Устанавливаем размер
+            if(value == Infinity) e.target.value = "";
             dimSize.setEnd(value);
         }
 
