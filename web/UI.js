@@ -336,6 +336,8 @@ class UI {
             } else if (data instanceof ArrayPattern) {
                 this.loadArrayPatternData(data);
                 this.setArrayParamsEnabled(true);
+            } else if (data instanceof AreaPattern) {
+                this.setAreaParamsEnabled(true);
             } else this.setGeneralPatternParamsEnabled(true);
         } else if (data instanceof Component) {
             this.loadComponentData(data);
@@ -474,11 +476,13 @@ class UI {
             this.patternParams.hidden = false;
             this.cellParams.hidden = true;
             this.arrayParams.hidden = true;
+            this.areaParams.hidden = true;
             this.componentParams.hidden = true;
         } else {
             this.patternParams.hidden = true;
             this.cellParams.hidden = true;
             this.arrayParams.hidden = true;
+            this.areaParams.hidden = true;
         }
     }
 
@@ -498,6 +502,11 @@ class UI {
     static setArrayParamsEnabled(isEnabled) {
         this.setGeneralPatternParamsEnabled(isEnabled);
         this.arrayParams.hidden = !isEnabled;
+    }
+
+    static setAreaParamsEnabled(isEnabled) {
+        this.setGeneralPatternParamsEnabled(isEnabled);
+        this.areaParams.hidden = !isEnabled;
     }
 
     /**
@@ -526,6 +535,7 @@ class UI {
         this.patternParams = document.getElementById("pattern-parameters");
         this.cellParams = document.getElementById("cell-parameters");
         this.arrayParams = document.getElementById("array-parameters");
+        this.areaParams = document.getElementById("area-parameters");
         this.componentParams = document.getElementById("component-parameters");
         this.patternName = document.getElementById("pattern-name");
         this.patternKind = document.getElementById("pattern-kind");
