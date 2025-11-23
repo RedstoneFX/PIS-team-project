@@ -306,13 +306,6 @@ class UI {
      * @param {Object} data 
      */
     static updateBrowserControllsFor(data) {
-        if (data instanceof AreaPattern) {
-            this.createComponentDefinitionButton.disabled = false;
-            this.createComponentLinkButton.disabled = false;
-        } else {
-            this.createComponentDefinitionButton.disabled = true;
-            this.createComponentLinkButton.disabled = true;
-        }
         this.deleteSelectedButton.disabled = data == null;
     }
 
@@ -513,8 +506,6 @@ class UI {
      */
     static setComponentParamsEnabled(isEnabled) {
         this.componentParams.hidden = !isEnabled;
-        this.createComponentDefinitionButton.disabled = true;
-        this.createComponentLinkButton.disabled = true;
         if (isEnabled) this.setGeneralPatternParamsEnabled(false);
     }
 
