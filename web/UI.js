@@ -534,12 +534,31 @@ class UI {
         Grammar.deletePattern(pattern);
     }
 
-    static onCreateComponentDefinitionClicked() {
+    static validateComponentName(name) {
+        if (/\s/g.test(name)) {
+            alert("Название компонента содержит пробельные символы, что недопустимо!");
+            return false;
+        }
+        if (name == "") {
+            alert("Название компонента не может быть пустой строкой!");
+            return false;   
+        }
+        for (let i = 0; i < this.selectedItem.components.length; ++i) {
+            if (this.selectedItem.components.at(i).name == name) {
+                alert("Уже существует компонент с таким названием в выбранном паттерне!");
+                return false;
+            }
+        }
+    }
 
+    static onCreateComponentDefinitionClicked() {
+        let name = this.newComponentName.value;
+        if (!this.validateComponentName(name)) return;
     }
 
     static onCreateComponentLinkClicked() {
-
+        let name = this.newComponentName.value;
+        if (!this.validateComponentName(name)) return;
     }
 
     static init() {
