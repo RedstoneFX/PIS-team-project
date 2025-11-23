@@ -619,7 +619,7 @@ class UI {
         else value = e.target.value - 0;
 
         // Сообщаяем о недопустимом вводе, если введено число <= 0 или > 100
-        if (value <= e.target.min) {
+        if (value < e.target.min) {
             alert("Введенное значение выходит за рамки допустимого!");
             e.target.value = this.selectedItem.width.getBegin();
             return;
@@ -642,6 +642,7 @@ class UI {
         // Указываем бесконечный максимум, если интервал не был задан (на случай, если там есть остатки от предыдущего размера)
         if (!this.selectedItem.width.isDefined()) {
             this.selectedItem.width.setDefined();
+            this.selectedItem.width.setBegin(1);
             this.selectedItem.width.setEnd(Infinity);
         }
 
