@@ -1156,11 +1156,10 @@ class AreaPattern extends Pattern {
      * @param {YamlRange} height 
      * @param {Boolean} isRoot 
      * @param {Boolean} isInline 
-     * @param {String} contentType 
      * @returns {AreaPattern}
      */
-    static fromDataStructure(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, contentType) {
-        return new AreaPattern(patternName, kind, desc, countInDoc, width, height, isRoot, isInline, contentType);
+    static fromDataStructure(patternName, kind, desc, countInDoc, width, height, isRoot, isInline) {
+        return new AreaPattern(patternName, kind, desc, countInDoc, width, height, isRoot, isInline);
     }
 
     static fromYaml(patternName, data) {
