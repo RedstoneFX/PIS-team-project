@@ -623,6 +623,9 @@ class Component {
         if (last != this) {
             this.parentPattern.components[this.parentPattern.components.indexOf(this)] = last;
         }
+        this.pattern = null;
+        this.parentPattern = null;
+        this.location = null;
     }
 }
 
