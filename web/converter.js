@@ -850,6 +850,19 @@ class Pattern {
             return `${width.toYaml()} x ${height.toYaml()}`;
         }
     }
+
+    remove() {
+        if (this.isInline) {
+            throw new Error(`Невозможно удалить паттерн, так как он задан внутри компонента`);
+        }
+        if (this.getLinkedEntities().size != 0) {
+            throw new Error(`Невозможно удалить паттерн, так как на него имеются ссылки`);
+        }
+        this.countInDoc = null;
+        this.width = null;
+        this.height = null;
+        Grammar.patterns.delete(this.name);
+    }
 }
 
 class CellPattern extends Pattern {
@@ -926,6 +939,10 @@ class CellPattern extends Pattern {
         }
 
         return result;
+    }
+
+    remove() {
+        super.remove();
     }
 }
 
@@ -1073,6 +1090,13 @@ class ArrayPattern extends Pattern {
 
         return result;
     }
+
+    remove() {
+        super.remove();
+        this.pattern = null;
+        this.gap = null;
+        this.countInDoc = null;
+    }
 }
 
 class AreaPattern extends Pattern {
@@ -1171,6 +1195,13 @@ class AreaPattern extends Pattern {
         }
 
         return result;
+    }
+
+    remove() {
+        super.remove();
+        for (let i = 0; i < this.components.length; ++i) {
+            this.components[i].remove();
+        }
     }
 }
 
