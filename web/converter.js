@@ -478,7 +478,7 @@ class Component {
     pattern
     /** @type {String} */
     #patternName
-    /** @type {ArrayPattern} */
+    /** @type {AreaPattern} */
     parentPattern
     /** @type {YamlLocation} */
     location
@@ -613,6 +613,16 @@ class Component {
         }
 
         return result;
+    }
+
+    remove() {
+        if (this.pattern.isInline) {
+            this.pattern.remove();
+        }
+        let last = this.parentPattern.components.pop();
+        if (last != this) {
+            this.parentPattern.components[this.parentPattern.components.indexOf(this)] = last;
+        }
     }
 }
 
