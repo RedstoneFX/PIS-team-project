@@ -242,4 +242,105 @@ static drawFillArray(group, cellPattern, itemCount, gap, cellWidth, cellHeight) 
     
     return group;
 }
+
+/**
+ * Нарисовать стрелки для отступов
+ */
+static drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight) {
+    const parentWidth = this.getValueFromYamlRange(parentPattern.width);
+    const parentHeight = this.getValueFromYamlRange(parentPattern.height);
+    
+    const offsets = [
+        {
+            type: component.inner ? 'padding' : 'margin',
+            direction: 'top',
+            value: this.getValueFromYamlRange(component.location.top || 0),
+            from: [x + cellWidth / 2, component.inner ? 0 : y + cellHeight],
+            to: [x + cellWidth / 2, y],
+            labelPos: [x + cellWidth / 2 - 15, y / 2]
+        },
+        {
+            type: component.inner ? 'padding' : 'margin',
+            direction: 'left',
+            value: this.getValueFromYamlRange(component.location.left || 0),
+            from: [component.inner ? 0 : x + cellWidth, y + cellHeight / 2],
+            to: [x, y + cellHeight / 2],
+            labelPos: [x / 2 - 15, y + cellHeight / 2 - 10]
+        },
+        {
+            type: component.inner ? 'padding' : 'margin',
+            direction: 'bottom',
+            value: this.getValueFromYamlRange(component.location.bottom || 0),
+            from: [x + cellWidth / 2, y + cellHeight],
+            to: [x + cellWidth / 2, component.inner ? parentHeight : y + cellHeight],
+            labelPos: [x + cellWidth / 2 - 15, y + cellHeight + (component.inner ? (parentHeight - y - cellHeight) / 2 : 0)]
+        },
+        {
+            type: component.inner ? 'padding' : 'margin',
+            direction: 'right',
+            value: this.getValueFromYamlRange(component.location.right || 0),
+            from: [x + cellWidth, y + cellHeight / 2],
+            to: [component.inner ? parentWidth : x + cellWidth, y + cellHeight / 2],
+            labelPos: [x + cellWidth + (component.inner ? (parentWidth - x - cellWidth) / 2 : 0), y + cellHeight / 2 - 10]
+        }
+    ];
+    
+    // Рисуем стрелки только для ненулевых отступов
+    for (const offset of offsets) {
+        if (offset.value > 0) {
+            this.drawDoubleArrowWithLabel(
+                group,
+                offset.from,
+                offset.to,
+                `${offset.type}-${offset.direction}: ${offset.value}`,
+                offset.labelPos
+            );
+        }
+    }
+}
+
+/**
+ * Нарисовать двухконечную стрелку с подписью
+ */
+static drawDoubleArrowWithLabel(group, from, to, label, labelPos) {
+    // Рисуем основную линию
+    const line = new Path.Line({
+        from: from,
+        to: to,
+        strokeColor: 'blue',
+        strokeWidth: 1
+    });
+    group.addChild(line);
+    
+    // Рисуем стрелки на обоих концах
+    this.drawArrowhead(group, from, to);
+    this.drawArrowhead(group, to, from);
+    
+    // Добавляем подпись
+    const text = new PointText({
+        point: labelPos,
+        content: label,
+        fillColor: 'blue',
+        fontSize: 8,
+        fontFamily: 'Arial'
+    });
+    group.addChild(text);
+}
+
+/**
+ * Нарисовать стрелку
+ */
+static drawArrowhead(group, point, directionPoint) {
+    const arrowSize = 5;
+    const angle = new Point(point).subtract(directionPoint).angle;
+    
+    const arrow = new Path.RegularPolygon({
+        center: point,
+        sides: 3,
+        radius: arrowSize,
+        fillColor: 'blue',
+        rotation: angle
+    });
+    group.addChild(arrow);
+}
 }
