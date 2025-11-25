@@ -161,41 +161,58 @@ class drawer {
      * @param {AreaPattern} pattern 
      */
     static drawAreaPattern(pattern) {
-    const group = new Group();
+        const group = new paper.Group();
+
+        const area_needed_width = 0;
+        const area_needed_height = 0;
+
+        for (const component of pattern.components) {
+                const component_max_width = component.pattern.width.getEnd();
+                const component_min_width = Math.max(component.pattern.width.getBegin(), 0);
+
+                const component_max_height = component.pattern.height.getEnd();
+                const component_min_height = Math.max(component.pattern.height.getBegin(), 0);
+
+                const component_needed_width = component_max_width == Infinity ? component_min_width : (component_max_width + component_min_width) / 2;
+                const component_needed_height = component_max_height == Infinity ? component_min_height : (component_max_height + component_min_height) / 2;
+
+                for(paddingling in component.location.padding) {
+                    component_needed_width += paddingling[0];
+                    component_needed_height += paddingling[1];
+                }
+
+                area_needed_width = Math.max(area_needed_width, component_needed_width);
+                area_needed_height = Math.max(area_needed_height, component_needed_height);
+            }
+
+        // Получаем значения ширины и высоты из диапазонов
+        const area_max_width = pattern.width.getEnd();
+        const area_min_width = Math.max(pattern.width.getBegin(), area_needed_width);
+
+        const area_max_height = pattern.height.getEnd();
+        const area_min_height = Math.max(pattern.height.getBegin(), area_needed_height);
+
+        const width = area_max_width == Infinity ? area_min_width : (area_max_width + area_min_width) / 2;
+        const height = area_max_height == Infinity ? area_min_height : (area_max_height + area_min_height) / 2;
     
-    // Получаем размеры области
-    const width = this.getValueFromYamlRange(pattern.width);
-    const height = this.getValueFromYamlRange(pattern.height);
+        // Рисуем основную область
+        const areaRect = new Path.Rectangle({
+            point: [0, 0],
+            size: [width, height],
+            strokeColor: 'black',
+            strokeWidth: 3,
+            fillColor: 'white'
+        });
+        group.addChild(areaRect);
     
-    // Рисуем основную область
-    const areaRect = new Path.Rectangle({
-        point: [0, 0],
-        size: [width, height],
-        strokeColor: 'black',
-        strokeWidth: 3,
-        fillColor: 'white'
-    });
-    group.addChild(areaRect);
+        // Отрисовываем все компоненты
+        for (const component of pattern.components) {
+            const componentGroup = this.drawComponent(component, pattern);
+            group.addChild(componentGroup);
+        }
     
-    // Добавляем название паттерна сверху слева
-    const title = new PointText({
-        point: [5, 15],
-        content: pattern.name,
-        fillColor: 'black',
-        fontSize: 12,
-        fontFamily: 'Arial',
-        fontWeight: 'bold'
-    });
-    group.addChild(title);
-    
-    // Отрисовываем все компоненты
-    for (const component of pattern.components) {
-        const componentGroup = this.drawComponent(component, pattern);
-        group.addChild(componentGroup);
+        return group;
     }
-    
-    return group;
-}
 
 
     /**
@@ -204,7 +221,7 @@ class drawer {
      * @param {AreaPattern} parentPattern 
      */
     static drawComponent(component, parentPattern) {
-    const group = new Group();
+    const group = new paper.Group();
     
     // Получаем паттерн компонента
     const cellPattern = component.pattern;
