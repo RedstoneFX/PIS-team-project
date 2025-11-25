@@ -156,8 +156,42 @@ static drawFillArray(group, cellPattern, itemCount, gap, cellWidth, cellHeight) 
      * @param {AreaPattern} pattern 
      */
     static drawAreaPattern(pattern) {
-
+    const group = new Group();
+    
+    // Получаем размеры области
+    const width = this.getValueFromYamlRange(pattern.width);
+    const height = this.getValueFromYamlRange(pattern.height);
+    
+    // Рисуем основную область
+    const areaRect = new Path.Rectangle({
+        point: [0, 0],
+        size: [width, height],
+        strokeColor: 'black',
+        strokeWidth: 3,
+        fillColor: 'white'
+    });
+    group.addChild(areaRect);
+    
+    // Добавляем название паттерна сверху слева
+    const title = new PointText({
+        point: [5, 15],
+        content: pattern.name,
+        fillColor: 'black',
+        fontSize: 12,
+        fontFamily: 'Arial',
+        fontWeight: 'bold'
+    });
+    group.addChild(title);
+    
+    // Отрисовываем все компоненты
+    for (const component of pattern.components) {
+        const componentGroup = this.drawComponent(component, pattern);
+        group.addChild(componentGroup);
     }
+    
+    return group;
+}
+
 
     /**
      * Отрисовать компонент
