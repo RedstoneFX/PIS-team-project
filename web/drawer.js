@@ -34,8 +34,8 @@ class drawer {
     static drawCellPattern(pattern) {
 
         // Получаем средние значения ширины и высоты из диапазонов
-        const width = (pattern.width.min + pattern.width.max) / 2;
-        const height = (pattern.height.min + pattern.height.max) / 2;
+        const width = this.getValueFromYamlRange(pattern.width);
+        const height = this.getValueFromYamlRange(pattern.height);
 
         // Создаем прямоугольник ячейки
         const cell = new Path.Rectangle({
@@ -43,7 +43,7 @@ class drawer {
             size: [width, height],
             strokeColor: 'black',
             strokeWidth: 2,
-            fillColor: 'white'
+            fillColor: 'none'
         });
 
         // Создаем текст с названием паттерна
@@ -73,8 +73,83 @@ class drawer {
      * @param {ArrayPattern} pattern 
      */
     static drawArrayPattern(pattern) {
-
+    const group = new Group();
+    
+    // Получаем значения из диапазонов
+    const itemCount = this.getValueFromYamlRange(pattern.itemCount);
+    const gap = this.getValueFromYamlRange(pattern.gap);
+    
+    // Получаем размеры ячейки из внутреннего паттерна
+    const cellWidth = this.getValueFromYamlRange(pattern.pattern.width);
+    const cellHeight = this.getValueFromYamlRange(pattern.pattern.height);
+    
+    // Добавляем название паттерна сверху слева
+    const title = new PointText({
+        point: [0, -10],
+        content: pattern.pattern.name,
+        fillColor: 'black',
+        fontSize: 10,
+        fontFamily: 'Arial'
+    });
+    group.addChild(title);
+    
+    // Создаем ячейки в зависимости от направления
+    switch (pattern.direction) {
+        case 'ROW':
+            this.drawRowArray(group, pattern.pattern, itemCount, gap, cellWidth, cellHeight);
+            break;
+        case 'COLUMN':
+            this.drawColumnArray(group, pattern.pattern, itemCount, gap, cellWidth, cellHeight);
+            break;
+        case 'FILL':
+            this.drawFillArray(group, pattern.pattern, itemCount, gap, cellWidth, cellHeight);
+            break;
     }
+    
+    return group;
+}
+
+/**
+ * Отрисовать массив в строку
+ */
+static drawRowArray(group, cellPattern, itemCount, gap, cellWidth, cellHeight) {
+    for (let i = 0; i < itemCount; i++) {
+        const cell = this.drawCellPattern(cellPattern);
+        cell.position = [i * (cellWidth + gap), 0];
+        group.addChild(cell);
+    }
+}
+
+/**
+ * Отрисовать массив в колонку
+ */
+static drawColumnArray(group, cellPattern, itemCount, gap, cellWidth, cellHeight) {
+    for (let i = 0; i < itemCount; i++) {
+        const cell = this.drawCellPattern(cellPattern);
+        cell.position = [0, i * (cellHeight + gap)];
+        group.addChild(cell);
+    }
+}
+
+/**
+ * Отрисовать массив с заполнением в обоих направлениях
+ */
+static drawFillArray(group, cellPattern, itemCount, gap, cellWidth, cellHeight) {
+    // Вычисляем оптимальное количество колонок для квадратного расположения
+    const columns = Math.ceil(Math.sqrt(itemCount));
+    
+    for (let i = 0; i < itemCount; i++) {
+        const row = Math.floor(i / columns);
+        const col = i % columns;
+        
+        const cell = this.drawCellPattern(cellPattern);
+        cell.position = [
+            col * (cellWidth + gap),
+            row * (cellHeight + gap)
+        ];
+        group.addChild(cell);
+    }
+}
 
     /**
      * Отрисовать паттерн-структуру
