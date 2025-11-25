@@ -199,6 +199,47 @@ static drawFillArray(group, cellPattern, itemCount, gap, cellWidth, cellHeight) 
      * @param {AreaPattern} parentPattern 
      */
     static drawComponent(component, parentPattern) {
-
+    const group = new Group();
+    
+    // Получаем паттерн компонента
+    const cellPattern = component.pattern;
+    if (!cellPattern) {
+        console.warn(`Component ${component.name} has no pattern`);
+        return group;
     }
+    
+    // Получаем размеры компонента
+    const cellWidth = this.getValueFromYamlRange(cellPattern.width);
+    const cellHeight = this.getValueFromYamlRange(cellPattern.height);
+    
+    // Получаем отступы из location
+    const paddingTop = this.getValueFromYamlRange(component.location.top || 0);
+    const paddingLeft = this.getValueFromYamlRange(component.location.left || 0);
+    const paddingBottom = this.getValueFromYamlRange(component.location.bottom || 0);
+    const paddingRight = this.getValueFromYamlRange(component.location.right || 0);
+    
+    // Вычисляем позицию компонента
+    let x, y;
+    
+    if (component.inner) {
+        // Внутренний компонент - позиционируем внутри родителя с учетом padding
+        x = paddingLeft;
+        y = paddingTop;
+    } else {
+        // Внешний компонент - позиционируем снаружи родителя с учетом margin
+        // Для простоты располагаем слева от родителя
+        x = -paddingLeft - cellWidth;
+        y = paddingTop;
+    }
+    
+    // Рисуем ячейку компонента
+    const cellGroup = this.drawCellPattern(cellPattern);
+    cellGroup.position = [x, y];
+    group.addChild(cellGroup);
+    
+    // Рисуем стрелки для отступов
+    this.drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight);
+    
+    return group;
+}
 }
