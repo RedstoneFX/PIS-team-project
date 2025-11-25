@@ -854,17 +854,73 @@ class Pattern {
         }
     }
 
-    remove() {
-        if (this.isInline) {
-            throw new Error(`Невозможно удалить паттерн, так как он задан внутри компонента`);
+    changeKind(newKind) {
+        if (this.kind === newKind) {
+            return this;
         }
+
+        // Изменить тип паттерна...
+
+        // Создать копию текущего паттерна с новым типом...
+        let newPattern;
+        // Если новый тип - клетка...
+        if (newKind == "CELL") {
+            // создать новый паттерн-клетку с частью данных текущего паттерна и "" в типе данных
+            newPattern = new CellPattern.fromDataStructure(this.name, newKind, this.desc, this, this.width, this.height, this.isRoot, this.isInline, "");
+        } else if (newKind == "ARRAY" || newKind == "ARRAY-IN-CONTEXT") { // Если новый тип - разновидность массива...
+            // Заменить тип на корректный, если исходный паттерн разновидность массива
+            if (this.kind == "ARRAY" || this.kind == "ARRAY-IN-CONTEXT") {
+                this.kind = newKind;
+                return this;
+            }
+            // Выбросить ошибку, если в граматике только один паттерн
+            if (Grammar.patterns.length == 1) {
+                throw new Error(`Невозможно создать массив, так как не хвататет паттернов для определения типа его элементов`);
+            }
+            // Создать новый паттерн-массив с частью данных текущего и 
+            // привязкой к какому-либо паттерну в граматике, кроме исходного
+            let it = Grammar.patterns.values();
+            let placeholder = it.next().value;
+            if (placeholder == this) {
+                placeholder = it.next().value;
+            }
+            newPattern = new ArrayPattern.fromDataStructure(this.name, newKind, this.desc, this, this.width, this.height, this.isRoot, this.isInline, 
+                "ROW", placeholder, new YamlRange(0).setUndefined(), new YamlRange(0).setUndefined());
+        } else if (newKind == "AREA") { // Если новый тип - область...
+            // Создать новый паттерн-область с частью данных текущего паттерна
+            newPattern = new AreaPattern.fromDataStructure(this.name, newKind, this.desc, this, this.width, this.height, this.isRoot, this.isInline);
+        } else {
+            // Выбросить ошибку, если не удаётся распознать тип паттерна
+            throw new Error(`Неизвестный тип паттерна: ${newKind}`);
+        }
+
+        // Изменить все ссылки на старый паттерн на ссылки на новый паттерн
+        for (const link of this.getLinkedEntities()) {
+            link.pattern = newPattern;
+        }
+
+        // Уничтожить старый паттерн
+        this.remove();
+
+        // Добавить новый паттерн в граматику, если он не является pattern-definition
+        if (!this.isInline) {
+            Grammar.patterns.set(newPattern.name, newPattern);
+        }
+
+        // Вернуть новый паттерн
+        return newPattern;
+    }
+
+    remove() {
         if (this.getLinkedEntities().size != 0) {
             throw new Error(`Невозможно удалить паттерн, так как на него имеются ссылки`);
         }
         this.countInDoc = null;
         this.width = null;
         this.height = null;
-        Grammar.patterns.delete(this.name);
+        if (!this.isInline) {
+            Grammar.patterns.delete(this.name);
+        }
     }
 }
 
