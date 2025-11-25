@@ -1,5 +1,6 @@
 
 /// <reference path="converter.js" />
+/// <reference path="lib/paper-core.js" />
 
 class drawer {
     /** @type {Number} */
@@ -33,9 +34,12 @@ class drawer {
      */
     static drawCellPattern(pattern) {
 
-        // Получаем средние значения ширины и высоты из диапазонов
-        const width = this.getValueFromYamlRange(pattern.width);
-        const height = this.getValueFromYamlRange(pattern.height);
+        // Получаем значения ширины и высоты из диапазонов
+        const pattern_width_avg = (pattern.width.getEnd() + pattern.width.getBegin()) / 2;
+        const pattern_height_avg = (pattern.height.getEnd() + pattern.height.getBegin()) / 2;
+
+        const width = pattern_width_avg < 10 ? 10 : pattern_width_avg;
+        const height = pattern_height_avg < 10 ? 10 : pattern_height_avg;
 
         // Создаем прямоугольник ячейки
         const cell = new Path.Rectangle({
@@ -46,26 +50,7 @@ class drawer {
             fillColor: 'none'
         });
 
-        // Создаем текст с названием паттерна
-        const text = new PointText({
-            point: [5, 15],
-            content: pattern.name,
-            fillColor: 'black',
-            fontFamily: 'Arial',
-            fontSize: 12
-        });
-
-        // Группируем элементы для удобства
-        const group = new Group([cell, text]);
-    
-        // Добавляем свойства паттерна в группу для отладки
-        group.data = {
-            isRoot: pattern.isRoot,
-            isInline: pattern.isInline,
-            kind: pattern.kind
-        };
-
-        return group;
+        return cell;
     }
 
     /**
@@ -73,83 +58,103 @@ class drawer {
      * @param {ArrayPattern} pattern 
      */
     static drawArrayPattern(pattern) {
-    const group = new Group();
-    
-    // Получаем значения из диапазонов
-    const itemCount = this.getValueFromYamlRange(pattern.itemCount);
-    const gap = this.getValueFromYamlRange(pattern.gap);
-    
-    // Получаем размеры ячейки из внутреннего паттерна
-    const cellWidth = this.getValueFromYamlRange(pattern.pattern.width);
-    const cellHeight = this.getValueFromYamlRange(pattern.pattern.height);
-    
-    // Добавляем название паттерна сверху слева
-    const title = new PointText({
-        point: [0, -10],
-        content: pattern.pattern.name,
-        fillColor: 'black',
-        fontSize: 10,
-        fontFamily: 'Arial'
-    });
-    group.addChild(title);
-    
-    // Создаем ячейки в зависимости от направления
-    switch (pattern.direction) {
-        case 'ROW':
-            this.drawRowArray(group, pattern.pattern, itemCount, gap, cellWidth, cellHeight);
-            break;
-        case 'COLUMN':
-            this.drawColumnArray(group, pattern.pattern, itemCount, gap, cellWidth, cellHeight);
-            break;
-        case 'FILL':
-            this.drawFillArray(group, pattern.pattern, itemCount, gap, cellWidth, cellHeight);
-            break;
-    }
-    
-    return group;
-}
+        const group = new paper.Group();
 
-/**
- * Отрисовать массив в строку
- */
-static drawRowArray(group, cellPattern, itemCount, gap, cellWidth, cellHeight) {
-    for (let i = 0; i < itemCount; i++) {
-        const cell = this.drawCellPattern(cellPattern);
-        cell.position = [i * (cellWidth + gap), 0];
-        group.addChild(cell);
-    }
-}
+        const max_item_count = pattern.itemCount.getEnd();
+        const min_item_count = pattern.itemCount.getBegin() < 0 ? 0 : pattern.itemCount.getBegin();
+        const item_count = max_item_count == Infinity ? Math.max(min_item_count, 5) : Math.ceil((max_item_count + min_item_count) / 2);
 
-/**
- * Отрисовать массив в колонку
- */
-static drawColumnArray(group, cellPattern, itemCount, gap, cellWidth, cellHeight) {
-    for (let i = 0; i < itemCount; i++) {
-        const cell = this.drawCellPattern(cellPattern);
-        cell.position = [0, i * (cellHeight + gap)];
-        group.addChild(cell);
-    }
-}
+        const max_gap = pattern.gap.getEnd() == NaN ? 0 : pattern.gap.getEnd();
+        const min_gap = pattern.gap.getBegin() == NaN ? 0 : pattern.gap.getBegin();
+        const gap = (max_gap + min_gap) / 2;
 
-/**
- * Отрисовать массив с заполнением в обоих направлениях
- */
-static drawFillArray(group, cellPattern, itemCount, gap, cellWidth, cellHeight) {
-    // Вычисляем оптимальное количество колонок для квадратного расположения
-    const columns = Math.ceil(Math.sqrt(itemCount));
+        // Получаем размеры ячейки из внутреннего паттерна
+        const cell_width_avg = (pattern.pattern.width.getEnd() + pattern.pattern.width.getBegin()) / 2;
+        const cell_height_avg = (pattern.pattern.height.getEnd() + pattern.pattern.height.getBegin()) / 2;
     
-    for (let i = 0; i < itemCount; i++) {
-        const row = Math.floor(i / columns);
-        const col = i % columns;
+        const cellWidth = cell_width_avg < 10 ? 10 : cell_width_avg;
+        const cellHeight = cell_height_avg < 10 ? 10 : cell_height_avg;
+
+        const min_pattern_width = cellWidth;
+        const min_pattern_height = cellHeight;
+
+        switch (pattern.direction) {
+            case 'ROW':
+                min_pattern_width += item_count * (cellWidth + gap);
+                break;
+            case 'COLUMN':
+                min_pattern_height += item_count * (cellHeight + gap);
+                break;
+            case 'FILL':
+                min_pattern_width += Math.sqrt(item_count).toFixed(0) * (cellWidth + gap);
+                min_pattern_height += Math.sqrt(item_count).toFixed(0) * (cellHeight + gap);
+                break;
+        }
+
+        // Получаем значения ширины и высоты из диапазонов
+        const pattern_width_avg = (pattern.width.getEnd() + pattern.width.getBegin()) / 2;
+        const pattern_height_avg = (pattern.height.getEnd() + pattern.height.getBegin()) / 2;
+
+        const width = pattern_width_avg < min_pattern_width ? min_pattern_width : pattern_width_avg;
+        const height = pattern_height_avg < min_pattern_height ? min_pattern_height : pattern_height_avg;
+    
+        // Создаем ячейки в зависимости от направления
+        switch (pattern.direction) {
+            case 'ROW':
+                drawRowArray(group, pattern.pattern, itemCount, gap, cellWidth);
+                break;
+            case 'COLUMN':
+                drawColumnArray(group, pattern.pattern, itemCount, gap, cellHeight);
+                break;
+            case 'FILL':
+                drawFillArray(group, pattern.pattern, itemCount, gap, cellWidth, cellHeight);
+                break;
+        }
+    
+        return group;
+    }
+
+    /**
+     * Отрисовать массив в строку
+     */
+    static drawRowArray(group, cellPattern, itemCount, gap, cellWidth) {
+        for (let i = 0; i < itemCount; i++) {
+            const cell = drawCellPattern(cellPattern);
+            cell.position = [i * (cellWidth + gap), 0];
+            group.addChild(cell);
+        }
+    }
+
+    /**
+     * Отрисовать массив в колонку
+     */
+    static drawColumnArray(group, cellPattern, itemCount, gap, cellHeight) {
+        for (let i = 0; i < itemCount; i++) {
+            const cell = drawCellPattern(cellPattern);
+            cell.position = [0, i * (cellHeight + gap)];
+            group.addChild(cell);
+        }
+    }
+
+    /**
+     * Отрисовать массив с заполнением в обоих направлениях
+     */
+    static drawFillArray(group, cellPattern, itemCount, gap, cellWidth, cellHeight) {
+        // Вычисляем оптимальное количество колонок для квадратного расположения
+        const columns = Math.ceil(Math.sqrt(itemCount));
+    
+        for (let i = 0; i < itemCount; i++) {
+            const row = Math.floor(i / columns);
+            const col = i % columns;
         
-        const cell = this.drawCellPattern(cellPattern);
-        cell.position = [
-            col * (cellWidth + gap),
-            row * (cellHeight + gap)
-        ];
-        group.addChild(cell);
+            const cell = drawCellPattern(cellPattern);
+            cell.position = [
+                col * (cellWidth + gap),
+                row * (cellHeight + gap)
+            ];
+            group.addChild(cell);
+        }
     }
-}
 
     /**
      * Отрисовать паттерн-структуру
