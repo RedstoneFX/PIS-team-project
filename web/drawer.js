@@ -28,15 +28,48 @@ class drawer {
     }
 
     /**
-     * Отрисовать паттерн-клетку
+     * Отрисовать паттерн-ячейку
      * @param {CellPattern} pattern 
      */
     static drawCellPattern(pattern) {
 
+        // Получаем средние значения ширины и высоты из диапазонов
+        const width = (pattern.width.min + pattern.width.max) / 2;
+        const height = (pattern.height.min + pattern.height.max) / 2;
+
+        // Создаем прямоугольник ячейки
+        const cell = new Path.Rectangle({
+            point: [0, 0],
+            size: [width, height],
+            strokeColor: 'black',
+            strokeWidth: 2,
+            fillColor: 'white'
+        });
+
+        // Создаем текст с названием паттерна
+        const text = new PointText({
+            point: [5, 15],
+            content: pattern.name,
+            fillColor: 'black',
+            fontFamily: 'Arial',
+            fontSize: 12
+        });
+
+        // Группируем элементы для удобства
+        const group = new Group([cell, text]);
+    
+        // Добавляем свойства паттерна в группу для отладки
+        group.data = {
+            isRoot: pattern.isRoot,
+            isInline: pattern.isInline,
+            kind: pattern.kind
+        };
+
+        return group;
     }
 
     /**
-     * Отрисовать паттерн-клетку
+     * Отрисовать паттерн-массив
      * @param {ArrayPattern} pattern 
      */
     static drawArrayPattern(pattern) {
@@ -44,7 +77,7 @@ class drawer {
     }
 
     /**
-     * Отрисовать паттерн-клетку
+     * Отрисовать паттерн-структуру
      * @param {AreaPattern} pattern 
      */
     static drawAreaPattern(pattern) {
