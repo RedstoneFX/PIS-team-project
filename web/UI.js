@@ -539,7 +539,7 @@ class UI {
         if (!(pattern instanceof Pattern))
             throw new Error("Выбранный элемент не является паттерном!");
 
-        let entities = pattern.getLinkedEntities(true, true);
+        let entities = pattern.getLinkedEntities(true, false);
         let areaNames = [];
         let arrayNames = [];
 
@@ -574,7 +574,13 @@ class UI {
         else if (areaNames.length > 0 && arrayNames.length > 0)
             alert("Не могу удалить паттерн, так как он используется в качестве вида элемента в массивах: " + arrayNames.join(", ") + "; и в качестве компонента в областях: " + areaNames.join(", "));
         else {
-
+            pattern.remove();
+            let browserItems = UI_STORAGE.getElementsByData(pattern);
+            for (let i = 0; i < browserItems.length; ++i) {
+                browserItems[i].parentElement.remove();
+            }
+            UI_STORAGE.unbind(pattern);
+            this.deleteSelectedButton.disabled = true;
         }
     }
 
