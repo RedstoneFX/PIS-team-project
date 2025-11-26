@@ -749,7 +749,7 @@ class Pattern {
             
             // Добавить этот паттерн в множество сущностей, если он - массив, ссылающийся на целевой паттерн
             if (includeArrays && pattern instanceof ArrayPattern && pattern.pattern == this) {
-                entities.add(pattern.pattern);
+                entities.add(pattern);
             }
         
             // Если этот паттерн - область...
