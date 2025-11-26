@@ -730,7 +730,7 @@ class Pattern {
      * Найти все сущности, ссылающиеся на этот паттерн
      * @returns {Set}
      */
-    getLinkedEntities() {
+    getLinkedEntities(includeArrays=true, includeComponents=true) {
         // Считать список сущностей пустым
         let entities = new Set();
 
@@ -748,7 +748,7 @@ class Pattern {
             let pattern = patterns.pop();
             
             // Добавить этот паттерн в множество сущностей, если он - массив, ссылающийся на целевой паттерн
-            if (pattern instanceof ArrayPattern && pattern.pattern == this) {
+            if (includeArrays && pattern instanceof ArrayPattern && pattern.pattern == this) {
                 entities.add(pattern.pattern);
             }
         
@@ -757,7 +757,7 @@ class Pattern {
                 // Для каждого компонента в этом паттерне...
                 for (let i = 0; i < pattern.components.length; ++i) {
                     if (pattern.components.at(i).pattern == this) { // Добавить в множество сущностей компонент, если он ссылается на целевой паттерн
-                        entities.add(pattern.components.at(i));
+                        if(includeComponents) entities.add(pattern.components.at(i));
                     } else if (pattern.components.at(i).pattern.isInline) { // Добавить в очередь паттернов паттерн в этом компоненте, если он объявлен как pattern_definition и не является целевым
                         patterns.push(pattern.components.at(i).pattern);
                     }
