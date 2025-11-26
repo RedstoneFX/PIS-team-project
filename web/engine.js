@@ -1,6 +1,18 @@
 
 /// <reference path="converter.js" />
 
+function writeFile(name, value) {
+
+    let blobdtMIME =
+        new Blob([value], { type: "text/plain" })
+    let url = URL.createObjectURL(blobdtMIME)
+    let anele = document.createElement("a")
+    anele.setAttribute("download", name);
+    anele.href = url;
+    anele.click();
+    console.log(blobdtMIME)
+}
+
 function saveToLocalStorage() {
     localStorage.setItem("GrammarData", JSON.stringify(Grammar.toYamlObject()));
 }
@@ -13,22 +25,44 @@ function loadFromLocalStorage() {
 }
 
 function onPageLoaded() {
-    let testData = YAML.load(request("cnf/grammar_root.yml"));
     drawer.init();
     UI.init();
 
-    try {
+    /*try {
         Grammar.parse(testData);
-        loadFromLocalStorage();
+        //loadFromLocalStorage();
         UI.loadFromGrammar();
     } catch (e) {
         UI.resetUI();
         alert(e.message);
         throw e;
-    }
+    }*/
 
-    setInterval(saveToLocalStorage, 300000);
+    setInterval(saveToLocalStorage, 1000);
 }
 
+function onFileUpload(e) {
+    let file = e.target.files[0];
+    let reader = new FileReader();
+    reader.onload = (e) => {
+        let text = e.target.result;
+        try {
+            let yaml = YAML.load(text);
+            Grammar.parse(yaml)
+            UI.loadFromGrammar();
+        } catch (e) {
+            UI.resetUI();
+            alert(e.message);
+            throw e;
+        }
+    };
+    reader.readAsText(file);
+}
 
+function onFileSave() {
+    writeFile("grammar.yml", YAML.dump(Grammar.toYamlObject()))
+}
+
+document.getElementById("load-from-file").addEventListener("change", (e) => onFileUpload(e));
+document.getElementById("save-to-file").onclick = onFileSave;
 document.addEventListener('DOMContentLoaded', onPageLoaded());

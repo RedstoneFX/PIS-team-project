@@ -27,10 +27,10 @@ class UI_STORAGE {
      * @param {HTMLElement} element 
      * @param {Object} data 
      */
-    static bindDataToElement(element, data) {
+    static bindDataToElement(element, data, attrName = "data-id") {
         let id = this.getUniqueID(data);
         data.UNIQUE_UI_ID = id;
-        element.setAttribute("data-id", id);
+        element.setAttribute(attrName, id);
         if (this.elementByID.get(id) == null)
             this.elementByID.set(id, [element]);
         else this.elementByID.get(id).push(element);
@@ -45,8 +45,8 @@ class UI_STORAGE {
      * @param {Element} element
      * @returns {Object} 
      */
-    static getDataFromElement(element) {
-        let id = element.getAttribute("data-id");
+    static getDataFromElement(element, attrName = "data-id") {
+        let id = element.getAttribute(attrName);
         if (id == null) return null;
         let data = this.itemByID.get(id);
         if (data == null) // Если это случилось, то выясняйте, почему этот элемент интерфейса до сих пор привязан несуществующим данным.
@@ -59,6 +59,21 @@ class UI_STORAGE {
         this.itemByID.clear();
         this.elementByID.clear();
         this.last_id = 0;
+    }
+
+    static unbind(data) {
+        let id = this.getUniqueID(data);
+        this.itemByID.delete(id);
+        this.elementByID.delete(id);
+        this.IDByItem.delete(data);
+    }
+
+    static replace(oldData, newData) {
+        let id = this.IDByItem.get(oldData);
+        this.itemByID.set(id, newData);
+        this.IDByItem.set(newData, id);
+        this.IDByItem.delete(oldData);
+        newData.UNIQUE_UI_ID = id;
     }
 }
 
@@ -114,6 +129,10 @@ class UI {
     static createComponentLinkButton;
     /** @type {HTMLButtonElement} */
     static createComponentDefinitionButton;
+    /** @type {HTMLInputElement} */
+    static newComponentName;
+    /** @type {HTMLInputElement} */
+    static newComponentPattern;
 
     /** @type {HTMLInputElement} */
     static componentLeftMarginMin;
@@ -152,7 +171,7 @@ class UI {
     /** @type {HTMLElement} */
     static previousSelectedElement;
 
-    /** @type {Pattern | Component}*/
+    /** @type {CellPattern | ArrayPattern | AreaPattern | Component} */
     static selectedItem;
 
     static loadFromGrammar() {
@@ -175,7 +194,7 @@ class UI {
             for (const [name, pattern] of Grammar.patterns.entries()) {
                 let newOption = document.createElement("option");
                 newOption.innerText = pattern.name;
-                newOption.value = UI_STORAGE.getUniqueID(pattern);
+                UI_STORAGE.bindDataToElement(newOption, pattern, "value");
                 selection.append(newOption);
             }
         }
@@ -222,7 +241,7 @@ class UI {
 
     static createBrowserLinkForPattern(displayName, pattern) {
         let element = document.createElement("div");
-        element.innerText = "🌌 " + displayName;
+        element.innerText = displayName;
         element.classList.add("browser-item");
         element.classList.add("pattern-pointer");
         element.onclick = (e) => this.onBrowserItemClicked(e);
@@ -273,7 +292,7 @@ class UI {
                 this.highlightBrowserElement(element);
                 this.selectedItem = data;
                 this.loadSelectedDataToUI(data);
-                this.updateBrowserControllsFor(data);
+                this.deleteSelectedButton.disabled = false;
             }
         });
     }
@@ -295,18 +314,10 @@ class UI {
         while (this.isNameReserved(name + i)) ++i;
         name = name + i;
 
-        let newPattern = new Pattern(name, { kind: "cell", size: "1 x 1" });
+        let newPattern = new Pattern(name, { kind: "area", size: "1 x 1" });
         Grammar.patterns.set(name, newPattern);
         this.browser.append(this.createBrowserElementForPattern(newPattern.name, newPattern));
         this.selectBrowserElementByData(newPattern);
-    }
-
-    /**
-     * Включает и выключает кнопки в панели управления браузера, соответствующие действиям с переданным элементом
-     * @param {Object} data 
-     */
-    static updateBrowserControllsFor(data) {
-        this.deleteSelectedButton.disabled = data == null;
     }
 
     /**
@@ -449,10 +460,10 @@ class UI {
         }
         if (pattern.countInDoc.isDefined()) {
             this.patternCountInDocMin.value = pattern.countInDoc.getBegin();
-            this.patternCountInDocMin.value = pattern.countInDoc.getEnd();
+            this.patternCountInDocMax.value = pattern.countInDoc.getEnd();
         } else {
             this.patternCountInDocMin.value = "";
-            this.patternCountInDocMin.value = "";
+            this.patternCountInDocMax.value = "";
         }
     }
 
@@ -460,6 +471,7 @@ class UI {
         this.clearBrowser();
         this.setGeneralPatternParamsEnabled(false);
         this.setComponentParamsEnabled(false);
+        this.deleteSelectedButton.disabled = true;
     }
 
     static clearBrowser() {
@@ -518,17 +530,345 @@ class UI {
         if (isEnabled) this.setGeneralPatternParamsEnabled(false);
     }
 
-    /**
-     * Удаляет выбранный объект
-     */
-    static deleteCurrentItem() {
-        this.updateBrowserControllsFor(null);
-        if (this.currentElement instanceof Pattern) {
+    static deleteComponent(component) {
+        if (!(component instanceof Component))
+            throw new Error("Выбранный элемент не является компонентом!");
+        component.remove();
 
-        } else if (this.currentElement instanceof Component) {
+        let browserItems = UI_STORAGE.getElementsByData(component);
+        for (let i = 0; i < browserItems.length; ++i) {
+            browserItems[i].parentElement.remove();
         }
-        Grammar.deletePattern(pattern);
+
+        UI_STORAGE.unbind(component);
+        this.deleteSelectedButton.disabled = true;
     }
+
+    static deletePattern(pattern) {
+        if (!(pattern instanceof Pattern))
+            throw new Error("Выбранный элемент не является паттерном!");
+
+        let entities = pattern.getLinkedEntities(true, false);
+        let areaNames = [];
+        let arrayNames = [];
+
+        for (let [entity, _] of entities.entries()) {
+            /** @type {Pattern} */
+            let a = entity;
+            if (entity instanceof Component)
+                a = entity.parentPattern;
+
+            let path = [];
+            while (a.isInline) {
+                path.push("patern-definition");
+                /** @type {Set} */
+                let [component] = a.getLinkedEntities(false, true);
+                path.push(component.name);
+                a = component.parentPattern;
+            }
+
+            path.push(a.name);
+
+            path.reverse();
+            let name = path.join(">");
+            if (entity instanceof Component)
+                areaNames.push(name);
+            else arrayNames.push(name);
+        }
+
+        if (areaNames.length > 0 && arrayNames.length == 0)
+            alert("Не могу удалить паттерн, так как он используется в качестве компонента в областях: " + areaNames.join(", "));
+        else if (areaNames.length == 0 && arrayNames.length > 0)
+            alert("Не могу удалить паттерн, так как он используется в качестве вида элемента в массивах: " + arrayNames.join(", "));
+        else if (areaNames.length > 0 && arrayNames.length > 0)
+            alert("Не могу удалить паттерн, так как он используется в качестве вида элемента в массивах: " + arrayNames.join(", ") + "; и в качестве компонента в областях: " + areaNames.join(", "));
+        else {
+            pattern.remove();
+            let browserItems = UI_STORAGE.getElementsByData(pattern);
+            for (let i = 0; i < browserItems.length; ++i) {
+                browserItems[i].parentElement.remove();
+            }
+            UI_STORAGE.unbind(pattern);
+            this.deleteSelectedButton.disabled = true;
+        }
+    }
+
+    /**
+     * Обработчик кнопки удаления выбранного элемента
+     * @param {PointerEvent} event 
+     */
+    static onDeleteSelectedClicked(event) {
+
+        let selectedItem = this.selectedItem;
+        if (selectedItem instanceof Pattern) {
+            this.deletePattern(this.selectedItem);
+        } else if (selectedItem instanceof Component) {
+            this.deleteComponent(this.selectedItem);
+        } else {
+            throw new Error("Обнаружена попытка удаления элемента, не являющегося ни компонентом, ни паттерном");
+        }
+    }
+
+    static validateComponentName(name) {
+        if (/\s/g.test(name)) {
+            alert("Название компонента содержит пробельные символы, что недопустимо!");
+            return false;
+        }
+        if (name == "") {
+            alert("Название компонента не может быть пустой строкой!");
+            return false;
+        }
+        for (let i = 0; i < this.selectedItem.components.length; ++i) {
+            if (this.selectedItem.components.at(i).name == name) {
+                alert("Уже существует компонент с таким названием в выбранном паттерне!");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static onCreateComponentDefinitionClicked() {
+        let name = this.newComponentName.value;
+        if (!this.validateComponentName(name)) return;
+        let pattern = AreaPattern.fromDataStructure("", "AREA", "", new YamlRange(0, Infinity), new YamlRange(1, Infinity), new YamlRange(1, Infinity), false, true);
+
+        let comp = Component.fromDataStructure(name, pattern, this.selectedItem, Grammar.parseYamlLocation("top"), false, false);
+
+        this.selectedItem.components.push(comp);
+
+        let compsElementsList = this.previousSelectedElement.lastElementChild;
+        compsElementsList.appendChild(this.generateBrowserElementForComponent(name, comp));
+    }
+
+    static onCreateComponentLinkClicked() {
+        let name = this.newComponentName.value;
+        if (!this.validateComponentName(name)) return;
+        let linkedPattern = UI_STORAGE.itemByID.get(this.newComponentPattern.value);
+
+        let comp = Component.fromYaml(name, { pattern: linkedPattern.name }, this.selectedItem, false);
+        comp.resolveLinks();
+
+        this.selectedItem.components.push(comp);
+
+        let compsElementsList = this.previousSelectedElement.lastElementChild;
+        compsElementsList.appendChild(this.generateBrowserElementForComponent(name, comp));
+    }
+
+    static onPatternNameChange(e) {
+        let newName = this.patternName.value;
+
+        if (/\s/g.test(newName)) {
+            alert("Имя паттерна не может содержать пробельные символы.");
+            this.patternName.value = this.selectedItem.name;
+            return;
+        }
+
+        if (newName === "") {
+            alert("Имя паттерна не должно быть пустым!");
+            this.patternName.value = this.selectedItem.name;
+            return;
+        }
+
+        for (let [key, pattern] of Grammar.patterns.entries()) {
+            if (pattern.name == newName) {
+                alert("Уже существует паттерн с таким именем!");
+                this.patternName.value = this.selectedItem.name;
+                return;
+            }
+        }
+        if (this.selectedItem instanceof Pattern) {
+            UI_STORAGE.getElementsByData(this.selectedItem).forEach(element => {
+                element.innerText = newName;
+            });
+            this.selectedItem.rename(newName);
+        } else throw new Error("Выбранный элемент не является паттерном!");
+    }
+
+    static onPatternDescChanged(e) {
+        this.selectedItem.desc = this.patternDesc.value;
+    }
+
+    static onPatternSizeChanged(e, isMin, isWidth) {
+
+        let dimSize = this.selectedItem.width;
+        if (!isWidth) dimSize = this.selectedItem.height;
+
+        // Сообщаем о недопустимом вводе, если введено что-то кроме цифр
+        if (!/^\d*$/g.test(e.target.value)) {
+            alert("Введенное значение не является целым числом!");
+            if (isMin) {
+                let v = dimSize.getBegin();
+                if (v == 1) e.target.value = "";
+                else e.target.value = v;
+            } else {
+                let v = dimSize.getEnd();
+                if (v == Infinity) e.target.value = "";
+                else e.target.value = v;
+            }
+            return;
+        }
+
+        // Считываем новое значение
+        let value;
+        if (e.target.value != "") value = e.target.value - 0;
+        else if (isMin) value = 1;
+        else value = Infinity;
+
+        // Сообщаяем о недопустимом вводе, если введено число < 1
+        if (value < e.target.min) {
+            alert("Размер не может быть меньше 1!");
+            e.target.value = dimSize.getBegin();
+            return;
+        }
+
+        // Сбрасываем значения размера, если они не были заданы до этого
+        if (!dimSize.isDefined()) {
+            dimSize.setDefined();
+            dimSize.setEnd(Infinity);
+            dimSize.setBegin(1);
+        }
+
+        if (isMin) {
+            // Сообщаем о недопустимом вводе, если введенное число больше максимума (если интервал задан)
+            if (value > dimSize.getEnd()) {
+                alert("Минимум не может быть больше максимума!");
+                if (dimSize.getBegin() == 1)
+                    e.target.value = "";
+                else e.target.value = dimSize.getBegin();
+                return;
+            }
+
+            // Устанавливаем размер
+            if (value == 1) e.target.value = "";
+            dimSize.setBegin(value);
+        } else {
+            // Сообщаем о недопустимом вводе, если введенное число меньше минимума (если интервал задан)
+            if (value < dimSize.getBegin()) {
+                alert("Максимум не может быть меньше минимума!");
+                if (dimSize.getEnd() == Infinity)
+                    e.target.value = "";
+                else e.target.value = dimSize.getEnd();
+                return;
+            }
+
+            // Устанавливаем размер
+            if (value == Infinity) e.target.value = "";
+            dimSize.setEnd(value);
+        }
+
+        // Снимаем определение размера, если минимум 1, а максимум infinity
+        if (isWidth && dimSize.getBegin() == 1 && dimSize.getEnd() == Infinity) {
+            dimSize.setUndefined();
+            this.patternWidthMin.value = "";
+            this.patternWidthMax.value = "";
+        } else if (dimSize.getBegin() == 1 && dimSize.getEnd() == Infinity) {
+            dimSize.setUndefined();
+            this.patternHeightMin.value = "";
+            this.patternHeightMax.value = "";
+        }
+    }
+
+    /** */
+    static onCountInDocChange(e, isMin) {
+
+        let countInDoc = this.selectedItem.countInDoc;
+
+        // Сообщаем о недопустимом вводе, если введено что-то кроме цифр
+        if (!/^\d*$/g.test(e.target.value)) {
+            alert("Введенное значение не является целым числом!");
+            if (isMin) {
+                let v = countInDoc.getBegin();
+                if (v == 0) e.target.value = "";
+                else e.target.value = v;
+            } else {
+                let v = countInDoc.getEnd();
+                if (v == Infinity) e.target.value = "";
+                else e.target.value = v;
+            }
+            return;
+        }
+
+        // Считываем новое значение
+        let value;
+        if (e.target.value != "") value = e.target.value - 0;
+        else if (isMin) value = 0;
+        else value = Infinity;
+
+        // Сообщаяем о недопустимом вводе, если введено число < 1
+        if (value < e.target.min) {
+            alert("Размер не может быть меньше 1!");
+            e.target.value = countInDoc.getBegin();
+            return;
+        }
+
+        // Сбрасываем значения размера, если они не были заданы до этого
+        if (!countInDoc.isDefined()) {
+            countInDoc.setDefined();
+            countInDoc.setEnd(Infinity);
+            countInDoc.setBegin(0);
+        }
+
+        // Если изменяется минимум...
+        if (isMin) {
+
+            // Сообщаем об ошибке, если максимум меньше
+            if (value > countInDoc.getEnd()) {
+                alert("Минимум не может быть больше максимума!");
+                if (countInDoc.getBegin() == 0)
+                    e.target.value = "";
+                else e.target.value = countInDoc.getBegin();
+                return;
+            }
+
+            // Иначе сохнаняем данные
+            if (value == 0) e.target.value = "";
+            countInDoc.setBegin(value);
+
+        } else { // Иначе если изменяется максимум...
+            // Сообщаем об ошибке, если минимум больше максимума
+            if (value < countInDoc.getBegin()) {
+                alert("максимум не может быть меньше минимума!");
+                if (countInDoc.getEnd() == Infinity)
+                    e.target.value = "";
+                else e.target.value = countInDoc.getEnd();
+                return;
+            }
+
+            // Иначе сохнаняем данные
+            if (value == Infinity) e.target.value = "";
+            countInDoc.setEnd(value);
+        }
+
+        // Снимаем определения , если минимум 0, а максимум 1
+        if (countInDoc.getBegin() == 0 && countInDoc.getEnd() == Infinity) {
+            countInDoc.setUndefined();
+            this.patternWidthMin.value = "";
+            this.patternWidthMax.value = "";
+        }
+    }
+
+    static onCellTypeChange(e) {
+        if (/^\s*$/g.test(e.target.value)) {
+            alert("Вид данных не может быть пустым!");
+            e.target.value = this.selectedItem.contentType;
+        } else this.selectedItem.contentType = e.target.value;
+    }
+
+
+    static onPatternTypeChange(e) {
+        let oldType = this.selectedItem.kind;
+        let newType = e.target.value;
+        if (oldType == "AREA" && this.selectedItem.components.length > 0) {
+            alert("Нельзя изменить область, пока у неё есть компоненты!");
+            e.target.value = oldType;
+        } else {
+            let oldPattern = this.selectedItem;
+            let newPattern = this.selectedItem.changeKind(newType);
+            UI_STORAGE.replace(oldPattern, newPattern);
+            this.selectBrowserElementByData(newPattern);
+        }
+    }
+
 
     static init() {
         this.browser = document.getElementById("tree-browser");
@@ -556,10 +896,14 @@ class UI {
         this.createPatternButton = document.getElementById("create-pattern-button");
         this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
         this.deleteSelectedButton = document.getElementById("delete-selected-button");
-        this.deleteSelectedButton.onclick = () => this.deleteCurrentItem();
+        this.deleteSelectedButton.onclick = (e) => this.onDeleteSelectedClicked(e);
         this.createComponentLinkButton = document.getElementById("create-component-link-button");
+        this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
         this.createComponentDefinitionButton = document.getElementById("create-component-definition-button");
+        this.createComponentDefinitionButton.onclick = () => this.onCreateComponentDefinitionClicked();
         this.componentLocationList = document.getElementById("component-location-list");
+        this.newComponentName = document.getElementById("new-component-name");
+        this.newComponentPattern = document.getElementById("new-component-pattern");
 
         this.componentLeftMarginMin = document.getElementById("left-margin-min");
         this.componentLeftMarginMax = document.getElementById("left-margin-max");
@@ -579,5 +923,16 @@ class UI {
         this.componentBottomPaddingMin = document.getElementById("bottom-padding-min");
         this.componentBottomPaddingMax = document.getElementById("bottom-padding-max");
         this.resetUI();
+
+        this.patternName.addEventListener("change", (e) => this.onPatternNameChange(e));
+        this.patternDesc.addEventListener("change", (e) => this.onPatternDescChanged(e));
+        this.patternWidthMin.addEventListener("change", (e) => this.onPatternSizeChanged(e, true, true));
+        this.patternWidthMax.addEventListener("change", (e) => this.onPatternSizeChanged(e, false, true));
+        this.patternHeightMin.addEventListener("change", (e) => this.onPatternSizeChanged(e, true, false));
+        this.patternHeightMax.addEventListener("change", (e) => this.onPatternSizeChanged(e, false, false));
+        this.patternCountInDocMin.addEventListener("change", (e) => this.onCountInDocChange(e, true));
+        this.patternCountInDocMax.addEventListener("change", (e) => this.onCountInDocChange(e, false));
+        this.patternCellContentType.addEventListener("change", (e) => this.onCellTypeChange(e));
+        this.patternKind.addEventListener("change", (e) => this.onPatternTypeChange(e));
     }
 }
