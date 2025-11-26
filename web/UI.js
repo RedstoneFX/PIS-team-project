@@ -60,6 +60,13 @@ class UI_STORAGE {
         this.elementByID.clear();
         this.last_id = 0;
     }
+
+    static unbind(data) {
+        let id = this.getUniqueID(data);
+        this.itemByID.delete(id);
+        this.elementByID.delete(id);
+        this.IDByItem.delete(data);
+    }
 }
 
 
@@ -277,7 +284,7 @@ class UI {
                 this.highlightBrowserElement(element);
                 this.selectedItem = data;
                 this.loadSelectedDataToUI(data);
-                this.updateBrowserControllsFor(data);
+                this.deleteSelectedButton.disabled = false;
             }
         });
     }
@@ -303,14 +310,6 @@ class UI {
         Grammar.patterns.set(name, newPattern);
         this.browser.append(this.createBrowserElementForPattern(newPattern.name, newPattern));
         this.selectBrowserElementByData(newPattern);
-    }
-
-    /**
-     * Включает и выключает кнопки в панели управления браузера, соответствующие действиям с переданным элементом
-     * @param {Object} data 
-     */
-    static updateBrowserControllsFor(data) {
-        this.deleteSelectedButton.disabled = data == null;
     }
 
     /**
@@ -522,16 +521,77 @@ class UI {
         if (isEnabled) this.setGeneralPatternParamsEnabled(false);
     }
 
-    /**
-     * Удаляет выбранный объект
-     */
-    static deleteCurrentItem() {
-        this.updateBrowserControllsFor(null);
-        if (this.currentElement instanceof Pattern) {
+    static deleteComponent(component) {
+        if (!(component instanceof Component))
+            throw new Error("Выбранный элемент не является компонентом!");
+        component.remove();
 
-        } else if (this.currentElement instanceof Component) {
+        let browserItems = UI_STORAGE.getElementsByData(component);
+        for (let i = 0; i < browserItems.length; ++i) {
+            browserItems[i].parentElement.remove();
         }
-        Grammar.deletePattern(pattern);
+
+        UI_STORAGE.unbind(component);
+        this.deleteSelectedButton.disabled = true;
+    }
+
+    static deletePattern(pattern) {
+        if (!(pattern instanceof Pattern))
+            throw new Error("Выбранный элемент не является паттерном!");
+
+        let entities = pattern.getLinkedEntities(true, true);
+        let areaNames = [];
+        let arrayNames = [];
+
+        for (let [entity, _] of entities.entries()) {
+            /** @type {Pattern} */
+            let a = entity;
+            if (entity instanceof Component)
+                a = entity.parentPattern;
+
+            let path = [];
+            while (a.isInline) {
+                path.push("patern-definition");
+                /** @type {Set} */
+                let [component] = a.getLinkedEntities(false, true);
+                path.push(component.name);
+                a = component.parentPattern;
+            }
+
+            path.push(a.name);
+
+            path.reverse();
+            let name = path.join(">");
+            if (entity instanceof Component)
+                areaNames.push(name);
+            else arrayNames.push(name);
+        }
+
+        if (areaNames.length > 0 && arrayNames.length == 0)
+            alert("Не могу удалить паттерн, так как он используется в качестве компонента в областях: " + areaNames.join(", "));
+        else if (areaNames.length == 0 && arrayNames.length > 0)
+            alert("Не могу удалить паттерн, так как он используется в качестве вида элемента в массивах: " + arrayNames.join(", "));
+        else if (areaNames.length > 0 && arrayNames.length > 0)
+            alert("Не могу удалить паттерн, так как он используется в качестве вида элемента в массивах: " + arrayNames.join(", ") + "; и в качестве компонента в областях: " + areaNames.join(", "));
+        else {
+
+        }
+    }
+
+    /**
+     * Обработчик кнопки удаления выбранного элемента
+     * @param {PointerEvent} event 
+     */
+    static onDeleteSelectedClicked(event) {
+
+        let selectedItem = this.selectedItem;
+        if (selectedItem instanceof Pattern) {
+            this.deletePattern(this.selectedItem);
+        } else if (selectedItem instanceof Component) {
+            this.deleteComponent(this.selectedItem);
+        } else {
+            throw new Error("Обнаружена попытка удаления элемента, не являющегося ни компонентом, ни паттерном");
+        }
     }
 
     static validateComponentName(name) {
@@ -798,7 +858,7 @@ class UI {
         this.createPatternButton = document.getElementById("create-pattern-button");
         this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
         this.deleteSelectedButton = document.getElementById("delete-selected-button");
-        this.deleteSelectedButton.onclick = () => this.deleteCurrentItem();
+        this.deleteSelectedButton.onclick = (e) => this.onDeleteSelectedClicked(e);
         this.createComponentLinkButton = document.getElementById("create-component-link-button");
         this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
         this.createComponentDefinitionButton = document.getElementById("create-component-definition-button");
