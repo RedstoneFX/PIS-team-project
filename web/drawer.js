@@ -2,7 +2,7 @@
 /// <reference path="converter.js" />
 /// <reference path="lib/paper-core.js" />
 
-class drawer {
+class Drawer {
     /** @type {Number} */
     static exampleVariable1;
     /** @type {Number} */

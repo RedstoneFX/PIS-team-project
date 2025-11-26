@@ -25,7 +25,7 @@ function loadFromLocalStorage() {
 }
 
 function onPageLoaded() {
-    drawer.init();
+    Drawer.init();
     UI.init();
 
     /*try {
