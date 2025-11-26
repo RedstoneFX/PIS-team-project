@@ -35,17 +35,11 @@ class drawer {
     static drawCellPattern(pattern) {
 
         // Получаем значения ширины и высоты из диапазонов
-        const max_width = pattern.width.getEnd();
-        const min_width = Math.max(pattern.width.getBegin(), 0);
+        const pattern_width_avg = this.getValueFromYamlRange(pattern.width);
+        const pattern_height_avg = this.getValueFromYamlRange(pattern.height);
 
-        const max_height = pattern.height.getEnd();
-        const min_height = Math.max(pattern.height.getBegin(), 0);
-
-        const pattern_width_avg = max_width == Infinity ? min_width : (max_width + min_width) / 2;
-        const pattern_height_avg = max_height == Infinity ? min_height : (max_height + min_height) / 2;
-
-        const width = pattern_width_avg < 10 ? 10 : pattern_width_avg;
-        const height = pattern_height_avg < 10 ? 10 : pattern_height_avg;
+        const width = Math.max(pattern_width_avg, 10);
+        const height = Math.max(pattern_height_avg, 10);
 
         // Создаем прямоугольник ячейки
         const cell = new Path.Rectangle({
@@ -84,27 +78,18 @@ class drawer {
     static drawArrayPattern(pattern) {
         const group = new paper.Group();
 
-        const max_item_count = pattern.itemCount.getEnd();
-        const min_item_count = Math.max(pattern.itemCount.getBegin(), 0);
+        const gap = this.getValueFromYamlRange(pattern.gap);
 
-        const max_gap = pattern.gap.getEnd();
-        const min_gap = Math.max(pattern.gap.getBegin(), 0);
-        
+        const max_item_count = pattern.itemCount.getEnd();
+        const min_item_count = Math.max(pattern.itemCount.getBegin(), 0);        
         const itemCount = max_item_count == Infinity ? Math.max(min_item_count, 4) : Math.ceil((max_item_count + min_item_count) / 2);
-        const gap = max_gap == Infinity ? Math.max(min_gap, 0) : (max_gap + min_gap) / 2;
 
         // Получаем размеры ячейки из внутреннего паттерна
-        const max_cell_width = pattern.pattern.width.getEnd();
-        const min_cell_width = pattern.pattern.width.getBegin();
-
-        const max_cell_height = pattern.pattern.width.getEnd();
-        const min_cell_height = pattern.pattern.height.getBegin();
-
-        const cell_width_avg = max_cell_width == Infinity ? Math.max(min_cell_width, 0) : (max_cell_width + min_cell_width) / 2;
-        const cell_height_avg = max_cell_height == Infinity ? Math.max(min_cell_height, 0) : (max_cell_height + min_cell_height) / 2;
+        const cell_width_avg = this.getValueFromYamlRange(pattern.pattern.width);
+        const cell_height_avg = this.getValueFromYamlRange(pattern.pattern.height);
     
-        const cellWidth = cell_width_avg < 10 ? 10 : cell_width_avg;
-        const cellHeight = cell_height_avg < 10 ? 10 : cell_height_avg;
+        const cellWidth = Math.max(cell_width_avg, 0);
+        const cellHeight = Math.max(cell_height_avg, 0);
 
         const min_pattern_width = cellWidth;
         const min_pattern_height = cellHeight;
@@ -124,14 +109,8 @@ class drawer {
         }
 
         // Получаем значения ширины и высоты из диапазонов
-        const max_width = pattern.width.getEnd();
-        const min_width = Math.max(pattern.width.getBegin(), 0);
-
-        const max_height = pattern.height.getEnd();
-        const min_height = Math.max(pattern.height.getBegin(), 0);
-
-        const pattern_width_avg = max_width == Infinity ? Math.max(min_width, 0) : (max_width + min_width) / 2;
-        const pattern_height_avg = max_height == Infinity ? Math.max(min_height, 0) : (max_height + min_height) / 2;
+        const pattern_width_avg = this.getValueFromYamlRange(pattern.width);
+        const pattern_height_avg = this.getValueFromYamlRange(pattern.height);
 
         const width = Math.max(pattern_width_avg, min_pattern_width);
         const height = Math.max(pattern_height_avg, min_pattern_height);
@@ -216,33 +195,22 @@ class drawer {
         const area_needed_height = 0;
 
         for (const component of pattern.components) {
-                const component_max_width = component.pattern.width.getEnd();
-                const component_min_width = Math.max(component.pattern.width.getBegin(), 0);
+            const component_needed_width = this.getValueFromYamlRange(component.pattern.width);
+            const component_needed_height = this.getValueFromYamlRange(component.pattern.height);
+                
+            component_needed_width += this.getValueFromYamlRange(component.location.padding.left);
+            component_needed_width += this.getValueFromYamlRange(component.location.padding.right);
 
-                const component_max_height = component.pattern.height.getEnd();
-                const component_min_height = Math.max(component.pattern.height.getBegin(), 0);
+            component_needed_height += this.getValueFromYamlRange(component.location.padding.bottom);
+            component_needed_height += this.getValueFromYamlRange(component.location.padding.top);
 
-                const component_needed_width = component_max_width == Infinity ? component_min_width : Math.max((component_max_width + component_min_width) / 2, 10);
-                const component_needed_height = component_max_height == Infinity ? component_min_height : Math.max((component_max_height + component_min_height) / 2, 10);
-
-                for(paddingling in component.location.padding) {
-                    component_needed_width += paddingling[0];
-                    component_needed_height += paddingling[1];
-                }
-
-                area_needed_width = Math.max(area_needed_width, component_needed_width);
-                area_needed_height = Math.max(area_needed_height, component_needed_height);
-            }
+            area_needed_width = Math.max(area_needed_width, component_needed_width);
+            area_needed_height = Math.max(area_needed_height, component_needed_height);
+        }
 
         // Получаем значения ширины и высоты из диапазонов
-        const area_max_width = pattern.width.getEnd();
-        const area_min_width = Math.max(pattern.width.getBegin(), area_needed_width);
-
-        const area_max_height = pattern.height.getEnd();
-        const area_min_height = Math.max(pattern.height.getBegin(), area_needed_height);
-
-        const width = area_max_width == Infinity ? area_min_width : (area_max_width + area_min_width) / 2;
-        const height = area_max_height == Infinity ? area_min_height : (area_max_height + area_min_height) / 2;
+        const width = this.getValueFromYamlRange(pattern.width);
+        const height = this.getValueFromYamlRange(pattern.height);
     
         // Рисуем основную область
         const areaRect = new Path.Rectangle({
