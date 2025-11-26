@@ -48,7 +48,8 @@ class Grammar {
                     this.rootName = patternName; // Иначе сохраняем этот паттерн как корневой
                 }
             } catch (error) {
-                throw new Error(`Ошибка создания паттерна "${patternName}": ${error.message}`); // Выводим ошибку, если не удалось спарсить паттерн
+                error.message = `Ошибка создания паттерна "${patternName}": ${error.message}`;
+                throw error; // Выводим ошибку, если не удалось спарсить паттерн
             }
         }
 
