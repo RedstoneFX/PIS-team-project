@@ -35,8 +35,14 @@ class drawer {
     static drawCellPattern(pattern) {
 
         // Получаем значения ширины и высоты из диапазонов
-        const pattern_width_avg = (pattern.width.getEnd() + pattern.width.getBegin()) / 2;
-        const pattern_height_avg = (pattern.height.getEnd() + pattern.height.getBegin()) / 2;
+        const max_width = pattern.width.getEnd();
+        const min_width = Math.max(pattern.width.getBegin(), 0);
+
+        const max_height = pattern.height.getEnd();
+        const min_height = Math.max(pattern.height.getBegin(), 0);
+
+        const pattern_width_avg = max_width == Infinity ? min_width : (max_width + min_width) / 2;
+        const pattern_height_avg = max_height == Infinity ? min_height : (max_height + min_height) / 2;
 
         const width = pattern_width_avg < 10 ? 10 : pattern_width_avg;
         const height = pattern_height_avg < 10 ? 10 : pattern_height_avg;
@@ -61,16 +67,23 @@ class drawer {
         const group = new paper.Group();
 
         const max_item_count = pattern.itemCount.getEnd();
-        const min_item_count = pattern.itemCount.getBegin() < 0 ? 0 : pattern.itemCount.getBegin();
-        const item_count = max_item_count == Infinity ? Math.max(min_item_count, 5) : Math.ceil((max_item_count + min_item_count) / 2);
+        const min_item_count = Math.max(pattern.itemCount.getBegin(), 0);
 
-        const max_gap = pattern.gap.getEnd() == NaN ? 0 : pattern.gap.getEnd();
-        const min_gap = pattern.gap.getBegin() == NaN ? 0 : pattern.gap.getBegin();
-        const gap = (max_gap + min_gap) / 2;
+        const max_gap = pattern.gap.getEnd();
+        const min_gap = Math.max(pattern.gap.getBegin(), 0);
+        
+        const itemCount = max_item_count == Infinity ? Math.max(min_item_count, 4) : Math.ceil((max_item_count + min_item_count) / 2);
+        const gap = max_gap == Infinity ? Math.max(min_gap, 0) : (max_gap + min_gap) / 2;
 
         // Получаем размеры ячейки из внутреннего паттерна
-        const cell_width_avg = (pattern.pattern.width.getEnd() + pattern.pattern.width.getBegin()) / 2;
-        const cell_height_avg = (pattern.pattern.height.getEnd() + pattern.pattern.height.getBegin()) / 2;
+        const max_cell_width = pattern.pattern.width.getEnd();
+        const min_cell_width = pattern.pattern.width.getBegin();
+
+        const max_cell_height = pattern.pattern.width.getEnd();
+        const min_cell_height = pattern.pattern.height.getBegin();
+
+        const cell_width_avg = max_cell_width == Infinity ? Math.max(min_cell_width, 0) : (max_cell_width + min_cell_width) / 2;
+        const cell_height_avg = max_cell_height == Infinity ? Math.max(min_cell_height, 0) : (max_cell_height + min_cell_height) / 2;
     
         const cellWidth = cell_width_avg < 10 ? 10 : cell_width_avg;
         const cellHeight = cell_height_avg < 10 ? 10 : cell_height_avg;
@@ -80,23 +93,41 @@ class drawer {
 
         switch (pattern.direction) {
             case 'ROW':
-                min_pattern_width += item_count * (cellWidth + gap);
+                min_pattern_width += itemCount * (cellWidth + gap);
                 break;
             case 'COLUMN':
-                min_pattern_height += item_count * (cellHeight + gap);
+                min_pattern_height += itemCount * (cellHeight + gap);
                 break;
             case 'FILL':
-                min_pattern_width += Math.sqrt(item_count).toFixed(0) * (cellWidth + gap);
-                min_pattern_height += Math.sqrt(item_count).toFixed(0) * (cellHeight + gap);
+                const squareRoot = Math.ceil(Math.sqrt(itemCount));
+                min_pattern_width += squareRoot * (cellWidth + gap);
+                min_pattern_height += squareRoot * (cellHeight + gap);
                 break;
         }
 
         // Получаем значения ширины и высоты из диапазонов
-        const pattern_width_avg = (pattern.width.getEnd() + pattern.width.getBegin()) / 2;
-        const pattern_height_avg = (pattern.height.getEnd() + pattern.height.getBegin()) / 2;
+        const max_width = pattern.width.getEnd();
+        const min_width = Math.max(pattern.width.getBegin(), 0);
 
-        const width = pattern_width_avg < min_pattern_width ? min_pattern_width : pattern_width_avg;
-        const height = pattern_height_avg < min_pattern_height ? min_pattern_height : pattern_height_avg;
+        const max_height = pattern.height.getEnd();
+        const min_height = Math.max(pattern.height.getBegin(), 0);
+
+        const pattern_width_avg = max_width == Infinity ? Math.max(min_width, 0) : (max_width + min_width) / 2;
+        const pattern_height_avg = max_height == Infinity ? Math.max(min_height, 0) : (max_height + min_height) / 2;
+
+        const width = Math.max(pattern_width_avg, min_pattern_width);
+        const height = Math.max(pattern_height_avg, min_pattern_height);
+
+        // Создаем прямоугольник массива
+        const array_cell = new Path.Rectangle({
+            point: [0, 0],
+            size: [width, height],
+            strokeColor: 'black',
+            strokeWidth: 2,
+            fillColor: 'none'
+        });
+
+        group.addChild(array_cell);
     
         // Создаем ячейки в зависимости от направления
         switch (pattern.direction) {
