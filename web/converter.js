@@ -912,8 +912,16 @@ class Pattern {
     }
 
     remove() {
-        if (this.getLinkedEntities().size != 0) {
-            throw new Error(`Невозможно удалить паттерн, так как на него имеются ссылки`);
+        if(!this.isInline) { // Если это не pattern-definition
+            if (this.getLinkedEntities(true, false).size != 0) { // Выводим ошибку, если есть массивы, ссылающиеся на этот паттерн
+                throw new Error(`Невозможно удалить паттерн, так как на него имеются ссылки`);
+            }
+
+            // Удаляем все компоненты, что ссылаются на этот паттерн
+            let linkedComponents = this.getLinkedEntities(false, true);
+            for(let [i, component] of linkedComponents.entries()) {
+                component.remove();
+            }
         }
         this.countInDoc = null;
         this.width = null;
