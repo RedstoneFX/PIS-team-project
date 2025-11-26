@@ -67,6 +67,14 @@ class UI_STORAGE {
         this.elementByID.delete(id);
         this.IDByItem.delete(data);
     }
+
+    static replace(oldData, newData) {
+        let id = this.IDByItem.get(oldData);
+        this.itemByID.set(id, newData);
+        this.IDByItem.set(newData, id);
+        this.IDByItem.delete(oldData);
+        newData.UNIQUE_UI_ID = id;
+    }
 }
 
 
@@ -846,6 +854,21 @@ class UI {
     }
 
 
+    static onPatternTypeChange(e) {
+        let oldType = this.selectedItem.kind;
+        let newType = e.target.value;
+        if (oldType == "AREA" && this.selectedItem.components.length > 0) {
+            alert("Нельзя изменить область, пока у неё есть компоненты!");
+            e.target.value = oldType;
+        } else {
+            let oldPattern = this.selectedItem;
+            let newPattern = this.selectedItem.changeKind(newType);
+            UI_STORAGE.replace(oldPattern, newPattern);
+            this.selectBrowserElementByData(newPattern);
+        }
+    }
+
+
     static init() {
         this.browser = document.getElementById("tree-browser");
         this.patternParams = document.getElementById("pattern-parameters");
@@ -909,5 +932,6 @@ class UI {
         this.patternCountInDocMin.addEventListener("change", (e) => this.onCountInDocChange(e, true));
         this.patternCountInDocMax.addEventListener("change", (e) => this.onCountInDocChange(e, false));
         this.patternCellContentType.addEventListener("change", (e) => this.onCellTypeChange(e));
+        this.patternKind.addEventListener("change", (e) => this.onPatternTypeChange(e));
     }
 }

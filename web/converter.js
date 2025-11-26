@@ -865,7 +865,7 @@ class Pattern {
         // Если новый тип - клетка...
         if (newKind == "CELL") {
             // создать новый паттерн-клетку с частью данных текущего паттерна и "" в типе данных
-            newPattern = new CellPattern.fromDataStructure(this.name, newKind, this.desc, this, this.width, this.height, this.isRoot, this.isInline, "");
+            newPattern = CellPattern.fromDataStructure(this.name, newKind, this.desc, this.countInDoc, this.width, this.height, this.isRoot, this.isInline, "");
         } else if (newKind == "ARRAY" || newKind == "ARRAY-IN-CONTEXT") { // Если новый тип - разновидность массива...
             // Заменить тип на корректный, если исходный паттерн разновидность массива
             if (this.kind == "ARRAY" || this.kind == "ARRAY-IN-CONTEXT") {
@@ -883,11 +883,11 @@ class Pattern {
             if (placeholder == this) {
                 placeholder = it.next().value;
             }
-            newPattern = new ArrayPattern.fromDataStructure(this.name, newKind, this.desc, this, this.width, this.height, this.isRoot, this.isInline, 
-                "ROW", placeholder, new YamlRange(0).setUndefined(), new YamlRange(0).setUndefined());
+            newPattern = ArrayPattern.fromDataStructure(this.name, newKind, this.desc, this.countInDoc, this.width, this.height, this.isRoot, this.isInline, 
+                "ROW", placeholder, new YamlRange(0, Infinity).setUndefined(), new YamlRange(1, Infinity).setUndefined());
         } else if (newKind == "AREA") { // Если новый тип - область...
             // Создать новый паттерн-область с частью данных текущего паттерна
-            newPattern = new AreaPattern.fromDataStructure(this.name, newKind, this.desc, this, this.width, this.height, this.isRoot, this.isInline);
+            newPattern = AreaPattern.fromDataStructure(this.name, newKind, this.desc, this.countInDoc, this.width, this.height, this.isRoot, this.isInline);
         } else {
             // Выбросить ошибку, если не удаётся распознать тип паттерна
             throw new Error(`Неизвестный тип паттерна: ${newKind}`);
