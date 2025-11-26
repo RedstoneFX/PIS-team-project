@@ -60,6 +60,24 @@ class drawer {
     }
 
     /**
+     * Отрисовать паттерн-ячейку
+     * @param {Number} width 
+     * @param {Number} height 
+     */
+    static drawCell(width, height) {
+        // Создаем прямоугольник ячейки
+        const cell = new Path.Rectangle({
+            point: [0, 0],
+            size: [width, height],
+            strokeColor: 'black',
+            strokeWidth: 2,
+            fillColor: 'none'
+        });
+
+        return cell;
+    }
+
+    /**
      * Отрисовать паттерн-массив
      * @param {ArrayPattern} pattern 
      */
@@ -204,8 +222,8 @@ class drawer {
                 const component_max_height = component.pattern.height.getEnd();
                 const component_min_height = Math.max(component.pattern.height.getBegin(), 0);
 
-                const component_needed_width = component_max_width == Infinity ? component_min_width : (component_max_width + component_min_width) / 2;
-                const component_needed_height = component_max_height == Infinity ? component_min_height : (component_max_height + component_min_height) / 2;
+                const component_needed_width = component_max_width == Infinity ? component_min_width : Math.max((component_max_width + component_min_width) / 2, 10);
+                const component_needed_height = component_max_height == Infinity ? component_min_height : Math.max((component_max_height + component_min_height) / 2, 10);
 
                 for(paddingling in component.location.padding) {
                     component_needed_width += paddingling[0];
@@ -238,7 +256,7 @@ class drawer {
     
         // Отрисовываем все компоненты
         for (const component of pattern.components) {
-            const componentGroup = this.drawComponent(component, pattern);
+            const componentGroup = this.drawComponent(component, pattern, width, height);
             group.addChild(componentGroup);
         }
     
@@ -248,152 +266,227 @@ class drawer {
 
     /**
      * Отрисовать компонент
-     * @param {Comment} component 
+     * @param {Component} component 
      * @param {AreaPattern} parentPattern 
      */
-    static drawComponent(component, parentPattern) {
-    const group = new paper.Group();
+    static drawComponent(component, parentPattern, areaWidth, areaHeight) {
+        const group = new paper.Group();
     
-    // Получаем паттерн компонента
-    const cellPattern = component.pattern;
-    if (!cellPattern) {
-        console.warn(`Component ${component.name} has no pattern`);
+        // Получаем отступы из location
+        const cellLocation = component.location;
+        const cellPadding = cellLocation.padding;
+        const cellMargin = cellLocation.margin;
+
+        const paddingTop = this.getValueFromYamlRange(cellPadding.top);
+        const paddingLeft = this.getValueFromYamlRange(cellPadding.left);
+        const paddingBottom = this.getValueFromYamlRange(cellPadding.bottom);
+        const paddingRight = this.getValueFromYamlRange(cellPadding.right);
+        
+        const marginTop = this.getValueFromYamlRange(cellMargin.top);
+        const marginLeft = this.getValueFromYamlRange(cellMargin.left);
+        const marginBottom = this.getValueFromYamlRange(cellMargin.bottom);
+        const marginRight = this.getValueFromYamlRange(cellMargin.right);
+    
+        // Вычисляем позицию и ширину компонента
+        const x = 0;
+        const y = 0;
+
+        const cellWidth = Math.max(pattern_width_avg, 10);
+        const cellHeight = Math.max(pattern_height_avg, 10);
+
+        const width = cellWidth;
+        const height = cellHeight;
+    
+        if (component.inner) {
+            // Внутренний компонент - позиционируем внутри 
+            if (cellPadding.left.isDefined()) {
+                x = paddingLeft;
+                if (cellPadding.right.isDefined()) {
+                    width = areaWidth - paddingLeft - paddingRight;
+                }
+            }
+            else if (cellPadding.right.isDefined()) {
+                x = areaWidth - cellWidth - paddingRight;
+            }
+            else {
+                width = areaWidth;
+            }
+
+            if (cellPadding.bottom.isDefined()) {
+                y = paddingTop;
+                if (cellPadding.top.isDefined()) {
+                    height = areaHeight - paddingBottom - paddingTop;
+                }
+            }
+            else if (cellPadding.top.isDefined()) {
+                y = areaHeight - cellHeight - paddingTop;
+            }
+            else {
+                height = areaHeight;
+            }
+
+        } else {
+            // Внешний компонент - позиционируем снаружи родителя
+            if (cellMargin.right.isDefined()) {
+                x = areaWidth + marginRight;
+            }
+            else if (cellMargin.left.isDefined()) {
+                x = - marginLeft - cellWidth;
+            }
+            else {
+                if (cellPadding.left.isDefined()) {
+                    x = paddingLeft;
+                    if (cellPadding.right.isDefined()) {
+                        width = areaWidth - paddingLeft - paddingRight;
+                    }
+                }
+                else if (cellPadding.right.isDefined()) {
+                    x = areaWidth - cellWidth - paddingRight;
+                }
+                else {
+                    width = areaWidth;
+                }
+            }
+            
+            if (cellMargin.top.isDefined()) {
+                y = areaHeight + marginTop;
+            }
+            else if (cellMargin.bottom.isDefined()) {
+                y = - marginBottom - cellHeight;
+            }
+            else {
+                if (cellPadding.bottom.isDefined()) {
+                    y = paddingTop;
+                    if (cellPadding.top.isDefined()) {
+                        height = areaHeight - paddingBottom - paddingTop;
+                    }
+                }
+                else if (cellPadding.top.isDefined()) {
+                    y = areaHeight - cellHeight - paddingTop;
+                }
+                else {
+                    height = areaHeight;
+                }
+            }
+        }
+    
+        // Рисуем ячейку компонента
+        const cell = this.drawCell(width, height);
+        cell.position = [x, y];
+        group.addChild(cell);
+    
+        // Рисуем стрелки для отступов
+        this.drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight);
+        
         return group;
     }
-    
-    // Получаем размеры компонента
-    const cellWidth = this.getValueFromYamlRange(cellPattern.width);
-    const cellHeight = this.getValueFromYamlRange(cellPattern.height);
-    
-    // Получаем отступы из location
-    const paddingTop = this.getValueFromYamlRange(component.location.top || 0);
-    const paddingLeft = this.getValueFromYamlRange(component.location.left || 0);
-    const paddingBottom = this.getValueFromYamlRange(component.location.bottom || 0);
-    const paddingRight = this.getValueFromYamlRange(component.location.right || 0);
-    
-    // Вычисляем позицию компонента
-    let x, y;
-    
-    if (component.inner) {
-        // Внутренний компонент - позиционируем внутри родителя с учетом padding
-        x = paddingLeft;
-        y = paddingTop;
-    } else {
-        // Внешний компонент - позиционируем снаружи родителя с учетом margin
-        // Для простоты располагаем слева от родителя
-        x = -paddingLeft - cellWidth;
-        y = paddingTop;
-    }
-    
-    // Рисуем ячейку компонента
-    const cellGroup = this.drawCellPattern(cellPattern);
-    cellGroup.position = [x, y];
-    group.addChild(cellGroup);
-    
-    // Рисуем стрелки для отступов
-    this.drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight);
-    
-    return group;
-}
 
-/**
- * Нарисовать стрелки для отступов
- */
-static drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight) {
-    const parentWidth = this.getValueFromYamlRange(parentPattern.width);
-    const parentHeight = this.getValueFromYamlRange(parentPattern.height);
-    
-    const offsets = [
-        {
-            type: component.inner ? 'padding' : 'margin',
-            direction: 'top',
-            value: this.getValueFromYamlRange(component.location.top || 0),
-            from: [x + cellWidth / 2, component.inner ? 0 : y + cellHeight],
-            to: [x + cellWidth / 2, y],
-            labelPos: [x + cellWidth / 2 - 15, y / 2]
-        },
-        {
-            type: component.inner ? 'padding' : 'margin',
-            direction: 'left',
-            value: this.getValueFromYamlRange(component.location.left || 0),
-            from: [component.inner ? 0 : x + cellWidth, y + cellHeight / 2],
-            to: [x, y + cellHeight / 2],
-            labelPos: [x / 2 - 15, y + cellHeight / 2 - 10]
-        },
-        {
-            type: component.inner ? 'padding' : 'margin',
-            direction: 'bottom',
-            value: this.getValueFromYamlRange(component.location.bottom || 0),
-            from: [x + cellWidth / 2, y + cellHeight],
-            to: [x + cellWidth / 2, component.inner ? parentHeight : y + cellHeight],
-            labelPos: [x + cellWidth / 2 - 15, y + cellHeight + (component.inner ? (parentHeight - y - cellHeight) / 2 : 0)]
-        },
-        {
-            type: component.inner ? 'padding' : 'margin',
-            direction: 'right',
-            value: this.getValueFromYamlRange(component.location.right || 0),
-            from: [x + cellWidth, y + cellHeight / 2],
-            to: [component.inner ? parentWidth : x + cellWidth, y + cellHeight / 2],
-            labelPos: [x + cellWidth + (component.inner ? (parentWidth - x - cellWidth) / 2 : 0), y + cellHeight / 2 - 10]
-        }
-    ];
-    
-    // Рисуем стрелки только для ненулевых отступов
-    for (const offset of offsets) {
-        if (offset.value > 0) {
-            this.drawDoubleArrowWithLabel(
-                group,
-                offset.from,
-                offset.to,
-                `${offset.type}-${offset.direction}: ${offset.value}`,
-                offset.labelPos
-            );
+    static getValueFromYamlRange(range) {
+        const max_len = range.getEnd();
+        const min_len = Math.max(range.getBegin(), 0);
+
+        const len_avg = max_len == Infinity ? min_len : (max_len + min_len) / 2;
+        return len_avg
+    }
+
+    /**
+     * Нарисовать стрелки для отступов
+     */
+    static drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight) {
+        const parentWidth = this.getValueFromYamlRange(parentPattern.width);
+        const parentHeight = this.getValueFromYamlRange(parentPattern.height);
+        
+        const offsets = [
+            {
+                type: component.inner ? 'padding' : 'margin',
+                direction: 'top',
+                value: this.getValueFromYamlRange(component.location.top || 0),
+                from: [x + cellWidth / 2, component.inner ? 0 : y + cellHeight],
+                to: [x + cellWidth / 2, y],
+                labelPos: [x + cellWidth / 2 - 15, y / 2]
+            },
+            {
+                type: component.inner ? 'padding' : 'margin',
+                direction: 'left',
+                value: this.getValueFromYamlRange(component.location.left || 0),
+                from: [component.inner ? 0 : x + cellWidth, y + cellHeight / 2],
+                to: [x, y + cellHeight / 2],
+                labelPos: [x / 2 - 15, y + cellHeight / 2 - 10]
+            },
+            {
+                type: component.inner ? 'padding' : 'margin',
+                direction: 'bottom',
+                value: this.getValueFromYamlRange(component.location.bottom || 0),
+                from: [x + cellWidth / 2, y + cellHeight],
+                to: [x + cellWidth / 2, component.inner ? parentHeight : y + cellHeight],
+                labelPos: [x + cellWidth / 2 - 15, y + cellHeight + (component.inner ? (parentHeight - y - cellHeight) / 2 : 0)]
+            },
+            {
+                type: component.inner ? 'padding' : 'margin',
+                direction: 'right',
+                value: this.getValueFromYamlRange(component.location.right || 0),
+                from: [x + cellWidth, y + cellHeight / 2],
+                to: [component.inner ? parentWidth : x + cellWidth, y + cellHeight / 2],
+                labelPos: [x + cellWidth + (component.inner ? (parentWidth - x - cellWidth) / 2 : 0), y + cellHeight / 2 - 10]
+            }
+        ];
+        
+        // Рисуем стрелки только для ненулевых отступов
+        for (const offset of offsets) {
+            if (offset.value > 0) {
+                this.drawDoubleArrowWithLabel(
+                    group,
+                    offset.from,
+                    offset.to,
+                    `${offset.type}-${offset.direction}: ${offset.value}`,
+                    offset.labelPos
+                );
+            }
         }
     }
-}
 
-/**
- * Нарисовать двухконечную стрелку с подписью
- */
-static drawDoubleArrowWithLabel(group, from, to, label, labelPos) {
-    // Рисуем основную линию
-    const line = new Path.Line({
-        from: from,
-        to: to,
-        strokeColor: 'blue',
-        strokeWidth: 1
-    });
-    group.addChild(line);
-    
-    // Рисуем стрелки на обоих концах
-    this.drawArrowhead(group, from, to);
-    this.drawArrowhead(group, to, from);
-    
-    // Добавляем подпись
-    const text = new PointText({
-        point: labelPos,
-        content: label,
-        fillColor: 'blue',
-        fontSize: 8,
-        fontFamily: 'Arial'
-    });
-    group.addChild(text);
-}
+    /**
+     * Нарисовать двухконечную стрелку с подписью
+     */
+    static drawDoubleArrowWithLabel(group, from, to, label, labelPos) {
+        // Рисуем основную линию
+        const line = new Path.Line({
+            from: from,
+            to: to,
+            strokeColor: 'blue',
+            strokeWidth: 1
+        });
+        group.addChild(line);
+        
+        // Рисуем стрелки на обоих концах
+        this.drawArrowhead(group, from, to);
+        this.drawArrowhead(group, to, from);
+        
+        // Добавляем подпись
+        const text = new PointText({
+            point: labelPos,
+            content: label,
+            fillColor: 'blue',
+            fontSize: 8,
+            fontFamily: 'Arial'
+        });
+        group.addChild(text);
+    }
 
-/**
- * Нарисовать стрелку
- */
-static drawArrowhead(group, point, directionPoint) {
-    const arrowSize = 5;
-    const angle = new Point(point).subtract(directionPoint).angle;
-    
-    const arrow = new Path.RegularPolygon({
-        center: point,
-        sides: 3,
-        radius: arrowSize,
-        fillColor: 'blue',
-        rotation: angle
-    });
-    group.addChild(arrow);
-}
+    /**
+     * Нарисовать стрелку
+     */
+    static drawArrowhead(group, point, directionPoint) {
+        const arrowSize = 5;
+        const angle = new Point(point).subtract(directionPoint).angle;
+        
+        const arrow = new Path.RegularPolygon({
+            center: point,
+            sides: 3,
+            radius: arrowSize,
+            fillColor: 'blue',
+            rotation: angle
+        });
+        group.addChild(arrow);
+    }
 }
