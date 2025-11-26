@@ -344,7 +344,7 @@ class drawer {
         group.addChild(cell);
     
         // Рисуем стрелки для отступов
-        this.drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight);
+        this.drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight, areaWidth, areaHeight);
         
         return group;
     }
@@ -360,9 +360,7 @@ class drawer {
     /**
      * Нарисовать стрелки для отступов
      */
-    static drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight) {
-        const parentWidth = this.getValueFromYamlRange(parentPattern.width);
-        const parentHeight = this.getValueFromYamlRange(parentPattern.height);
+    static drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight, parentWidth, parentHeight) {
         
         const offsets = [
             {
