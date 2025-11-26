@@ -115,7 +115,7 @@ class Grammar {
         rangeStr = rangeStr.replaceAll(/\s+/g, "");
 
         // Вернуть единичный интервал, если в строке только число (одно)
-        if (/\d+$/.test(rangeStr)) {
+        if (/^-?\d+$/.test(rangeStr)) {
             let i = parseInt(rangeStr);
             return new YamlRange(i, i);
         }
@@ -133,7 +133,7 @@ class Grammar {
             let end;
 
             // Парсим левую часть интервала
-            if (/\d+$/.test(parts[0])) {
+            if (/^-?\d+$/.test(parts[0])) {
                 begin = parseInt(parts[0]);
             } else if (parts[0] == "*") {
                 begin = -Infinity;
@@ -142,7 +142,7 @@ class Grammar {
             }
 
             // Парсим правую часть интервала
-            if (/\d+$/.test(parts[1])) {
+            if (/^-?\d+$/.test(parts[1])) {
                 end = parseInt(parts[1]);
             } else if (parts[1] == "*") {
                 end = Infinity;
@@ -159,7 +159,7 @@ class Grammar {
             const modifier = rangeStr.slice(-1);
 
             // Парсим число
-            if (/\d+$/.test(number)) {
+            if (/^-?\d+$/.test(number)) {
                 number = parseInt(number);
             } else {
                 throw new Error(`Не удается распознать число, задающее интервал: '${rangeStr}'.`);
