@@ -538,7 +538,7 @@ class Component {
             this.pattern = pattern;
             this.#patternName = pattern.name;
 
-            if (!(parentPattern instanceof ArrayPattern)) {
+            if (!(parentPattern instanceof AreaPattern)) {
                 throw new Error(`Компонент должен иметь ссылку на паттерн (область), в котором содержится`);
             }
             this.parentPattern = parentPattern;
