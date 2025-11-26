@@ -236,6 +236,8 @@ class drawer {
      * Отрисовать компонент
      * @param {Component} component 
      * @param {AreaPattern} parentPattern 
+     * @param {number} areaWidth 
+     * @param {number} areaHeight 
      */
     static drawComponent(component, parentPattern, areaWidth, areaHeight) {
         const group = new paper.Group();
@@ -254,6 +256,11 @@ class drawer {
         const marginLeft = this.getValueFromYamlRange(cellMargin.left);
         const marginBottom = this.getValueFromYamlRange(cellMargin.bottom);
         const marginRight = this.getValueFromYamlRange(cellMargin.right);
+
+        const paddings = {paddingTop, paddingLeft, paddingBottom, paddingRight};
+        const margins = {marginTop, marginLeft, marginBottom, marginRight};
+
+        const located = {paddings, margins};
     
         // Вычисляем позицию и ширину компонента
         const x = 0;
@@ -344,7 +351,7 @@ class drawer {
         group.addChild(cell);
     
         // Рисуем стрелки для отступов
-        this.drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight, areaWidth, areaHeight);
+        this.drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight, areaWidth, areaHeight, located);
         
         return group;
     }
@@ -359,41 +366,49 @@ class drawer {
 
     /**
      * Нарисовать стрелки для отступов
+     * @param {Component} component
+     * @param {AreaPattern} parentPattern 
+     * @param {number} x
+     * @param {number} y
+     * @param {number} cellWidth
+     * @param {number} cellHeight
+     * @param {number} areaWidth 
+     * @param {number} areaHeight 
      */
-    static drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight, parentWidth, parentHeight) {
+    static drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight, parentWidth, parentHeight, located) {
         
         const offsets = [
             {
-                type: component.inner ? 'padding' : 'margin',
+                type: component.location.margin.top.isDefined() ? 'margin' : 'padding',
                 direction: 'top',
-                value: this.getValueFromYamlRange(component.location.top || 0),
-                from: [x + cellWidth / 2, component.inner ? 0 : y + cellHeight],
+                value: component.location.margin.top.isDefined() ? located[1][0] : located[0][0],
+                from: [x + cellWidth / 2, component.location.padding.top.isDefined() ? 0 : y + cellHeight],
                 to: [x + cellWidth / 2, y],
                 labelPos: [x + cellWidth / 2 - 15, y / 2]
             },
             {
-                type: component.inner ? 'padding' : 'margin',
+                type: component.location.margin.left.isDefined() ? 'margin' : 'padding',
                 direction: 'left',
-                value: this.getValueFromYamlRange(component.location.left || 0),
-                from: [component.inner ? 0 : x + cellWidth, y + cellHeight / 2],
+                value: component.location.margin.left.isDefined() ? located[1][1] : located[0][1],
+                from: [component.location.padding.left.isDefined() ? 0 : x + cellWidth, y + cellHeight / 2],
                 to: [x, y + cellHeight / 2],
                 labelPos: [x / 2 - 15, y + cellHeight / 2 - 10]
             },
             {
-                type: component.inner ? 'padding' : 'margin',
+                type: component.location.margin.bottom.isDefined() ? 'margin' : 'padding',
                 direction: 'bottom',
-                value: this.getValueFromYamlRange(component.location.bottom || 0),
+                value: component.location.margin.bottom.isDefined() ? located[1][2] : located[0][2],
                 from: [x + cellWidth / 2, y + cellHeight],
-                to: [x + cellWidth / 2, component.inner ? parentHeight : y + cellHeight],
-                labelPos: [x + cellWidth / 2 - 15, y + cellHeight + (component.inner ? (parentHeight - y - cellHeight) / 2 : 0)]
+                to: [x + cellWidth / 2, component.location.padding.bottom.isDefined() ? parentHeight : y + cellHeight],
+                labelPos: [x + cellWidth / 2 - 15, y + cellHeight + (component.location.padding.bottom.isDefined() ? (parentHeight - y - cellHeight) / 2 : 0)]
             },
             {
-                type: component.inner ? 'padding' : 'margin',
+                type: component.location.margin.right.isDefined() ? 'margin' : 'padding',
                 direction: 'right',
-                value: this.getValueFromYamlRange(component.location.right || 0),
+                value: component.location.margin.right.isDefined() ? located[1][3] : located[0][3],
                 from: [x + cellWidth, y + cellHeight / 2],
-                to: [component.inner ? parentWidth : x + cellWidth, y + cellHeight / 2],
-                labelPos: [x + cellWidth + (component.inner ? (parentWidth - x - cellWidth) / 2 : 0), y + cellHeight / 2 - 10]
+                to: [component.location.padding.right.isDefined() ? parentWidth : x + cellWidth, y + cellHeight / 2],
+                labelPos: [x + cellWidth + (component.location.padding.right.isDefined() ? (parentWidth - x - cellWidth) / 2 : 0), y + cellHeight / 2 - 10]
             }
         ];
         
