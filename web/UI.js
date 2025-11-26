@@ -471,6 +471,7 @@ class UI {
         this.clearBrowser();
         this.setGeneralPatternParamsEnabled(false);
         this.setComponentParamsEnabled(false);
+        this.deleteSelectedButton.disabled = true;
     }
 
     static clearBrowser() {
