@@ -26,7 +26,7 @@ function onPageLoaded() {
         throw e;
     }
 
-    setInterval(saveToLocalStorage, 300000);
+    setInterval(saveToLocalStorage, 1000);
 }
 
 
