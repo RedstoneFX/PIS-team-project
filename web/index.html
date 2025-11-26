@@ -10,7 +10,11 @@
 
 <body>
     <div id="top-bar">
-        <button id="file-button">Файл</button><button id="edit-button">Правка</button>
+        <label for="load-from-file" class="button">Загрузить</label>
+        <input type="file" id="load-from-file" accept=".yml, .yaml" />
+        <button id="save-to-file">Сохранить</button>
+    </div>
+
     </div>
 
     <div id="the-editor">
@@ -51,17 +55,21 @@
 
                     <label>Размер</label>
                     <div id="pattern-size">
-                        <input type="number" id="pattern-x-min" class="numeric" min="1" placeholder="1" title="Минимальная ширина" />
-                        <input type="number" id="pattern-x-max" class="numeric" min="1" placeholder="+inf" title="Максимальная ширина" />
+                        <input type="number" id="pattern-x-min" class="numeric" min="1" placeholder="1"
+                            title="Минимальная ширина" />
+                        <input type="number" id="pattern-x-max" class="numeric" min="1" placeholder="+inf"
+                            title="Максимальная ширина" />
                         <div>x</div>
-                        <input type="number" id="pattern-y-min" class="numeric" min="1" placeholder="1" title="Минимальная высота" />
-                        <input type="number" id="pattern-y-max" class="numeric" min="1" placeholder="+inf" title="Максимальная высота" />
+                        <input type="number" id="pattern-y-min" class="numeric" min="1" placeholder="1"
+                            title="Минимальная высота" />
+                        <input type="number" id="pattern-y-max" class="numeric" min="1" placeholder="+inf"
+                            title="Максимальная высота" />
                     </div>
 
                     <label>Количество</label>
                     <div id="pattern-count">
-                        <input type="number" class="numeric" id="pattern-count-min" min="0"
-                            placeholder="0" />..<input type="number" class="numeric" id="pattern-count-max" min="1" placeholder="+Infinity" />
+                        <input type="number" class="numeric" id="pattern-count-min" min="0" placeholder="0" />..<input
+                            type="number" class="numeric" id="pattern-count-max" min="1" placeholder="+Infinity" />
                     </div>
                 </div>
             </details>
@@ -92,10 +100,10 @@
                     <label>Промежуток</label>
                     <div id="pattern-array-gap">
                         <input type="number" class="numeric" id="pattern-array-gap-min" min="0" max="100"
-                            placeholder="min" />
+                            placeholder="0" />
                         <div>..</div>
                         <input type="number" class="numeric" id="pattern-array-gap-max" min="0" max="100"
-                            placeholder="max" />
+                            placeholder="0" />
                     </div>
                     <label>Количество</label>
                     <div id="pattern-array-count">
