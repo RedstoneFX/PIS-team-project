@@ -350,9 +350,11 @@ class UI {
             } else if (data instanceof AreaPattern) {
                 this.setAreaParamsEnabled(true);
             } else this.setGeneralPatternParamsEnabled(true);
+            Drawer.drawPattern(data);
         } else if (data instanceof Component) {
             this.loadComponentData(data);
             this.setComponentParamsEnabled(true);
+            Drawer.drawComponent(data, data.parentPattern, data.parentPattern.width.getBegin, data.parentPattern.height.getBegin);
         }
     }
 
