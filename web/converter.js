@@ -440,7 +440,7 @@ class YamlRange {
     }
 
     setEnd(value) {
-        if (this.getBegin > value) {
+        if (this.getBegin() > value) {
             throw new Error('Конец диапазона не может быть больше начала');
         }
         this.#end = value;
