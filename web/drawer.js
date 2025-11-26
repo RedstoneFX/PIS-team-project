@@ -42,7 +42,7 @@ class Drawer {
         const height = Math.max(pattern_height_avg, 10);
 
         // Создаем прямоугольник ячейки
-        const cell = new Path.Rectangle({
+        const cell = new paper.Path.Rectangle({
             point: [0, 0],
             size: [width, height],
             strokeColor: 'black',
@@ -60,7 +60,7 @@ class Drawer {
      */
     static drawCell(width, height) {
         // Создаем прямоугольник ячейки
-        const cell = new Path.Rectangle({
+        const cell = new paper.Path.Rectangle({
             point: [0, 0],
             size: [width, height],
             strokeColor: 'black',
@@ -116,7 +116,7 @@ class Drawer {
         const height = Math.max(pattern_height_avg, min_pattern_height);
 
         // Создаем прямоугольник массива
-        const array_cell = new Path.Rectangle({
+        const array_cell = new paper.Path.Rectangle({
             point: [0, 0],
             size: [width, height],
             strokeColor: 'black',
@@ -213,7 +213,7 @@ class Drawer {
         const height = this.getValueFromYamlRange(pattern.height);
     
         // Рисуем основную область
-        const areaRect = new Path.Rectangle({
+        const areaRect = new paper.Path.Rectangle({
             point: [0, 0],
             size: [width, height],
             strokeColor: 'black',
@@ -431,7 +431,7 @@ class Drawer {
      */
     static drawDoubleArrowWithLabel(group, from, to, label, labelPos) {
         // Рисуем основную линию
-        const line = new Path.Line({
+        const line = new paper.Path.Line({
             from: from,
             to: to,
             strokeColor: 'blue',
@@ -461,7 +461,7 @@ class Drawer {
         const arrowSize = 5;
         const angle = new Point(point).subtract(directionPoint).angle;
         
-        const arrow = new Path.RegularPolygon({
+        const arrow = new paper.Path.RegularPolygon({
             center: point,
             sides: 3,
             radius: arrowSize,
