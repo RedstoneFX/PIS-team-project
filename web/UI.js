@@ -628,7 +628,7 @@ class UI {
         if (!this.validateComponentName(name)) return;
         let linkedPattern = UI_STORAGE.itemByID.get(this.newComponentPattern.value);
 
-        let comp = new Component(name, { pattern: linkedPattern.name }, false);
+        let comp = Component.fromYaml(name, { pattern: linkedPattern.name }, this.selectedItem, false);
         comp.resolveLinks();
 
         this.selectedItem.components.push(comp);
