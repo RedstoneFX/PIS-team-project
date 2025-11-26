@@ -621,6 +621,14 @@ class UI {
     static onCreateComponentDefinitionClicked() {
         let name = this.newComponentName.value;
         if (!this.validateComponentName(name)) return;
+        let pattern = AreaPattern.fromDataStructure("", "AREA", "", new YamlRange(0, Infinity), new YamlRange(1, Infinity), new YamlRange(1, Infinity), false, true);
+
+        let comp = Component.fromDataStructure(name, pattern, this.selectedItem, Grammar.parseYamlLocation("top"), false, false);
+
+        this.selectedItem.components.push(comp);
+
+        let compsElementsList = this.previousSelectedElement.lastElementChild;
+        compsElementsList.appendChild(this.generateBrowserElementForComponent(name, comp));
     }
 
     static onCreateComponentLinkClicked() {
