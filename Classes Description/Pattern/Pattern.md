@@ -4,7 +4,7 @@
 - `#width` - [[Range]]
 - `#height` - [[Range]]
 - `#kind` - [[PatternExtension]]
-
+- `#style` - объект, сохраняющий неиспользуемые данные стиля (пусть не будут терятся)
 Методы:
 - [[Pattern.constructor()]]
 - [[Pattern.destroy()]]
@@ -24,6 +24,7 @@ class Pattern {
 	#countInDocument = new Range().default(0,Infinity).limit(0, Infinity);
 	#width = new Range().default(1, Infinity).limit(1, Infinity);
 	#height = new Range().default(1, Infinity).limit(1, Infinity);
+	#style = {};
 	/** @type {PatternExtension} */
 	#kind;
 	#description = "";
