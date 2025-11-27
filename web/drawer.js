@@ -18,10 +18,20 @@ class Drawer {
     }
 
     /**
+     * Метод, который очищает холст
+     * @param {HTMLCanvasElement} canvas 
+     */
+    static clearCanvas(canvas) {
+        const ctx = canvas.getContext('2d');  
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
+
+    /**
      * Метод, который будет вызван для отрисовки паттерна неизвестного вида
      * @param {Pattern} pattern 
      */
     static drawPattern(pattern) {
+        this.clearCanvas(this.canvas);
         if (pattern instanceof CellPattern) this.drawCellPattern(pattern);
         else if (pattern instanceof ArrayPattern) this.drawArrayPattern(pattern);
         else if (pattern instanceof AreaPattern) this.drawAreaPattern(pattern);
