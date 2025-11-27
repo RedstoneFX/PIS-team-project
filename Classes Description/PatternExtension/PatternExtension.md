@@ -2,7 +2,7 @@
 - `#kindName`
 
 Методы:
-- [[PatternExtension.constructor()]]
+- [[PatternExtension.constructor(relatedPattern)]]
 - [[PatternExtension.destroy()]]
 - [[PatternExtension.getKindName()]]
 - [[PatternExtension.setKindName(name)]]
@@ -12,8 +12,9 @@
 ```js
 class PatternExtension {
 	#kindName = "";
+	#relatedPattern;
 
-constructor() {}
+constructor(relatedPattern) {}
 destroy() {}
 getKindName() {}
 setKindName(name) {}
