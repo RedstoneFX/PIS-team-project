@@ -28,15 +28,14 @@ function onPageLoaded() {
     Drawer.init();
     UI.init();
 
-    /*try {
-        Grammar.parse(testData);
-        //loadFromLocalStorage();
+    try {
+        loadFromLocalStorage();
         UI.loadFromGrammar();
     } catch (e) {
         UI.resetUI();
-        alert(e.message);
+        console.log("Загрузка автосохранения не удалась.");
         throw e;
-    }*/
+    }
 
     setInterval(saveToLocalStorage, 1000);
 }

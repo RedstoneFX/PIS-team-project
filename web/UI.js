@@ -864,10 +864,15 @@ class UI {
             alert("Нельзя изменить область, пока у неё есть компоненты!");
             e.target.value = oldType;
         } else {
+            try{
             let oldPattern = this.selectedItem;
             let newPattern = this.selectedItem.changeKind(newType);
             UI_STORAGE.replace(oldPattern, newPattern);
             this.selectBrowserElementByData(newPattern);
+            } catch (er) {
+                alert(er.message);
+                e.target.value = oldType;
+            }
         }
     }
 
