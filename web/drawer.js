@@ -10,6 +10,8 @@ class Drawer {
     /** @type {HTMLCanvasElement} */
     static canvas;
 
+    static elements = [];
+
     static init() {
         this.exampleVariable1 = 1;
         this.exampleVariable2 = 2;
@@ -18,12 +20,13 @@ class Drawer {
     }
 
     /**
-     * Метод, который очищает холст
-     * @param {HTMLCanvasElement} canvas 
+     * Метод, который очищает холст 
      */
-    static clearCanvas(canvas) {
-        const ctx = canvas.getContext('2d');  
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+    static clearCanvas() {
+        this.elements.forEach(element => {
+            element.remove();
+        });
+        this.elements = [];
     }
 
     /**
@@ -31,10 +34,20 @@ class Drawer {
      * @param {Pattern} pattern 
      */
     static drawPattern(pattern) {
-        this.clearCanvas(this.canvas);
-        if (pattern instanceof CellPattern) this.drawCellPattern(pattern);
-        else if (pattern instanceof ArrayPattern) this.drawArrayPattern(pattern);
-        else if (pattern instanceof AreaPattern) this.drawAreaPattern(pattern);
+        this.clearCanvas();
+
+        if (pattern instanceof CellPattern) {
+            const figure = this.drawCellPattern(pattern);
+            this.elements.push(figure);
+        }
+        else if (pattern instanceof ArrayPattern) {
+            const figure = this.drawArrayPattern(pattern);
+            this.elements.push(figure);
+        }
+        else if (pattern instanceof AreaPattern) {
+            const figure = this.drawAreaPattern(pattern);
+            this.elements.push(figure);
+        }
         else throw new Error("Нельзя отрисовать данный объект!");
     }
 
