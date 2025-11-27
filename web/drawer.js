@@ -41,7 +41,7 @@ class Drawer {
         const width = Math.max(pattern_width_avg, 10);
         const height = Math.max(pattern_height_avg, 10);
 
-        this.drawCell(width, height);
+        const cell = this.drawCell(width, height);
 
         return cell;
     }
