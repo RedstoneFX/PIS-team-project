@@ -1,6 +1,7 @@
 Наследуется от [[Pattern]]
 Поля:
 - `#parrentComponent`
+
 Методы:
 - [[PatternByPatternDefinition.constructor(parrentComponent)]]
 - [[PatternByPatternDefinition.destroy()]]

@@ -5,6 +5,7 @@
 - `#height` - [[Range]]
 - `#kind` - [[PatternExtension]]
 - `#style` - объект, сохраняющий неиспользуемые данные стиля (пусть не будут теряться)
+
 Методы:
 - [[Pattern.constructor()]]
 - [[Pattern.destroy()]]

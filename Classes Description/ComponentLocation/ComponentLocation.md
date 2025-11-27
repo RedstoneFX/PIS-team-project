@@ -7,6 +7,7 @@
 - `#isTopPadding`
 - `#isRihtPadding`
 - `#isBottomPadding`
+
 Методы:
 - [[ComponentLocation.constructor()]]
 - [[ComponentLocation.destroy()]]

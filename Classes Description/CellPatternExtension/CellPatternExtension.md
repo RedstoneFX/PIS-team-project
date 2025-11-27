@@ -2,6 +2,7 @@
 
 Поля:
 - `#contentType`
+
 Методы:
 - [[CellPatternExtension.setContentType(contentType)]]
 - [[CellPatternExtension.getContentType()]]

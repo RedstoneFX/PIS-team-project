@@ -3,6 +3,7 @@
 - `#parentPattern`
 - `#isOptional`
 - `#location` - [[ComponentLocation]]
+
 Методы:
 - [[Component.constructor(parentPattern)]]
 - [[Componennt.setPattern(pattern)]]
