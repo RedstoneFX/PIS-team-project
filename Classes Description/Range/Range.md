@@ -13,10 +13,10 @@
 - [[Range.limit(minBegin, maxEnd)]]
 - [[Range.isDefault()]]
 - [[Range.toString()]]
-- [[getBegin()]]
-- [[setBegin()]]
-- [[getEnd()]]
-- [[setEnd()]]
+- [[Range.getBegin()]]
+- [[Range.setBegin()]]
+- [[Range.getEnd()]]
+- [[Range.setEnd()]]
 
 ```js
 class Range {
