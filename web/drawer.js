@@ -122,13 +122,13 @@ class Drawer {
         // Создаем ячейки в зависимости от направления
         switch (pattern.direction) {
             case 'ROW':
-                drawRowArray(group, pattern.pattern, itemCount, gap, cellWidth);
+                this.drawRowArray(group, pattern.pattern, itemCount, gap, cellWidth);
                 break;
             case 'COLUMN':
-                drawColumnArray(group, pattern.pattern, itemCount, gap, cellHeight);
+                this.drawColumnArray(group, pattern.pattern, itemCount, gap, cellHeight);
                 break;
             case 'FILL':
-                drawFillArray(group, pattern.pattern, itemCount, gap, cellWidth, cellHeight);
+                this.drawFillArray(group, pattern.pattern, itemCount, gap, cellWidth, cellHeight);
                 break;
         }
     
@@ -140,7 +140,7 @@ class Drawer {
      */
     static drawRowArray(group, cellPattern, itemCount, gap, cellWidth) {
         for (let i = 0; i < itemCount; i++) {
-            let cell = drawCellPattern(cellPattern);
+            let cell = this.drawCellPattern(cellPattern);
             cell.position = [i * (cellWidth + gap), 0];
             group.addChild(cell);
         }
@@ -151,7 +151,7 @@ class Drawer {
      */
     static drawColumnArray(group, cellPattern, itemCount, gap, cellHeight) {
         for (let i = 0; i < itemCount; i++) {
-            let cell = drawCellPattern(cellPattern);
+            let cell = this.drawCellPattern(cellPattern);
             cell.position = [0, i * (cellHeight + gap)];
             group.addChild(cell);
         }
@@ -168,7 +168,7 @@ class Drawer {
             const row = Math.floor(i / columns);
             const col = i % columns;
         
-            let cell = drawCellPattern(cellPattern);
+            let cell = this.drawCellPattern(cellPattern);
             cell.position = [
                 col * (cellWidth + gap),
                 row * (cellHeight + gap)
