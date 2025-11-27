@@ -17,6 +17,7 @@
 - [[Range.setBegin()]]
 - [[Range.getEnd()]]
 - [[Range.setEnd()]]
+- [[Range.restoreDefault()]]
 
 ```js
 class Range {
