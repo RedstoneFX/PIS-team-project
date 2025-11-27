@@ -11,9 +11,9 @@
 ```js
 class CellPatternExtension extends PatternExtension{
 	#contentType = "";
-setContentType(contentType) {}
-getContentType() {}
-fromRawData(rawData) {}
-serializeTo(rawData) {/* Всегда записывать content_type, даже если он "" */}
+	setContentType(contentType) {}
+	getContentType() {}
+	fromRawData(rawData) {}
+	serializeTo(rawData) {/* Всегда записывать content_type, даже если он "" */}
 }
 ```
