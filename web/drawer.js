@@ -41,14 +41,7 @@ class Drawer {
         const width = Math.max(pattern_width_avg, 10);
         const height = Math.max(pattern_height_avg, 10);
 
-        // Создаем прямоугольник ячейки
-        const cell = new paper.Path.Rectangle({
-            point: [0, 0],
-            size: [width, height],
-            strokeColor: 'black',
-            strokeWidth: 2,
-            fillColor: 'none'
-        });
+        this.drawCell(width, height);
 
         return cell;
     }
@@ -76,7 +69,7 @@ class Drawer {
      * @param {ArrayPattern} pattern 
      */
     static drawArrayPattern(pattern) {
-        const group = new paper.Group();
+        let group = new paper.Group();
 
         const gap = this.getValueFromYamlRange(pattern.gap);
 
@@ -91,8 +84,8 @@ class Drawer {
         const cellWidth = Math.max(cell_width_avg, 0);
         const cellHeight = Math.max(cell_height_avg, 0);
 
-        const min_pattern_width = cellWidth;
-        const min_pattern_height = cellHeight;
+        let min_pattern_width = cellWidth;
+        let min_pattern_height = cellHeight;
 
         switch (pattern.direction) {
             case 'ROW':
@@ -147,7 +140,7 @@ class Drawer {
      */
     static drawRowArray(group, cellPattern, itemCount, gap, cellWidth) {
         for (let i = 0; i < itemCount; i++) {
-            const cell = drawCellPattern(cellPattern);
+            let cell = drawCellPattern(cellPattern);
             cell.position = [i * (cellWidth + gap), 0];
             group.addChild(cell);
         }
@@ -158,7 +151,7 @@ class Drawer {
      */
     static drawColumnArray(group, cellPattern, itemCount, gap, cellHeight) {
         for (let i = 0; i < itemCount; i++) {
-            const cell = drawCellPattern(cellPattern);
+            let cell = drawCellPattern(cellPattern);
             cell.position = [0, i * (cellHeight + gap)];
             group.addChild(cell);
         }
@@ -175,7 +168,7 @@ class Drawer {
             const row = Math.floor(i / columns);
             const col = i % columns;
         
-            const cell = drawCellPattern(cellPattern);
+            let cell = drawCellPattern(cellPattern);
             cell.position = [
                 col * (cellWidth + gap),
                 row * (cellHeight + gap)
@@ -189,14 +182,14 @@ class Drawer {
      * @param {AreaPattern} pattern 
      */
     static drawAreaPattern(pattern) {
-        const group = new paper.Group();
+        let group = new paper.Group();
 
-        const area_needed_width = 0;
-        const area_needed_height = 0;
+        let area_needed_width = 0;
+        let area_needed_height = 0;
 
         for (const component of pattern.components) {
-            const component_needed_width = this.getValueFromYamlRange(component.pattern.width);
-            const component_needed_height = this.getValueFromYamlRange(component.pattern.height);
+            let component_needed_width = this.getValueFromYamlRange(component.pattern.width);
+            let component_needed_height = this.getValueFromYamlRange(component.pattern.height);
                 
             component_needed_width += this.getValueFromYamlRange(component.location.padding.left);
             component_needed_width += this.getValueFromYamlRange(component.location.padding.right);
@@ -240,7 +233,7 @@ class Drawer {
      * @param {number} areaHeight 
      */
     static drawComponent(component, parentPattern, areaWidth, areaHeight) {
-        const group = new paper.Group();
+        let group = new paper.Group();
     
         // Получаем отступы из location
         const cellLocation = component.location;
@@ -263,14 +256,14 @@ class Drawer {
         const located = {paddings, margins};
     
         // Вычисляем позицию и ширину компонента
-        const x = 0;
-        const y = 0;
+        let x = 0;
+        let y = 0;
 
         const cellWidth = Math.max(pattern_width_avg, 10);
         const cellHeight = Math.max(pattern_height_avg, 10);
 
-        const width = cellWidth;
-        const height = cellHeight;
+        let width = cellWidth;
+        let height = cellHeight;
     
         if (component.inner) {
             // Внутренний компонент - позиционируем внутри 
@@ -346,7 +339,7 @@ class Drawer {
         }
     
         // Рисуем ячейку компонента
-        const cell = this.drawCell(width, height);
+        let cell = this.drawCell(width, height);
         cell.position = [x, y];
         group.addChild(cell);
     
