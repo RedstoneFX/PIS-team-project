@@ -10,6 +10,8 @@
 - [[Grammar.addPattern(name, pattern)]]
 -  [[Grammar.popPattern(name)]]
 - [[Grammar.getPatternByName(name)]]
+- [[Grammar.renamePattern(pattern, newName)]]
+- [[Grammar.getPatternName(pattern)]]
 - [[Grammar.getAllPatternEntries()]]
 - [[static Grammar.fromRawData(rawData)]]
 - [[Grammar.setRoot(pattern)]]
@@ -47,6 +49,8 @@ class Grammar {
  - `setRoot` ничего не делает, если этот паттерн уже корневой
  - `getRoot` возвращает `null`, если корня нет
  - `fromRawData` выбрасывает исключение, если не обнаруживает поле `cell_types_filepath` или `patterns`, или если они не являются `строкой` и `объектом-словарем` соответственно.
+ - renamePattern выбрасывает ошибку, если не может найти переименовываемый паттерн
+ - Grammar.getPatternName(pattern) выбрасывает ошибку, если не может найти паттерн
 
 #### Примечание
 Если какой-то из сторонних методов, используемых в `fromRawData` выбрасывает ошибку - не ловить её, пусть метод аварийно завершится сам.
