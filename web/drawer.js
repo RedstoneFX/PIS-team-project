@@ -58,7 +58,7 @@ class Drawer {
             size: [width, height],
             strokeColor: 'black',
             strokeWidth: 2,
-            fillColor: 'none'
+            fillColor: null
         });
 
         return cell;
@@ -114,7 +114,7 @@ class Drawer {
             size: [width, height],
             strokeColor: 'black',
             strokeWidth: 2,
-            fillColor: 'none'
+            fillColor: null
         });
 
         group.addChild(array_cell);
