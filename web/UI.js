@@ -314,7 +314,7 @@ class UI {
         while (this.isNameReserved(name + i)) ++i;
         name = name + i;
 
-        let newPattern = new Pattern(name, { kind: "area", size: "1 x 1" });
+        let newPattern = new AreaPattern(name, { kind: "area", size: "1+ x 1+" });
         Grammar.patterns.set(name, newPattern);
         this.browser.append(this.createBrowserElementForPattern(newPattern.name, newPattern));
         this.selectBrowserElementByData(newPattern);
