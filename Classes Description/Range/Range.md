@@ -30,9 +30,10 @@ class Range {
 
 	constructor(begin, end) {this.#begin = begin; this.#end = end;}
 	fromString(stringRange) {}
-	default(begin, end) {this.#begin = begin; this.#end = end; this.#defaultBegin = begin, this.defaultEnd()}
-	limit(minBegin, minEnd) {}
+	default(begin, end) {this.#defaultBegin = begin, this.#defaultEnd = end; restoreDefault()}
+	limit(minBegin, maxEnd) {}
 	isDefault() {} // Всегда false, если нет значений по умолчнию
+	restoreDefault() {}
 	toString() {}
 	getBegin() {}
 	setBegin() {}
