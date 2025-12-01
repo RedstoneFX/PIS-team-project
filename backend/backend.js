@@ -202,3 +202,51 @@ class Range {
         return this;
     }
 }
+
+class PatternExtension {
+    /** @type {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} */
+    #kindName = "";
+    /** @type {Pattern} */
+    #relatedPattern;
+
+    constructor(relatedPattern) {
+        if (!(relatedPattern instanceof Pattern)) {
+            throw new Error("Расширение может быть только у паттерна");
+        }
+        this.#relatedPattern = relatedPattern;
+    }
+
+    /**
+     * Сериализирует данные объекта
+     * @param {Object} rawData 
+     */
+    serializeTo(rawData) {
+        rawData.kind = this.#kindName.toLowerCase();
+    }
+
+    /**
+     * Извлекает необходимые для объекта данные
+     * @param {Object} rawData 
+     */
+    fromRawData(rawData) {
+        this.setKindName(rawData.kind);
+    }
+
+    /**
+     * Обнуляет ссылки объекта
+     */
+    destroy() {
+        this.#relatedPattern = null;
+    }
+
+    getKindName() {
+        return this.#kindName;
+    }
+
+    setKindName(kindName) {
+        if (!(typeof kindName === 'string' && ["CELL", "AREA", "ARRAY", "ARRAY-IN-CONTEXT"].includes(kindName.toUpperCase()))) {
+            throw new Error(`Неизвестный тип паттерна: ${kindName}. Поддерживаемые: CELL, AREA, ARRAY, ARRAY-IN-CONTEXT`);
+        }
+        this.#kindName = kindName.toUpperCase();
+    }
+}
