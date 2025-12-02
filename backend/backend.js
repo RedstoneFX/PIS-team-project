@@ -3,15 +3,8 @@
 class PatternExtension {
     /** @type {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} */
     #kindName = "";
-    /** @type {Pattern} */
-    #relatedPattern;
 
-    constructor(relatedPattern) {
-        if (!(relatedPattern instanceof Pattern)) {
-            throw new Error("Расширение может быть только у паттерна");
-        }
-        this.#relatedPattern = relatedPattern;
-    }
+    constructor() { }
 
     /**
      * Сериализирует данные объекта
@@ -32,9 +25,7 @@ class PatternExtension {
     /**
      * Обнуляет ссылки объекта
      */
-    destroy() {
-        this.#relatedPattern = null;
-    }
+    destroy() { }
 
     getKindName() {
         return this.#kindName;
