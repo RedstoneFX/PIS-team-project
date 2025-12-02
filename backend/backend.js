@@ -1,6 +1,54 @@
 
 
-class Range {
+class PatternExtension {
+    /** @type {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} */
+    #kindName = "";
+    /** @type {Pattern} */
+    #relatedPattern;
+
+    constructor(relatedPattern) {
+        if (!(relatedPattern instanceof Pattern)) {
+            throw new Error("Расширение может быть только у паттерна");
+        }
+        this.#relatedPattern = relatedPattern;
+    }
+
+    /**
+     * Сериализирует данные объекта
+     * @param {Object} rawData 
+     */
+    serializeTo(rawData) {
+        rawData.kind = this.#kindName.toLowerCase();
+    }
+
+    /**
+     * Извлекает необходимые для объекта данные
+     * @param {Object} rawData 
+     */
+    fromRawData(rawData) {
+        this.setKindName(rawData.kind);
+    }
+
+    /**
+     * Обнуляет ссылки объекта
+     */
+    destroy() {
+        this.#relatedPattern = null;
+    }
+
+    getKindName() {
+        return this.#kindName;
+    }
+
+    setKindName(kindName) {
+        if (!(typeof kindName === 'string' && ["CELL", "AREA", "ARRAY", "ARRAY-IN-CONTEXT"].includes(kindName.toUpperCase()))) {
+            throw new Error(`Неизвестный тип паттерна: ${kindName}. Поддерживаемые: CELL, AREA, ARRAY, ARRAY-IN-CONTEXT`);
+        }
+        this.#kindName = kindName.toUpperCase();
+    }
+}
+
+class Interval {
     /** @type {number} */
     #begin;
     /** @type {number} */
@@ -35,39 +83,39 @@ class Range {
 
     /**
      * Парсит диапазон значений из строки
-     * @param {String} stringRange
-     * @returns {Range}
+     * @param {String} stringInterval
+     * @returns {Interval}
      */
-    fromString(stringRange) {
+    fromString(stringInterval) {
         // Возвращаем пустышку, если ничего не переданно
-        if (!stringRange) {
-            return new Range(0, 0);
+        if (!stringInterval) {
+            return new Interval(0, 0);
         }
 
         // Если переданно число, то интервал сокращается до точки
-        if (typeof stringRange === 'number') {
-            return new Range(stringRange, stringRange);
-        } else if (typeof stringRange !== "string") { // Выбросить ошибку, если интервал не является строкой или числом
-            throw new Error(`Не удается распознать интервал: '${stringRange}'.`);
+        if (typeof stringInterval === 'number') {
+            return new Interval(stringInterval, stringInterval);
+        } else if (typeof stringInterval !== "string") { // Выбросить ошибку, если интервал не является строкой или числом
+            throw new Error(`Не удается распознать интервал: '${stringInterval}'.`);
         }
 
         // Удалить пробелы
-        stringRange = stringRange.replaceAll(/\s+/g, "");
+        stringInterval = stringInterval.replaceAll(/\s+/g, "");
 
         // Вернуть единичный интервал, если в строке только число (одно)
-        if (/^-?\d+$/.test(stringRange)) {
-            let num = parseInt(stringRange);
-            return new Range(num, num);
+        if (/^-?\d+$/.test(stringInterval)) {
+            let num = parseInt(stringInterval);
+            return new Interval(num, num);
         }
 
         // Если передана * - то интервал бесконечен с обоих концов
-        if (stringRange === '*') {
-            return new Range(-Infinity, Infinity);
+        if (stringInterval === '*') {
+            return new Interval(-Infinity, Infinity);
         }
 
         // Если в строке точно есть интервал...
-        if (stringRange.includes('..')) {
-            const parts = stringRange.split('..', 2); // Выделяем левую и правую часть интервала
+        if (stringInterval.includes('..')) {
+            const parts = stringInterval.split('..', 2); // Выделяем левую и правую часть интервала
 
             let begin;
             let end;
@@ -78,7 +126,7 @@ class Range {
             } else if (parts[0] == "*") {
                 begin = -Infinity;
             } else {
-                throw new Error(`Не удается распознать левую часть (${parts[0]}) интервала: '${stringRange}'.`);
+                throw new Error(`Не удается распознать левую часть (${parts[0]}) интервала: '${stringInterval}'.`);
             }
 
             // Парсим правую часть интервала
@@ -87,10 +135,10 @@ class Range {
             } else if (parts[1] == "*") {
                 end = Infinity;
             } else {
-                throw new Error(`Не удается распознать правую часть (${parts[1]}) интервала: '${stringRange}'.`);
+                throw new Error(`Не удается распознать правую часть (${parts[1]}) интервала: '${stringInterval}'.`);
             }
 
-            return new Range(begin, end);
+            return new Interval(begin, end);
         }
     }
 
@@ -200,53 +248,5 @@ class Range {
         }
         this.#end = end;
         return this;
-    }
-}
-
-class PatternExtension {
-    /** @type {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} */
-    #kindName = "";
-    /** @type {Pattern} */
-    #relatedPattern;
-
-    constructor(relatedPattern) {
-        if (!(relatedPattern instanceof Pattern)) {
-            throw new Error("Расширение может быть только у паттерна");
-        }
-        this.#relatedPattern = relatedPattern;
-    }
-
-    /**
-     * Сериализирует данные объекта
-     * @param {Object} rawData 
-     */
-    serializeTo(rawData) {
-        rawData.kind = this.#kindName.toLowerCase();
-    }
-
-    /**
-     * Извлекает необходимые для объекта данные
-     * @param {Object} rawData 
-     */
-    fromRawData(rawData) {
-        this.setKindName(rawData.kind);
-    }
-
-    /**
-     * Обнуляет ссылки объекта
-     */
-    destroy() {
-        this.#relatedPattern = null;
-    }
-
-    getKindName() {
-        return this.#kindName;
-    }
-
-    setKindName(kindName) {
-        if (!(typeof kindName === 'string' && ["CELL", "AREA", "ARRAY", "ARRAY-IN-CONTEXT"].includes(kindName.toUpperCase()))) {
-            throw new Error(`Неизвестный тип паттерна: ${kindName}. Поддерживаемые: CELL, AREA, ARRAY, ARRAY-IN-CONTEXT`);
-        }
-        this.#kindName = kindName.toUpperCase();
     }
 }
