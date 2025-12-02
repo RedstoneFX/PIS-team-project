@@ -1,4 +1,217 @@
 
+class Pattern {
+    /** @type {string} */
+    #description = "";
+    /** @type {PatternExtension} */
+    #kind = null;
+    /** @type {Interval} */
+    #width = new Interval().default(1, Infinity).limit(1, Infinity);
+    /** @type {Interval} */
+    #height = new Interval().default(1, Infinity).limit(1, Infinity);
+    /** @type {Interval} */
+    #countInDocument = new Interval().default(0, Infinity).limit(0, Infinity);
+    /** @type {Object} */
+    #style = {};
+
+    constructor() { }
+
+    /**
+     * Генерирует расширение для текущего паттерна на основе сырых данных
+     * @param {Object} rawData 
+     */
+    resolveKindFromRawData(rawData) {
+        // Выбросить ошибку, если у паттерна уже есть kind
+        if (this.#kind) {
+            throw new Error(`Текущий паттерн уже имеет тип данных`);
+        }
+        // Выбросить ошибку, если в сырых данных не указан тип
+        if (!rawData.kind) {
+            throw new Error(`Текущий паттерн не имеет поля 'kind'`);
+        }
+
+        // Создать расширение, соответствующее полю rawData.kind...
+        const newKind = rawData.kind.toUpperCase();
+        // Если искомый тип паттерна - клетка...
+        if (newKind === "CELL") {
+            // Создать расширение клетки
+            this.#kind = new CellPatternExtension.fromRawData(rawData);
+        } else if (newKind === "ARRAY" || newKind === "ARRAY-IN-CONTEXT") { // Иначе если искомый тип паттерна - массив...
+            // Создать расширение массива
+            this.#kind = new ArrayPatternExtension.fromRawData(rawData);
+        } else if (newKind === "AREA") { // Иначе если искомый тип паттерна - область...
+            // Создать расширение массива
+            this.#kind = new AreaPatternExtension.fromRawData(rawData);
+        } else { // Иначе
+            // Выбросить ошибку о невозможности распознания вида паттерна по ключевому слову в поле rawData.kind
+            throw new Error(`В поле kind указан неизвестный тип паттерна: ${newKind}. Поддерживаемые: CELL, ARRAY, ARRAY-IN-CONTEXT, AREA`);
+        }
+    }
+
+    /**
+     * Извлекает необходимые для объекта данные
+     * @param {Object} rawData 
+     * @returns является ли паттерн корневым
+     */
+    fromRawData(rawData) {
+        // Обновить description из данных, если такое поле есть
+        if (rawData.description) {
+            this.#description = rawData.description;
+        }
+
+        // Записать kind из данных
+        if (rawData.kind) {
+            this.resolveKindFromRawData(rawData);
+        } else {
+            throw new Error(`Текущий паттерн не имеет поля 'kind'`);
+        }
+
+        // Обновить width и height из данных, если поле size есть
+        if (rawData.size) {
+            // Удалить пробелы из приведённой к нижнему регистру строки и разделить по "x"
+            const parts = rawData.size.toLowerCase().replaceAll(/\s+/g, "").split("x");
+
+            // Выбросить ошибку, если строка не задаёт размер
+            if (parts.length !== 2 || !parts[0] || !parts[1]) {
+                throw new Error(`Некорректный формат размера: ${rawData.size}. Ожидается формат "ширина x высота"`);
+            }
+
+            this.#width.fromString(parts[0]);
+            this.#height.fromString(parts[1]);
+        }
+
+        // Обновить countInDocument из данных, если такое поле есть
+        if (rawData.count_in_document) {
+            this.#countInDocument.fromString(rawData.count_in_document);
+        }
+
+        // Сохранить значение поля style, если такое поле есть (не терять неиспользуемые данные)
+        if (rawData.style) {
+            this.#style = rawData.style;
+        }
+
+        // Проверить, является ли паттерн корневым
+        let isRoot = data.root;
+        if (this.isRoot === null || this.isRoot == undefined) this.isRoot = false;
+        if (!(this.isRoot === true || this.isRoot === false)) {
+            throw new Error(`Паттерн имеет нечитаемое значение root (${data.root})`);
+        }
+
+        return isRoot;
+    }
+
+    /**
+     * Сериализирует данные объекта
+     * @param {Object} rawData 
+     */
+    serialize() {
+        // Выкинуть ошибку, если у текущего паттерна нет типа
+        if (!this.#kind) {
+            throw new Error(`Невозможно сериализовать, так как текущий паттерн не имеет типа`);
+        }
+
+        // Создать новый пустой объект
+        const result = {};
+        // Записать в объект общие данные паттерна...
+        // Записать в объект поле description, если описание не пустое
+        if (this.#description.length !== 0) {
+            result.description = this.#description;
+        }
+        // Записать в объект данные, зависящие от типа, с помощью PatternExtension.serializeTo(rawData)
+        this.#kind.serializeTo(result);
+        // Записать в объект поле size, если width и height не являются значениями по умолчанию
+        if (!(this.#width.isDefault() && this.#height.isDefault())) {
+            result.size = `${this.#width.toString()} x ${this.#height.toString()}`;
+        }
+        // Записать в объект поле count_in_document, если countInDocument не является значением по умолчанию
+        if (!this.#countInDocument.isDefault()) {
+            result.count_in_document = this.#countInDocument.toString();
+        }
+        // Записать в объект поле style, если this.style не пустой
+        if (this.#style) {
+            result.style = this.#style;
+        }
+
+        // Вернуть созданный сериализованный объект
+        return result;
+    }
+
+    /**
+     * Обнуляет ссылки объекта
+     */
+    destroy() {
+        if (this.#kind) {
+            this.#kind.destroy();
+        }
+        this.#kind = null;
+        this.#width = null;
+        this.#height = null;
+        this.#style = null;
+        this.#countInDocument = null;
+    }
+
+    setKind(kind) {
+        if (!(kind instanceof PatternExtension)) {
+            throw new Error(`Тип паттерна должен быть расширением паттерна`);
+        }
+        if (this.#kind) {
+            this.#kind.destroy();
+        }
+        this.#kind = kind;
+        return this;
+    }
+
+    getKind() {
+        return this.#kind;
+    }
+
+    setDescription(description) {
+        if (typeof description != "string") {
+            throw new Error(`Описание паттерна должно быть строкой`);
+        }
+        this.#description = description;
+        return this;
+    }
+
+    getDescription() {
+        return this.#description;
+    }
+
+    setWidth(width) {
+        if (!(width instanceof Interval)) {
+            throw new Error(`Ширина паттерна должна быть задана интервалом`);
+        }
+        this.#width = width;
+        return this;
+    }
+
+    getWidth() {
+        return this.#width;
+    }
+
+    setHeight(height) {
+        if (!(height instanceof Interval)) {
+            throw new Error(`Высота паттерна должна быть задана интервалом`);
+        }
+        this.#height = height;
+        return this;
+    }
+
+    getHeight() {
+        return this.#height;
+    }
+
+    setCountInDocument(count) {
+        if (!(count instanceof Interval)) {
+            throw new Error(`Количество паттернов в документе должно быть задано интервалом`);
+        }
+        this.#countInDocument = count;
+        return this;
+    }
+
+    getCountInDocument() {
+        return this.#countInDocument;
+    }
+}
 
 class PatternExtension {
     /** @type {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} */
@@ -19,6 +232,9 @@ class PatternExtension {
      * @param {Object} rawData 
      */
     fromRawData(rawData) {
+        if (!rawData.kind) {
+            throw new Error(`Паттерн не имеет типа`);
+        }
         this.setKindName(rawData.kind);
     }
 
