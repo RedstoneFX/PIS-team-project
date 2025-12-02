@@ -51,7 +51,7 @@ class Interval {
     /** @type {number} */
     #minBegin = -Infinity;
     /** @type {number} */
-    #maxEnd = infinity;
+    #maxEnd = Infinity;
 
     /**
      * Конструктор
@@ -59,17 +59,22 @@ class Interval {
      * @param {number} end
      */
     constructor(begin, end) {
-        if (begin > end) {
-            throw new Error('Конец диапазона не может быть меньше начала');
+        if (begin && end) {
+            if (begin > end) {
+                throw new Error('Конец диапазона не может быть меньше начала');
+            }
+            if (begin < this.#minBegin) {
+                throw new Error(`Начало не может быть меньше минимально допустимого (${this.#minBegin})`);
+            }
+            if (end > this.#maxEnd) {
+                throw new Error(`Начало не может быть больше максимально допустимого (${this.#maxEnd})`);
+            }
+            this.#begin = begin;
+            this.#end = end;
+        } else {
+            this.#begin = 0;
+            this.#end = 0;
         }
-        if (begin < this.#minBegin) {
-            throw new Error(`Начало не может быть меньше минимально допустимого (${this.#minBegin})`);
-        }
-        if (end > this.#maxEnd) {
-            throw new Error(`Начало не может быть больше максимально допустимого (${this.#maxEnd})`);
-        }
-        this.#begin = begin;
-        this.#end = end;
     }
 
     /**
@@ -186,8 +191,13 @@ class Interval {
      * @returns возвращает себя для цепного вызова
      */
     restoreDefault() {
-        this.#begin = this.#defaultBegin;
-        this.#end = this.#defaultEnd;
+        if (this.#defaultBegin && this.#defaultEnd) {
+            this.#begin = this.#defaultBegin;
+            this.#end = this.#defaultEnd;
+        } else {
+            this.#begin = 0;
+            this.#end = 0;
+        }
         return this;
     }
 
