@@ -460,7 +460,7 @@ class PatternExtension {
      * Сериализирует данные объекта
      * @param {Object} rawData 
      */
-    serializeTo(rawData) {
+    serializeTo(rawData, grammar) {
         rawData.kind = this.#kindName.toLowerCase();
     }
 
@@ -522,7 +522,7 @@ class CellPatternExtension extends PatternExtension {
      * Сериализирует данные объекта
      * @param {Object} rawData 
      */
-    serializeTo(rawData) {
+    serializeTo(rawData, grammar) {
         super.serializeTo(rawData);
         rawData.content_type = this.#contentType;
     }
