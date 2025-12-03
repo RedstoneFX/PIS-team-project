@@ -693,6 +693,9 @@ class Interval {
     }
 
     setBegin(begin) {
+        if (typeof begin !== 'number') {
+            throw new Error(`Начало интервала должно быть задано числом`);
+        }
         if (begin > this.#end) {
             throw new Error('Конец диапазона не может быть меньше начала');
         }
@@ -708,6 +711,9 @@ class Interval {
     }
 
     setEnd(end) {
+        if (typeof end !== 'number') {
+            throw new Error(`Конец интервала должен быть задан числом`);
+        }
         if (this.#begin > end) {
             throw new Error('Конец диапазона не может быть меньше начала');
         }
