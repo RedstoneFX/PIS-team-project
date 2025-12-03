@@ -34,13 +34,13 @@ class Pattern {
         // Если искомый тип паттерна - клетка...
         if (newKind === "CELL") {
             // Создать расширение клетки
-            this.#kind = new CellPatternExtension.fromRawData(rawData);
+            this.#kind = new CellPatternExtension().fromRawData(rawData);
         } else if (newKind === "ARRAY" || newKind === "ARRAY-IN-CONTEXT") { // Иначе если искомый тип паттерна - массив...
             // Создать расширение массива
-            this.#kind = new ArrayPatternExtension.fromRawData(rawData);
+            this.#kind = new ArrayPatternExtension().fromRawData(rawData);
         } else if (newKind === "AREA") { // Иначе если искомый тип паттерна - область...
             // Создать расширение массива
-            this.#kind = new AreaPatternExtension.fromRawData(rawData);
+            this.#kind = new AreaPatternExtension().fromRawData(rawData);
         } else { // Иначе
             // Выбросить ошибку о невозможности распознания вида паттерна по ключевому слову в поле rawData.kind
             throw new Error(`В поле kind указан неизвестный тип паттерна: ${newKind}. Поддерживаемые: CELL, ARRAY, ARRAY-IN-CONTEXT, AREA`);
