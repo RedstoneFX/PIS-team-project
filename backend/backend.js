@@ -50,7 +50,7 @@ class Pattern {
     /**
      * Извлекает необходимые для объекта данные
      * @param {Object} rawData 
-     * @returns является ли паттерн корневым
+     * @returns возвращает себя для цепного вызова
      */
     fromRawData(rawData) {
         // Обновить description из данных, если такое поле есть
@@ -89,14 +89,7 @@ class Pattern {
             this.#style = rawData.style;
         }
 
-        // Проверить, является ли паттерн корневым
-        let isRoot = data.root;
-        if (this.isRoot === null || this.isRoot == undefined) this.isRoot = false;
-        if (!(this.isRoot === true || this.isRoot === false)) {
-            throw new Error(`Паттерн имеет нечитаемое значение root (${data.root})`);
-        }
-
-        return isRoot;
+        return this;
     }
 
     /**
@@ -230,12 +223,14 @@ class PatternExtension {
     /**
      * Извлекает необходимые для объекта данные
      * @param {Object} rawData 
+     * @returns возвращает себя для цепного вызова
      */
     fromRawData(rawData) {
         if (!rawData.kind) {
             throw new Error(`Паттерн не имеет типа`);
         }
         this.setKindName(rawData.kind);
+        return this;
     }
 
     /**
