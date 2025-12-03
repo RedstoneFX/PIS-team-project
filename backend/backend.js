@@ -192,6 +192,10 @@ class Grammar {
         return this.#patterns.entries();
     }
 
+    /**
+     * @param {Pattern} pattern 
+     * @returns возвращает себя для цепного вызова
+     */
     setRoot(pattern) {
         if (!(pattern instanceof Pattern)) {
             throw new Error(`Только паттерн может быть корнем`);
@@ -206,6 +210,10 @@ class Grammar {
         return this.#rootPattern;
     }
 
+    /**
+     * @param {string} filepath 
+     * @returns возвращает себя для цепного вызова
+     */
     setCellTypesFilepath(filepath) {
         if (typeof filepath !== "string") {
             throw new Error(`Путь к файлу с описанием типов клеток должен быть строкой`);
@@ -355,6 +363,10 @@ class Pattern {
         this.#countInDocument = null;
     }
 
+    /**
+     * @param {PatternExtension} kind 
+     * @returns возвращает себя для цепного вызова
+     */
     setKind(kind) {
         if (!(kind instanceof PatternExtension)) {
             throw new Error(`Тип паттерна должен быть расширением паттерна`);
@@ -370,6 +382,10 @@ class Pattern {
         return this.#kind;
     }
 
+    /**
+     * @param {string} description 
+     * @returns возвращает себя для цепного вызова
+     */
     setDescription(description) {
         if (typeof description != "string") {
             throw new Error(`Описание паттерна должно быть строкой`);
@@ -382,11 +398,16 @@ class Pattern {
         return this.#description;
     }
 
-    setWidth(width) {
-        if (!(width instanceof Interval)) {
-            throw new Error(`Ширина паттерна должна быть задана интервалом`);
+    /**
+     * @param {number} widthBegin 
+     * @param {number} widthEnd 
+     * @returns возвращает себя для цепного вызова
+     */
+    setWidth(widthBegin, widthEnd) {
+        if (this.#width === null) {
+            throw new Error(`Объект уничтожен`);
         }
-        this.#width = width;
+        this.#width.setBegin(widthBegin).setEnd(widthEnd);
         return this;
     }
 
@@ -394,11 +415,16 @@ class Pattern {
         return this.#width;
     }
 
-    setHeight(height) {
-        if (!(height instanceof Interval)) {
-            throw new Error(`Высота паттерна должна быть задана интервалом`);
+    /**
+     * @param {number} heightBegin 
+     * @param {number} heightEnd 
+     * @returns возвращает себя для цепного вызова
+     */
+    setHeight(heightBegin, heightEnd) {
+        if (this.#height === null) {
+            throw new Error(`Объект уничтожен`);
         }
-        this.#height = height;
+        this.#height.setBegin(heightBegin).setEnd(heightEnd);
         return this;
     }
 
@@ -406,11 +432,16 @@ class Pattern {
         return this.#height;
     }
 
-    setCountInDocument(count) {
-        if (!(count instanceof Interval)) {
-            throw new Error(`Количество паттернов в документе должно быть задано интервалом`);
+    /**
+     * @param {number} countBegin 
+     * @param {number} countEnd 
+     * @returns возвращает себя для цепного вызова
+     */
+    setCountInDocument(countBegin, countEnd) {
+        if (this.#countInDocument === null) {
+            throw new Error(`Объект уничтожен`);
         }
-        this.#countInDocument = count;
+        this.#countInDocument.setBegin(countBegin).setEnd(countEnd);
         return this;
     }
 
@@ -455,6 +486,9 @@ class PatternExtension {
         return this.#kindName;
     }
 
+    /**
+     * @param {string} kindName 
+     */
     setKindName(kindName) {
         if (!(typeof kindName === 'string' && ["CELL", "AREA", "ARRAY", "ARRAY-IN-CONTEXT"].includes(kindName.toUpperCase()))) {
             throw new Error(`Неизвестный тип паттерна: ${kindName}. Поддерживаемые: CELL, AREA, ARRAY, ARRAY-IN-CONTEXT`);
@@ -493,6 +527,10 @@ class CellPatternExtension extends PatternExtension {
         rawData.content_type = this.#contentType;
     }
 
+    /**
+     * @param {string} contentType 
+     * @returns 
+     */
     setContentType(contentType) {
         if (typeof contentType !== 'string') {
             throw new Error(`Тип данных ячейки должен быть задан строкой`);
@@ -830,6 +868,10 @@ class Interval {
         return this.#begin;
     }
 
+    /**
+     * @param {number} begin 
+     * @returns 
+     */
     setBegin(begin) {
         if (typeof begin !== 'number') {
             throw new Error(`Начало интервала должно быть задано числом`);
@@ -848,6 +890,10 @@ class Interval {
         return this.#end;
     }
 
+    /**
+     * @param {number} end 
+     * @returns 
+     */
     setEnd(end) {
         if (typeof end !== 'number') {
             throw new Error(`Конец интервала должен быть задан числом`);
