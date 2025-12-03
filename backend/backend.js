@@ -58,13 +58,6 @@ class Pattern {
             this.#description = rawData.description;
         }
 
-        // Записать kind из данных
-        if (rawData.kind) {
-            this.resolveKindFromRawData(rawData);
-        } else {
-            throw new Error(`Текущий паттерн не имеет поля 'kind'`);
-        }
-
         // Обновить width и height из данных, если поле size есть
         if (rawData.size) {
             // Удалить пробелы из приведённой к нижнему регистру строки и разделить по "x"
