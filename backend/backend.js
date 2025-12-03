@@ -463,6 +463,49 @@ class PatternExtension {
     }
 }
 
+class CellPatternExtension extends PatternExtension {
+    /** @type {string} */
+    #contentType = "";
+
+    /**
+     * Извлекает необходимые для объекта данные
+     * @param {Object} rawData 
+     * @returns возвращает себя для цепного вызова
+     */
+    fromRawData(rawData) {
+        super.fromRawData(rawData);
+        if (!rawData.kind || rawData.kind.toUpperCase() !== "CELL") {
+            throw new Error(`Исходные данные не соответствуют паттерну типа 'ячейка'`);
+        }
+        if (!rawData.content_type) {
+            throw new Error(`Исходные данные для паттерна типа 'ячейка' не содержат поля 'content_type'`)
+        }
+        this.setContentType(rawData.content_type);
+        return this;
+    }
+
+    /**
+     * Сериализирует данные объекта
+     * @param {Object} rawData 
+     */
+    serializeTo(rawData) {
+        super.serializeTo(rawData);
+        rawData.content_type = this.#contentType;
+    }
+
+    setContentType(contentType) {
+        if (typeof contentType !== 'string') {
+            throw new Error(`Тип данных ячейки должен быть задан строкой`);
+        }
+        this.#contentType = contentType.toUpperCase();
+        return this;
+    }
+
+    getContentType() {
+        return this.#contentType;
+    }
+}
+
 class Interval {
     /** @type {number} */
     #begin;
