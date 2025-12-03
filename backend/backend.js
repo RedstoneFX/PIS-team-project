@@ -686,17 +686,16 @@ class Interval {
     /**
      * Парсит диапазон значений из строки
      * @param {String} stringInterval
-     * @returns {Interval}
+     * @returns возвращает себя для цепного вызова
      */
     fromString(stringInterval) {
-        // Возвращаем пустышку, если ничего не переданно
         if (!stringInterval) {
-            return new Interval(0, 0);
+            return this;
         }
 
         // Если переданно число, то интервал сокращается до точки
         if (typeof stringInterval === 'number') {
-            return new Interval(stringInterval, stringInterval);
+            this.setBegin(stringInterval).setEnd(stringInterval);
         } else if (typeof stringInterval !== "string") { // Выбросить ошибку, если интервал не является строкой или числом
             throw new Error(`Не удается распознать интервал: '${stringInterval}'.`);
         }
@@ -707,12 +706,12 @@ class Interval {
         // Вернуть единичный интервал, если в строке только число (одно)
         if (/^-?\d+$/.test(stringInterval)) {
             let num = parseInt(stringInterval);
-            return new Interval(num, num);
+            this.setBegin(num).setEnd(num);
         }
 
         // Если передана * - то интервал бесконечен с обоих концов
         if (stringInterval === '*') {
-            return new Interval(-Infinity, Infinity);
+            this.setBegin(-Infinity).setEnd(Infinity);
         }
 
         // Если в строке точно есть интервал...
@@ -740,7 +739,7 @@ class Interval {
                 throw new Error(`Не удается распознать правую часть (${parts[1]}) интервала: '${stringInterval}'.`);
             }
 
-            return new Interval(begin, end);
+            this.setBegin(begin).setEnd(end);
         }
     }
 
