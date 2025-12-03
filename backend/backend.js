@@ -1,4 +1,224 @@
 
+class Grammar {
+    /** @type {string} */
+    #cellTypesFilepath = "";
+    /** @type {Map<string, Pattern} */
+    #patterns = new Map();
+    /** @type {Pattern} */
+    #rootPattern = null;
+
+    constructor() { }
+
+    /**
+     * Создает новую грамматику на основе исходных данных
+     * @param {Object} rawData 
+     * @returns новая грамматика
+     */
+    static fromRawData(rawData) {
+        let tmp;
+        // Проверка типа исходных данных: должен быть объект
+        if (!rawData || typeof rawData !== 'object') {
+            throw new Error("Некорректные исходные данные");
+        }
+
+        // Создать пустой объект грамматики
+        const grammar = new Grammar();
+
+        // Заполнить #cell_types_filepath в грамматике...
+        tmp = rawData.cell_types_filepath;
+        // Выкинуть ошибку, если сell_types_filepath отсутствует
+        if (!tmp) {
+            throw new Error(`Поле сell_types_filepath отсутствует в исходных данных`)
+        }
+        // Выкинуть ошибку, если cell_types_filepath не является строкой
+        if (typeof tmp !== "string") {
+            throw new Error(`Путь к файлу с описанием типов клеток должен быть строкой`);
+        }
+        // Установить значение #cell_types_filepath
+        grammar.setCellTypesFilepath(tmp);
+
+        // Заполнить паттерны в грамматике...
+        tmp = rawData.patterns;
+        // Выбросить ошибку, если patterns отсутствует
+        if (!tmp) {
+            throw new Error(`Поле patterns отсутствует в исходных данных`)
+        }
+        // Создать паттерны без парсинга специфичных данных их типов...
+        // Для каждого паттерна в сырых данных...
+        for (const [patternName, patternData] of Object.entries(tmp)) {
+            // Создать новый паттерн на основе этих данных
+            let pattern = new Pattern().fromRawData(patternData);
+            // Обновить информацию о корневом узле...
+            // Проверить, является ли паттерн корневым
+            let isRoot = patternData.root;
+            if (!(this.isRoot === true || this.isRoot === false || this.isRoot === null || this.isRoot == undefined)) {
+                throw new Error(`Паттерн имеет нечитаемое значение root (${isRoot})`);
+            }
+            // Если паттерн корневой
+            if (isRoot) {
+                // Вывести уведомление в консоль, если корневой паттерн уже был
+                if (grammar.getRoot()) {
+                    console.log(`Иммется более чем один корневой паттерн. Записан только последний: '${patternName}'.`);
+                }
+                // Считать этот паттерн корневым
+                grammar.setRoot(pattern);
+            }
+            // Добавить паттерн в словарь паттернов по его имени
+            grammar.addPattern(patternName, pattern);
+        }
+
+        // Обработать специфичные данные для типов паттернов...
+        // Для каждого паттерна в словаре и его исходных данных...
+        for (const [patternName, patternData] of Object.entries(tmp)) {
+            // Обработать специфичные данные типа через Pattern.resolveKindFromRawData(rawData)
+            grammar.getPatternByName(patternName).resolveKindFromRawData(patternData);
+        }
+
+        // Вернуть созданный объект грамматики
+        return grammar;
+    }
+
+    /**
+     * Создает объект в формате исходных данных с информацией из грамматики
+     * @returns объект в формате исходных данных
+     */
+    serialize() {
+        // Создать новый пустой объект
+        const result = {};
+
+        // Записать поле cell_types_filepath, если такие данные есть
+        if (this.#cellTypesFilepath.length > 0) {
+            result.cell_types_filepath = this.#cellTypesFilepath;
+        }
+
+        // Если количество паттернов больше нуля...
+        if (this.#patterns.size > 0) {
+            // Записать в поле patterns пустой список
+            result.patterns = {};
+            // Для каждого известного паттерна...
+            for (const [patternName, pattern] of this.#patterns) {
+                // Добавить в поле patterns объект, созданный сериализацией паттерна через Pattern.serialize()
+                result.patterns[patternName] = pattern.serialize();
+            }
+        }
+
+        // Вернуть созданный объект
+        return result;
+    }
+
+    /**
+     * Добавляет переданный паттерн в словарь грамматики
+     * @param {string} name 
+     * @param {Pattern} pattern 
+     * @returns возвращает себя для цепного вызова
+     */
+    addPattern(name, pattern) {
+        // Выбросить ошибку, если паттерн с таким именем уже есть
+        if (this.#patterns.get(name)) {
+            throw new Error(`Паттерн с таким имененм уже есть`);
+        }
+        // Сохранить паттерн в грамматику
+        this.#patterns.set(name, pattern);
+        return this;
+    }
+
+    /**
+     * Находит паттерн и извлекает его из грамматики
+     * @param {string} name 
+     * @returns извлеченный паттерн
+     */
+    popPattern(name) {
+        const pattern = this.#patterns.get(name);
+        // Вернуть null, если паттерна с таким именем нет
+        if (!pattern) {
+            return null;
+        }
+        // Извлечь паттерн из #patterns, если он там есть
+        this.#patterns.delete(name);
+        // Если извлеченный паттерн является корневым...
+        if (this.#rootPattern === pattern) {
+            // Вывести в консоль сообщение об удалении корневого паттерна
+            console.log(`Удалён корневой паттерн '${name}'`);
+            // Занулить #rootPattern
+            this.#rootPattern = null;
+        }
+
+        // Вернуть извлеченный паттерн
+        return pattern;
+    }
+
+    /**
+     * Переименовывает существующий паттерн
+     * @param {Pattern} pattern 
+     * @param {string} newName 
+     * @returns возвращает себя для цепного вызова
+     */
+    renamePattern(pattern, newName) {
+        this.#patterns.delete(this.getPatternName(pattern));
+        this.#patterns.set(newName, pattern);
+        return this;
+    }
+
+    /**
+     * Обнуляет ссылки объекта
+     */
+    destroy() {
+        // Удалить ссылку на корневой паттерн
+        this.#rootPattern = null;
+        // Вызвать деструкторы всех известных паттернов
+        this.#patterns.forEach(pattern => pattern.destroy());
+        // Очистить набор паттернов
+        this.#patterns.clear();
+    }
+
+    getPatternName(pattern) {
+        for (const [key, value] of this.#patterns) {
+            if (value === pattern) {
+                return key;
+            }
+        }
+        throw new Error(`Грамматика не содержит требуемый паттерн`);
+    }
+
+    getPatternByName(name) {
+        const pattern = this.#patterns.get(name);
+        if (!pattern) {
+            throw new Error(`Грамматика не содержит паттерн с требуемым именем`);
+        }
+        return pattern;
+    }
+
+    getAllPatternEntries() {
+        return this.#patterns.entries();
+    }
+
+    setRoot(pattern) {
+        if (!(pattern instanceof Pattern)) {
+            throw new Error(`Только паттерн может быть корнем`);
+        }
+        if (this.#rootPattern !== pattern) {
+            this.#rootPattern = pattern;
+        }
+        return this;
+    }
+
+    getRoot() {
+        return this.#rootPattern;
+    }
+
+    setCellTypesFilepath(filepath) {
+        if (typeof filepath !== "string") {
+            throw new Error(`Путь к файлу с описанием типов клеток должен быть строкой`);
+        }
+        this.#cellTypesFilepath = filepath;
+        return this;
+    }
+
+    getCellTypesFilepath() {
+        return this.#cellTypesFilepath;
+    }
+}
+
 class Pattern {
     /** @type {string} */
     #description = "";
