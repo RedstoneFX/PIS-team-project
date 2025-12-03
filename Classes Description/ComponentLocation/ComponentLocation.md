@@ -5,7 +5,7 @@
 - `#bottom`
 - `#isLeftPadding`
 - `#isTopPadding`
-- `#isRihtPadding`
+- `#isRightPadding`
 - `#isBottomPadding`
 
 Методы:
@@ -22,8 +22,8 @@
 - [[ComponentLocation.isTopPadding()]]
 - [[ComponentLocation.isRightPadding()]]
 - [[ComponentLocation.isBottomPadding()]]
-- [[ComponentLocation.setPositionByWord(word, isInner)]]
-- [[ComponentLocation.setPositionByWordAndRange(word, range)]]
+- [[ComponentLocation.setPositionByWord(word, isInner)]] - isInner так же может быть трактован как "считать ли стороны без указания типа padding/margin как padding"
+- [[ComponentLocation.setPositionByWordAndRange(word, isInner, range)]] 
 - [[flipPaddingMargin()]] - везде, где был margin, установить padding, а где был padding - установить margin
 
 ```js
