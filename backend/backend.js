@@ -683,6 +683,297 @@ class ArrayPatternExtension extends PatternExtension {
     }
 }
 
+class ComponentLocation {
+    /** @type {Interval} */
+    #left = new Interval().default(-Infinity, Infinity);
+    /** @type {Interval} */
+    #top = new Interval().default(-Infinity, Infinity);
+    /** @type {Interval} */
+    #right = new Interval().default(-Infinity, Infinity);
+    /** @type {Interval} */
+    #bottom = new Interval().default(-Infinity, Infinity);
+    /** @type {boolean} */
+    #isLeftPadding
+    /** @type {boolean} */
+    #isTopPadding
+    /** @type {boolean} */
+    #isRightPadding
+    /** @type {boolean} */
+    #isBottomPadding
+
+    constructor() { }
+
+    /**
+     * Распознает значения позиции в указанных данных и обновляет текущую позицию
+     * @param {Object} rawData 
+     * @param {boolean} isInner 
+     */
+    parse(rawData, isInner) {
+        if (this.#left === null || this.#top === null || this.#right === null || this.#bottom === null) {
+            throw new Error(`Объект уничтожен`);
+        }
+
+        // Восстановить значения позиций по умолчанию
+        this.#left.restoreDefault();
+        this.#top.restoreDefault();
+        this.#right.restoreDefault();
+        this.#bottom.restoreDefault();
+
+        // Если тип переданных данных - строка...
+        if (typeof rawData === 'string') {
+
+            // Разбить строку на слова через запятую
+            const words = rawData.split(',').map(part => part.trim());
+
+            // Для каждого слова установить позицию по слову
+            words.forEach(word => {
+                this.setPositionByWord(word, isInner);
+            });
+
+        } else if (Array.isArray(rawData)) { // Иначе если тип данных - массив...
+            // Для каждого элемента в массиве...
+            for (let part of rawData) {
+                // Если элемент - строка со стороной...
+                if (['left', 'top', 'right', 'bottom'].includes(part)) {
+                    // Установить позицию по слову
+                    this.setPositionByWord(part, isInner);
+                } else {
+                    throw new Error(`Нечитаемое обозначение стороны: '${part}'`);
+                }
+            }
+        } else if (typeof rawData === 'object') { // Иначе если тип данных - объект...
+            for (const [key, value] of Object.entries(rawData)) {
+                let side = key.trim();
+                let interval = value.trim();
+
+                // Обработка смешанной записи, где только часть заданных направлений имеют стандартный промежуток, а не указанный явно
+                if (typeof value === 'string' && (value.includes('top') || value.includes('bottom')
+                    || value.includes('left') || value.includes('right'))) { // Если на месте промежутка оказалось направление
+                    side = value; // Вернуть направление на место
+                    interval = defaultRange; // Считать, что промежуток являтся стандартным
+                } else if (typeof value === 'object') { // Иначе если на месте промежутка пара направление - промежуток 
+                    [side, interval] = Object.entries(value)[0]; // Распаковать объект
+                }
+
+                // Выбросить ошибку, если итоговая сторона не задаёт направление
+                if (!(side.includes('top') || side.includes('bottom') || side.includes('left') || side.includes('right'))) {
+                    throw new Error(`Нечитаемое обозначение стороны: '${side}'`);
+                }
+
+                // Установить позицию по паре
+                this.setPositionByWordAndInterval(side, isInner, interval);
+            }
+        } else { // Иначе...
+            // Выбросить ошибку о неправильном способе задачи позиции
+            throw new Error(`Невозможно определить позицию по данной записи: '${rawData}'`)
+        }
+    }
+
+    /**
+     * Создает объект в формате исходных данных с текущей информацией
+     * @returns объект в формате исходных данных
+     */
+    serialize() {
+        if (this.#left === null || this.#top === null || this.#right === null || this.#bottom === null) {
+            throw new Error(`Объект уничтожен`);
+        }
+        // Создать пустой объект
+        const result = {};
+
+        // Для каждого направления...
+        // Если данное направление не является значением по умолчанию...
+        // Преобразовать диапазон значений в строку и записать в соответствующее поле
+        if (!this.#left.isDefault()) {
+            result[(this.#isLeftPadding ? 'padding' : 'margin') + '-left'] = this.#left.toString();
+        }
+        if (!this.#top.isDefault()) {
+            result[(this.#isTopPadding ? 'padding' : 'margin') + '-top'] = this.#top.toString();
+        }
+        if (!this.#right.isDefault()) {
+            result[(this.#isRightPadding ? 'padding' : 'margin') + '-right'] = this.#right.toString();
+        }
+        if (!this.#bottom.isDefault()) {
+            result[(this.#isBottomPadding ? 'padding' : 'margin') + '-bottom'] = this.#bottom.toString();
+        }
+
+        // Вернуть созданный объект
+        return result;
+    }
+
+    /**
+     * @returns имеют ли все отступы значение по умолчанию
+     */
+    isDefault() {
+        if (this.#left === null || this.#top === null || this.#right === null || this.#bottom === null) {
+            throw new Error(`Объект уничтожен`);
+        }
+        return this.#left.isDefault() && this.#top.isDefault() && this.#right.isDefault() && this.#bottom.isDefault();
+    }
+
+    /**
+     * Изменить тип относительного расположения на противоположный
+     */
+    flipPaddingMargin() {
+        this.#isLeftPadding = !this.#isLeftPadding;
+        this.#isTopPadding = !this.#isTopPadding;
+        this.#isRightPadding = !this.#isRightPadding;
+        this.#isBottomPadding = !this.#isBottomPadding;
+    }
+
+    /**
+     * Устанавливает дефолтную позицию в соответствии с заданной стороной
+     * @param {string} word 
+     * @param {boolean} isInner 
+     */
+    setPositionByWord(word, isInner) {
+        if (this.#left === null || this.#top === null || this.#right === null || this.#bottom === null) {
+            throw new Error(`Объект уничтожен`);
+        }
+
+        // Привести слово в нижний регистр и удалить пробелы
+        word = word.trim().toLowerCase();
+        // Обновить позицию, в зависимости от слова...
+        // Если слово - "left"...
+        if (word === 'left') {
+            // Установить дефолтное значение left
+            this.#left.setBegin(0).setEnd(isInner ? 0 : Infinity);
+            // Установить #isLeftPadding в истину, если компонент внутренний, иначе - в ложь
+            this.#isLeftPadding = isInner;
+        } else if (word === 'top') { // Иначе если слово - "top"...
+            // Установить дефолтное значение top
+            this.#top.setBegin(0).setEnd(isInner ? 0 : Infinity);
+            // Установить #isTopPadding в истину, если компонент внутренний, иначе - в ложь
+            this.#isTopPadding = isInner;
+        } else if (word === 'right') { // Иначе если слово - "right"...
+            // Установить дефолтное значение right
+            this.#right.setBegin(0).setEnd(isInner ? 0 : Infinity);
+            // Установить #isRightPadding в истину, если компонент внутренний, иначе - в ложь
+            this.#isRightPadding = isInner;
+        } else if (word === 'bottom') { // Иначе если слово - "bottom"...
+            // Установить дефолтное значение bottom
+            this.#bottom.setBegin(0).setEnd(isInner ? 0 : Infinity);
+            // Установить #isBottomPadding в истину, если компонент внутренний, иначе - в ложь
+            this.#isBottomPadding = isInner;
+        } else { // Иначе...
+            // Выбросить ошибку о встреченном неизвестном слове
+            throw Error(`Не удается распознать сторону: ${word}.`);
+        }
+    }
+
+    /**
+     * Устанавливает позицию в соответствии с заданной стороной и интервалом
+     * @param {string} word 
+     * @param {boolean} isInner 
+     * @param {string} interval 
+     */
+    setPositionByWordAndInterval(word, isInner, interval) {
+        if (this.#left === null || this.#top === null || this.#right === null || this.#bottom === null) {
+            throw new Error(`Объект уничтожен`);
+        }
+
+        // Определить написание стороны...
+        // Перевести строку в нижний регистр и удалить пробелы и табуляцию
+        word = word.toLowerCase().replaceAll(/\s+/g, "");
+
+        // Проверить, может ли строка задавать сторону
+        if ((word !== 'left' && word !== 'top' && word !== 'right' && word !== bootom) && !(word.includes('padding') || word.includes('margin'))) {
+            throw Error(`Переданная строка не задаёт сторону: ${word}.`);
+        }
+
+        // Если слово содержит "left"...
+        if (word.includes('left')) {
+            // Установить соответствующий padding флаг
+            if (word.includes('padding')) {
+                this.#isLeftPadding = true;
+            } else if (word.includes('margin')) {
+                this.#isLeftPadding = false;
+            } else {
+                this.#isLeftPadding = isInner;
+            }
+            // Установить значение left
+            this.#left.fromString(interval);
+        } else if (word.includes('top')) { // Иначе если слово содержит "top"...
+            // Установить соответствующий padding флаг
+            if (word.includes('padding')) {
+                this.#isTopPadding = true;
+            } else if (word.includes('margin')) {
+                this.#isTopPadding = false;
+            } else {
+                this.#isTopPadding = isInner;
+            }
+            // Установить значение top
+            this.#top.fromString(interval);
+        } else if (word.includes('right')) { // Иначе если слово содержит "right"...
+            // Установить соответствующий padding флаг
+            if (word.includes('padding')) {
+                this.#isRightPadding = true;
+            } else if (word.includes('margin')) {
+                this.#isRightPadding = false;
+            } else {
+                this.#isRightPadding = isInner;
+            }
+            // Установить значение right
+            this.#right.fromString(interval);
+        } else if (word.includes('bottom')) { // Иначе если слово содержит "bottom"...
+            // Установить соответствующий padding флаг
+            if (word.includes('padding')) {
+                this.#isBottomPadding = true;
+            } else if (word.includes('margin')) {
+                this.#isBottomPadding = false;
+            } else {
+                this.#isBottomPadding = isInner;
+            }
+            // Установить значение bottom
+            this.#bottom.fromString(interval);
+        } else { // Иначе...
+            // Выбросить ошибку о встреченном неизвестном слове
+            throw Error(`Не удается распознать сторону: ${word}.`);
+        }
+    }
+
+    getLeft() {
+        return this.#left;
+    }
+
+    getTop() {
+        return this.#top;
+    }
+
+    getRight() {
+        return this.#right;
+    }
+
+    getBottom() {
+        return this.#bottom;
+    }
+
+    isLeftPadding() {
+        return this.#isLeftPadding;
+    }
+
+    isTopPadding() {
+        return this.#isTopPadding;
+    }
+
+    isRightPadding() {
+        return this.#isRightPadding;
+    }
+
+    isBottomPadding() {
+        return this.#isBottomPadding;
+    }
+
+    /**
+     * Обнуляет ссылки объекта
+     */
+    destroy() {
+        this.#left = null;
+        this.#top = null;
+        this.#right = null;
+        this.#bottom = null;
+    }
+}
+
 class Interval {
     /** @type {number} */
     #begin;
