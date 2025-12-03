@@ -506,6 +506,145 @@ class CellPatternExtension extends PatternExtension {
     }
 }
 
+class ArrayPatternExtension extends PatternExtension {
+    /** @type {"COLUMN" | "ROW" | "FILL"} */
+    #direction = "ROW";
+    /** @type {Pattern} */
+    #itemPattern = null;
+    /** @type {Interval} */
+    #itemCount = new Interval().default(1, Infinity).limit(1, Infinity);
+    /** @type {Interval} */
+    #gap = new Interval().default(0, 0).limit(0, Infinity);
+
+    /**
+     * Извлекает необходимые для объекта данные
+     * @param {Object} rawData 
+     * @returns возвращает себя для цепного вызова
+     */
+    fromRawData(rawData) {
+        super.fromRawData(rawData);
+
+        if (!rawData.direction) {
+            throw new Error(`Не задано направление для массива.`);
+        }
+        this.setDirection(rawData.direction);
+
+        if (!rawData.item_pattern) {
+            throw new Error(`Не задан паттерн для массива.`);
+        }
+        this.setItemPattern(rawData.item_pattern);
+
+        if (rawData.item_count) {
+            this.#itemCount.fromString(rawData.item_count);
+        }
+
+        if (rawData.gap) {
+            this.#gap.fromString(rawData.gap);
+        }
+
+        return this;
+    }
+
+    /**
+     * Сериализирует данные объекта
+     * @param {Object} rawData 
+     * @param {Grammar} grammar 
+     */
+    serializeTo(rawData, grammar) {
+        super.serializeTo(rawData);
+
+        if (this.#itemPattern === null) {
+            throw new Error(`Не задан паттерн элемента массива`);
+        }
+
+        rawData.direction = this.#direction;
+        rawData.item_pattern = grammar.getPatternName(this.#itemPattern);
+        if (!this.#itemCount.isDefault()) {
+            rawData.item_count = this.#itemCount.toString();
+        }
+        if (!this.#gap.isDefault()) {
+            rawData.gap = this.#gap.toString();
+        }
+    }
+
+    /**
+     * Обнуляет ссылки объекта
+     */
+    destroy() {
+        super.destroy();
+        this.#itemPattern = null;
+        this.#itemCount = null;
+        this.#gap = null;
+    }
+
+    /**
+     * @param {"COLUMN" | "ROW" | "FILL"} direction 
+     * @returns возвращает себя для цепного вызова
+     */
+    setDirection(direction) {
+        const allowedDirection = ["ROW", "COLUMN", "FILL"];
+        if (!(allowedDirection.includes(direction.toUpperCase()))) {
+            throw new Error(`Некорректно задано направление для массива: '${direction}'. Допустимые: ${allowedDirection}.`);
+        }
+        this.#direction = direction.toUpperCase();
+        return this;
+    }
+
+    getDirection() {
+        return this.#direction;
+    }
+
+    /**
+     * @param {Pattern} pattern 
+     * @returns  возвращает себя для цепного вызова
+     */
+    setItemPattern(pattern) {
+        if (!(pattern instanceof Pattern)) {
+            throw new Error(`Элементы массива должны быть определены паттерном`);
+        }
+        this.#itemPattern = pattern;
+        return this;
+    }
+
+    getItemPattern() {
+        return this.#itemPattern;
+    }
+
+    /**
+     * @param {number} countBegin 
+     * @param {number} countEnd 
+     * @returns возвращает себя для цепного вызова
+     */
+    setItemCount(countBegin, countEnd) {
+        if (this.#itemCount === null) {
+            throw new Error(`Объект уничтожен`);
+        }
+        this.#itemCount.setBegin(countBegin).setEnd(countEnd);
+        return this;
+    }
+
+    getItemCount() {
+        return this.#itemCount;
+    }
+
+    /**
+     * @param {number} gapBegin 
+     * @param {number} gapEnd 
+     * @returns возвращает себя для цепного вызова
+     */
+    setGap(gapBegin, gapEnd) {
+        if (this.#gap === null) {
+            throw new Error(`Объект уничтожен`);
+        }
+        this.#gap.setBegin(gapBegin).setEnd(gapEnd);
+        return this;
+    }
+
+    getGap() {
+        return this.#gap;
+    }
+}
+
 class Interval {
     /** @type {number} */
     #begin;
