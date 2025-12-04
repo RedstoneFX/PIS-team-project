@@ -2,7 +2,7 @@
 class Grammar {
     /** @type {string} */
     #cellTypesFilepath = "";
-    /** @type {Map<string, Pattern} */
+    /** @type {Map<string, Pattern>} */
     #patterns = new Map();
     /** @type {Pattern} */
     #rootPattern = null;
@@ -491,9 +491,10 @@ class PatternExtension {
     /**
      * Извлекает необходимые для объекта данные
      * @param {Object} rawData 
+     * @param {Grammar} grammar 
      * @returns возвращает себя для цепного вызова
      */
-    fromRawData(rawData) {
+    fromRawData(rawData, grammar) {
         if (!rawData.kind) {
             throw new Error(`Паттерн не имеет типа`);
         }
@@ -528,9 +529,10 @@ class CellPatternExtension extends PatternExtension {
     /**
      * Извлекает необходимые для объекта данные
      * @param {Object} rawData 
+     * @param {Grammar} grammar 
      * @returns возвращает себя для цепного вызова
      */
-    fromRawData(rawData) {
+    fromRawData(rawData, grammar) {
         super.fromRawData(rawData);
         if (!rawData.kind || rawData.kind.toUpperCase() !== "CELL") {
             throw new Error(`Исходные данные не соответствуют паттерну типа 'ячейка'`);
@@ -581,9 +583,10 @@ class ArrayPatternExtension extends PatternExtension {
     /**
      * Извлекает необходимые для объекта данные
      * @param {Object} rawData 
+     * @param {Grammar} grammar 
      * @returns возвращает себя для цепного вызова
      */
-    fromRawData(rawData) {
+    fromRawData(rawData, grammar) {
         super.fromRawData(rawData);
 
         if (!rawData.direction) {
