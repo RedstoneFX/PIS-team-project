@@ -869,6 +869,15 @@ class Component {
     }
 
     /**
+     * Проверяет, является ли паттерн родительским
+     * @param {Pattern | PatternByPatternDefinition} pattern 
+     * @returns 
+     */
+    isParent(pattern) {
+        return this.#parentPattern === pattern;
+    }
+
+    /**
      * @param {boolean} isOptional 
      * @returns возвращает себя для цепного вызова
      */
