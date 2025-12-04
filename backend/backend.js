@@ -710,6 +710,202 @@ class ArrayPatternExtension extends PatternExtension {
     }
 }
 
+class AreaPatternExtension extends PatternExtension {
+    /** @type {Map<string, Component>} */
+    #innerComponents = new Map();
+    /** @type {Map<string, Component>} */
+    #outerComponents = new Map();
+
+    constructor() {
+        super();
+    }
+
+    /**
+     * Извлекает необходимые для объекта данные
+     * @param {Object} rawData 
+     * @param {Grammar} grammar 
+     * @returns возвращает себя для цепного вызова
+     */
+    fromRawData(rawData, grammar) {
+        super.fromRawData(rawData, grammar);
+
+        if (rawData.inner) { // Если область имеет внутренние компоненты
+            for (const [componentName, componentData] of Object.entries(data.inner)) { // Для каждого внутреннего компонента...
+                const component = new Component().fromRawData(this, componentData, true, grammar); // Распознаем компонент
+                this.#innerComponents.set(componentName, component);
+            }
+        }
+
+        if (rawData.outer) { // Если область имеет внешние компоненты
+            for (const [componentName, componentData] of Object.entries(data.outer)) { // Для каждого внешнего компонента...
+                const component = new Component().fromRawData(this, componentData, false, grammar); // Распознаем компонент
+                this.#outerComponents.set(componentName, component);
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     * Сериализирует данные объекта
+     * @param {Object} rawData 
+     * @param {Grammar} grammar 
+     */
+    serializeTo(rawData, grammar) {
+        super.serializeTo(rawData, grammar);
+
+        // Если у области есть внутренние компоненты
+        if (this.#innerComponents.size() > 0) {
+            // Создать поле inner, если его нет
+            if (!rawData.inner) { result.inner = {} };
+            // Записать все внутренние компоненты
+            for (const [name, component] of this.#innerComponents) {
+                rawData.inner[name] = component.serialize(grammar);
+            }
+        }
+
+        // Если у области есть внешние компоненты
+        if (this.#outerComponents.size() > 0) {
+            // Создать поле outer, если его нет
+            if (!rawData.outer) { result.outer = {} };
+            // Записать все внешние компоненты
+            for (const [name, component] of this.#outerComponents) {
+                rawData.outer[name] = component.serialize(grammar);
+            }
+        }
+    }
+
+    /**
+     * Добавляет компонент в область
+     * @param {string} componentName 
+     * @param {Component} component 
+     * @param {boolean} isInner 
+     * @returns возвращает себя для цепного вызова
+     */
+    addComponent(componentName, component, isInner) {
+        if (component.isParent(this)) {
+            throw new Error(`Компонент не считает, что принадлежит текущей области.`);
+        }
+        if ((isInner ? this.#innerComponents : this.#outerComponents).has(componentName)) {
+            throw new Error(`Компонент с таким именем уже записан в области.`);
+        }
+        (isInner ? this.#innerComponents : this.#outerComponents).set(componentName, component);
+        return this;
+    }
+
+    /**
+     * Удаляет компонент из области
+     * @param {Component} component 
+     * @param {boolean} isInner 
+     * @returns удалённый компонент
+     */
+    popComponent(component, isInner) {
+        const name = this.getComponentName(component, isInner);
+        (isInner ? this.#innerComponents : this.#outerComponents).delete(name);
+        return component;
+    }
+
+    /**
+     * Переименовать компонент
+     * @param {Component} component 
+     * @param {string} newName 
+     * @param {boolean} isInner 
+     * @returns возвращает себя для цепного вызова
+     */
+    renameComponent(component, newName, isInner) {
+        if ((isInner ? this.#innerComponents : this.#outerComponents).has(newName)) {
+            throw new Error(`Компонент с таким именем уже существует.`);
+        }
+        this.popComponent(component, isInner);
+        this.addComponent(newName, component, isInner);
+        return this;
+    }
+
+    /**
+     * Определить тип расположения компонента
+     * @param {Component} component 
+     * @returns true - inner | false - outer
+     */
+    isComponentInner(component) {
+        // Проверить, является ли компонент внутренним
+        for (const [key, value] of this.#innerComponents) {
+            if (value === component) {
+                return true;
+            }
+        }
+        // Проверить, является ли компонент внешним
+        for (const [key, value] of this.#outerComponents) {
+            if (value === component) {
+                return false;
+            }
+        }
+        // Выбросить ошибку, если компонента нет в области
+        throw new Error(`Компонент отсутствует в текущей области.`);
+    }
+
+    /**
+     * Изменить тип расположения компонента
+     * @param {Component} component 
+     * @param {boolean} isInner 
+     * @returns возвращает себя для цепного вызова
+     */
+    updateComponentInner(component, isInner) {
+        if (component.isParent(this)) {
+            throw new Error(`Компонент не считает, что принадлежит текущей области.`);
+        }
+        // Если компонент уже имеет требуемый тип расположения
+        if (this.isComponentInner(component)) {
+            // Вернуть себя
+            return this;
+        } else { // Иначе
+            // Изменить тип расположения
+            let name = this.getComponentName(component, !isInner);
+            this.popComponent(component, !isInner);
+            this.addComponent(name, component, isInner);
+        }
+        return this;
+    }
+
+    /**
+     * Определить имя компонента
+     * @param {Component} component 
+     * @param {boolean} isInner 
+     * @returns имя компонента
+     */
+    getComponentName(component, isInner) {
+        for (const [key, value] of (isInner ? this.#innerComponents : this.#outerComponents)) {
+            if (value === component) {
+                return key;
+            }
+        }
+        throw new Error(`Область не содержит требуемый компонент.`);
+    }
+
+    getInnerComponentsEntries() {
+        this.#innerComponents.entries();
+    }
+
+    getOuterComponentsEntries() {
+        this.#outerComponents.entries()
+    }
+
+    /**
+     * Обнуляет ссылки объекта
+     */
+    destroy() {
+        // Вызвать деструкторы компонентов
+        for (const component of this.#innerComponents.values()) {
+            component.destroy();
+        }
+        for (const component of this.#outerComponents.values()) {
+            component.destroy();
+        }
+        // Очистить списки
+        this.#innerComponents.clear();
+        this.#outerComponents.clear();
+    }
+}
+
 class Component {
     /** @type {Pattern | PatternByPatternDefinition} */
     #pattern = null;
