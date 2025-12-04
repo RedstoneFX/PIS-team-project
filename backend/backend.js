@@ -451,25 +451,25 @@ class Pattern {
 }
 
 class PatternByPatternDefinition extends Pattern {
-	/** @type {Component} */
-	#parentComponent;
-	
-	constructor(parrentComponent) {
-        if (!(parrentComponent instanceof Component)) {
+    /** @type {Component} */
+    #parentComponent;
+
+    constructor(parentComponent) {
+        if (!(parentComponent instanceof Component)) {
             throw new Error(`Вписанный паттерн должен быть определён в компоненте.`);
         }
-        this.#parentComponent = parrentComponent;
+        this.#parentComponent = parentComponent;
     }
 
     /**
      * Обнуляет ссылки объекта
      */
-	destroy() {
+    destroy() {
         super.destroy();
         this.#parentComponent = null;
     }
 
-	getParentComponent() {
+    getParentComponent() {
         return this.#parentComponent;
     }
 }
@@ -704,6 +704,219 @@ class ArrayPatternExtension extends PatternExtension {
 
     getGap() {
         return this.#gap;
+    }
+}
+
+class Component {
+    /** @type {Pattern | PatternByPatternDefinition} */
+    #pattern = null;
+    /** @type {Pattern | PatternByPatternDefinition} */
+    #parentPattern = null;
+    /** @type {boolean} */
+    #isOptional = false;
+    /** @type {ComponentLocation} */
+    #location = new ComponentLocation();
+
+    constructor(parentPattern) {
+        if (parentPattern) {
+            if (!(parentPattern instanceof Pattern)) {
+                throw new Error(`Компонент должен содержаться в паттерне.`);
+            }
+            this.#parentPattern = parentPattern;
+        }
+    }
+
+    /**
+     * Заполняет компонент, основываясь на данных
+     * @param {Pattern} parentPattern 
+     * @param {Object} rawData 
+     * @param {boolean} isInner 
+     * @param {Grammar} grammar 
+     * @returns возвращает себя для цепного вызова
+     */
+    fromRawData(parentPattern, rawData, isInner, grammar) {
+        if (!(parentPattern instanceof Pattern)) {
+            throw new Error(`Компонент должен содержаться в паттерне.`);
+        }
+        this.#parentPattern = parentPattern;
+
+        // Распознать паттерн...
+        let pattern = null;
+        // Если в данных указано название паттерна и не указан pattern_definition...
+        if (rawData.pattern && !rawData.pattern_definition) {
+            // Найти в грамматике паттерн с таким названием
+            pattern = grammar.getPatternByName(rawData.pattern);
+            // Выбросить ошибку, если паттерн не найден
+            if (!pattern) {
+                throw new Error(`Не удаётся найти паттерн с указанным названием (${rawData.pattern}) для компонента.`)
+            }
+        } else if (rawData.pattern_definition && !rawData.pattern) { // Иначе если в данных есть pattern_definition и нет названия паттерна...
+            try {
+                // Распознать pattern_definition
+                pattern = new PatternByPatternDefinition(this).fromRawData(rawData);
+            } catch (e) {
+                // Выбросить ошибку, если не удалось распознать паттерн
+                throw new Error(`Не удаётся распознать вложнный паттерн в компоненте: ${e.message}`);
+            }
+        } else {
+            throw new Error(`Компонент должен содержать pattern или pattern_definition`);
+        }
+
+        // Привязать к компоненту распознанный паттерн
+        this.#pattern = pattern;
+
+        // Распознать позицию...
+        // Если в данных есть location...
+        if (rawData.location) {
+            // Обновить позицию компонента
+            this.#location.parse(rawData, isInner);
+        }
+
+        // Распознать и установить #isOptional, если такое поле есть в данных
+        if (rawData.optional) {
+            let optional = data.optional;
+            if (!(optional === true || optional === false)) throw new Error(`Не удалось распознать поле optional у компонента`);
+            this.#isOptional = optional;
+        }
+
+        return this;
+    }
+
+    /**
+     * Создает объект в формате исходных данных с текущей информацией
+     * @param {Grammar} grammar 
+     * @returns объект в формате исходных данных
+     */
+    serialize(grammar) {
+        // Выбросить ошибку, если в компоненте не указан паттерн
+        if (this.#parentPattern === null) {
+            throw new Error(`Компонент уничтожен либо не инициализован.`);
+        }
+
+        // Создать пустой объект
+        const result = {};
+
+        // Сохранить паттерн...
+        // Если паттерн является pattern_definition...
+        if (this.#pattern instanceof PatternByPatternDefinition) {
+            // Сериализовать паттерн и добавить в поле pattern_definition
+            result.pattern_definition = this.#pattern.serialize();
+        } else { // Иначе...
+            // Узнать название паттерна в грамматике
+            let name = grammar.getPatternName(this.#pattern);
+            // Выбросить ошибку, если у паттерна нет названия
+            if (!name) {
+                throw new Error(`Указанный в компоненте паттерн не имеет названия`);
+            }
+            // Добавить название паттерна в поле pattern
+            result.pattern = name;
+        }
+
+        // Сохранить позицию...
+        // Если позиция не совпадает со значением по умолчанию (ComponentLocation.isDefault())...
+        if (!this.#location.isDefault()) {
+            // Сериализовать позицию и записать в поле location
+            result.location = this.#location.serialize();
+        }
+
+        // Сохранить optional...
+        // если isOptional - истина...
+        if (this.#isOptional) {
+            // записать истину в поле optional
+            result.optional = true;
+        }
+
+        // Вернуть созданный объект
+        return result;
+    }
+
+    /**
+     * Устанавливает или заменяет паттерн в данном компоненте
+     * @param {Pattern | PatternByPatternDefinition} pattern 
+     * @returns возвращает себя для цепного вызова
+     */
+    setPattern(pattern) {
+        if (this.#parentPattern === null) {
+            throw new Error(`Компонент уничтожен либо не инициализован.`);
+        }
+        if (!(pattern instanceof Pattern)) {
+            throw new Error(`Тип данных компонента должен быть задан вариацией паттерна.`);
+        }
+
+        // Вызвать деструктор дочернего паттерна, если он является pattern_definition
+        if (this.#pattern instanceof PatternByPatternDefinition) {
+            this.#pattern.destroy();
+        }
+
+        // Установить новый паттерн в компонент
+        this.#pattern = pattern;
+
+        return this;
+    }
+
+    getPattern() {
+        if (this.#parentPattern === null) {
+            throw new Error(`Компонент уничтожен либо не инициализован.`);
+        }
+        return this.#pattern;
+    }
+
+    getParentPattern() {
+        if (this.#parentPattern === null) {
+            throw new Error(`Компонент уничтожен либо не инициализован.`);
+        }
+        return this.#parentPattern;
+    }
+
+    /**
+     * @param {boolean} isOptional 
+     * @returns возвращает себя для цепного вызова
+     */
+    setOptional(isOptional) {
+        if (this.#parentPattern === null) {
+            throw new Error(`Компонент уничтожен либо не инициализован.`);
+        }
+        if (typeof isOptional != 'boolean') {
+            throw new Error(`Значение isOptional должно быть логическим`);
+        }
+        this.#isOptional = isOptional;
+        return this;
+    }
+
+    isOptional() {
+        if (this.#parentPattern === null) {
+            throw new Error(`Компонент уничтожен либо не инициализован.`);
+        }
+        return this.#isOptional;
+    }
+
+    /** Сеттер-Геттер */
+    location() {
+        if (this.#parentPattern === null) {
+            throw new Error(`Компонент уничтожен либо не инициализован.`);
+        }
+        return this.#location;
+    }
+
+    /**
+     * Обнуляет ссылки объекта
+     */
+    destroy() {
+        if (this.#parentPattern === null) {
+            throw new Error(`Компонент уже уничтожен либо ещё не инициализован.`);
+        }
+        // Вызвать деструктор дочернего компонента, если он является pattern_definition
+        if (this.#pattern instanceof PatternByPatternDefinition) {
+            this.#pattern.destroy();
+        }
+
+        // Вызвать деструктор для location
+        this.#location.destroy();
+
+        // Занулить все указатели на объекты
+        this.#pattern = null;
+        this.#parentPattern = null;
+        this.#location = null;
     }
 }
 
