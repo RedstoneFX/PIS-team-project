@@ -5,9 +5,9 @@
 	Если искомый тип паттерна - клетка...
 		Создать расширение клетки с помощью [[PatternCellExtension.fromRawData(rawData)]]
 	Иначе если искомый тип паттерна - массив...
-		Создать расширение массива с помощью [[PatternArrayExtension.fromRawData(rawData)]]
+		Создать расширение массива с помощью [[ArrayPatternExtension.fromRawData(rawData)]]
 	Иначе если искомый тип паттерна - область...
-		Создать расширение массива с помощью [[PatternAreaExtension.fromRawData(rawData, pattern)]]
+		Создать расширение массива с помощью [[AreaPatternExtension.fromRawData(rawData)]]
 	Иначе
 		Выбросить ошибку о невозможности распознания вида паттерна по ключевому слову в поле rawData.kind
 Сохранить созданное расширение в поле `kind` текущего паттерна
