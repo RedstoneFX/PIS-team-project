@@ -450,6 +450,30 @@ class Pattern {
     }
 }
 
+class PatternByPatternDefinition extends Pattern {
+	/** @type {Component} */
+	#parentComponent;
+	
+	constructor(parrentComponent) {
+        if (!(parrentComponent instanceof Component)) {
+            throw new Error(`Вписанный паттерн должен быть определён в компоненте.`);
+        }
+        this.#parentComponent = parrentComponent;
+    }
+
+    /**
+     * Обнуляет ссылки объекта
+     */
+	destroy() {
+        super.destroy();
+        this.#parentComponent = null;
+    }
+
+	getParentComponent() {
+        return this.#parentComponent;
+    }
+}
+
 class PatternExtension {
     /** @type {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} */
     #kindName = "";
