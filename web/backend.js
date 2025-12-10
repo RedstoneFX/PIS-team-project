@@ -1439,7 +1439,7 @@ class Interval {
      * @param {number} end
      */
     constructor(begin, end) {
-        if (begin && end) {
+        if (begin != null && end != null) {
             if (begin > end) {
                 throw new Error('Конец диапазона не может быть меньше начала');
             }
