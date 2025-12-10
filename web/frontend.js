@@ -1,8 +1,3 @@
-class BrowserLink {
-    constructor(data) {
-        this.data = data;
-    }
-}
 
 class Frontend {
     /** @type {Browser} */
@@ -55,7 +50,7 @@ class Frontend {
             this.browser.addItem(component, componentPattern, "pattern-definition", "browser-item");
             this.addComponentsOf(componentPattern);
         } else {
-            this.browser.addItem(component, new BrowserLink(this.grammar.getPatternName(componentPattern)), this.grammar.getPatternName(componentPattern), "browser-item");
+            this.browser.addLink(component, componentPattern, this.grammar.getPatternName(componentPattern), "browser-item");
         }
     }
 }

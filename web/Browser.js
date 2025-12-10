@@ -1,25 +1,21 @@
+class BrowserLink {
+    constructor(data) {
+        this.data = data;
+    }
+}
+
 class Browser {
     /** @type {HTMLDivElement} */
     #htmlElement;
-
-
-    /**
-     * @type {Map<object, Set>}
-     */
+    /** @type {Map<object, Set>} */
     #childrenOfParent = new Map();
-
-
-    /**
-     * @type {Map<Object, HTMLElement>}
-     */
+    /**  @type {Map<Object, HTMLElement>} */
     #HTMLElementForItem = new Map();
-
-    /**
-     * @type {Map<string, object>}
-     */
+    /** @type {Map<string, object>} */
     #itemByID = new Map();
-
     #lastID = 0;
+    /** @type {Map<object, Set<BrowserLink>>} */
+    #links = new Map();
 
     /**
      * @param {HTMLDivElement} htmlDiv 
@@ -143,5 +139,30 @@ class Browser {
         this.#itemByID.delete(element.getAttribute("item")); // Удаляем связку ID
         this.#HTMLElementForItem.delete(item); // Удаляем из базы данных элементов
         element.remove(); // Удаляем HTML
+
+        if (item instanceof BrowserLink) {
+            this.#links.get(item.data).delete(item);
+            item.data = null;
+        } else {
+            let links = this.#links.get(item);
+            if (links != null) {
+                for (let [link, _] of links.entries()) {
+                    this.removeItem(link);
+                }
+            }
+            this.#links.delete(item);
+        }
+    }
+
+    addLink(parentItem, targetChildren, title, extraClass = null) {
+        let links = this.#links.get(parentItem);
+        if (links == null) {
+            links = new Set();
+            this.#links.set(parentItem, links);
+        }
+
+        let link = new BrowserLink(targetChildren);
+        links.add(link);
+        this.addItem(parentItem, link, title, extraClass);
     }
 }
