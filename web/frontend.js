@@ -164,6 +164,8 @@ class Frontend {
 
     static resetUI() {
         this.browser.clear();
+        this.disableAllParameters();
+        this.deleteSelectedButton.disabled = true;
     }
 
     static setGrammar(grammar) {
@@ -211,6 +213,47 @@ class Frontend {
      * @param {Pattern | Component | PatternByPatternDefinition} item 
      */
     static onItemSelected(item) {
-        console.log(item);
+        this.toggleApplyableParameters(item);
+        this.loadParameters(item);
+        //console.log(item);
+    }
+
+    static disableAllParameters() {
+        this.patternParams.hidden = true;
+        this.areaParams.hidden = true;
+        this.cellParams.hidden = true;
+        this.arrayParams.hidden = true;
+        this.componentParams.hidden = true;
+    }
+
+    /**
+     * @param {Pattern | Component | PatternByPatternDefinition} item 
+     */
+    static toggleApplyableParameters(item) {
+        this.disableAllParameters();
+        if (item instanceof Pattern) {
+            this.patternParams.hidden = false;
+            this.patternName.disabled = false;
+            if (item instanceof PatternByPatternDefinition) {
+                this.patternName.value = "Объявлен в компоненте";
+                this.patternName.disabled = true;
+            }
+            let kind = item.getKind();
+            if (kind instanceof CellPatternExtension) {
+                this.cellParams.hidden = false;
+            } else if (kind instanceof ArrayPatternExtension) {
+                this.arrayParams.hidden = false;
+            } else if (kind instanceof AreaPatternExtension) {
+                this.areaParams.hidden = false;
+            }
+        } else {
+            this.componentParams.hidden = false;
+        }
+    }
+
+    /**
+     * @param {Pattern | Component | PatternByPatternDefinition} item 
+     */
+    static loadParameters(item) {
     }
 }
