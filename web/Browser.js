@@ -15,7 +15,7 @@ class Browser {
     #HTMLElementForItem = new Map();
 
     /**
-     * @type {Map<number, object>}
+     * @type {Map<string, object>}
      */
     #itemByID = new Map();
 
@@ -37,7 +37,7 @@ class Browser {
 
     #bindNewID(item) {
         let id = "" + this.#lastID;
-        this.#lastID;
+        this.#lastID += 1;
         this.#itemByID.set(id, item);
         return id;
     }
@@ -83,11 +83,11 @@ class Browser {
         // Выбросить ошибку, если переданный родитель не находится в дереве и не является корнем
         if (parentItem != null && !this.#HTMLElementForItem.has(parentItem)) throw new Error("В браузере нет элемента " + parentItem);
 
-        // Выбросить ошибку, если у данного родителя уже есть данный элемент в детях
-        let parentChildren = this.#childrenOfParent.get(parentItem);
-        if (parentChildren != null && parentChildren.has(childItem)) throw new Error("У данного родителя уже есть данный элемент среди детей");
+        // Выбросить ошибку, если данная сущность уже есть в дереве
+        if (this.#HTMLElementForItem.has(childItem)) throw new Error("Данный элемент уже есть в браузере");
 
         // Добавить данного ребенка к родителю
+        let parentChildren = this.#childrenOfParent.get(parentItem);
         if (parentChildren == null) {
             parentChildren = new Set();
             this.#childrenOfParent.set(parentItem, parentChildren)
@@ -107,5 +107,23 @@ class Browser {
             }
         }
         parentDiv.appendChild(this.#makeNewHTMLElementForItem(childItem, title)); // Вставляем элемент
+    }
+
+    removeItem(item) {
+        if (!this.#HTMLElementForItem.has(item)) return; // Ничего не делаем, если элемента и не было в дереве
+
+        // Вызываем удаление всех дочерних элементов
+        let childrenItems = this.#childrenOfParent.get(item);
+        if (childrenItems != null && childrenItems.size > 0) {
+            for (let [v, _] of childrenItems.entries()) {
+                this.removeItem(v);
+            }
+        }
+        // Удаляем этот элемент
+        let element = this.#HTMLElementForItem.get(item);
+        this.#childrenOfParent.delete(item); // Удаляем список его детей
+        this.#itemByID.delete(element.getAttribute("item")); // Удаляем связку ID
+        this.#HTMLElementForItem.delete(item); // Удаляем из базы данных элементов
+        element.remove(); // Удаляем HTML
     }
 }
