@@ -33,6 +33,10 @@ class Browser {
         for (let i = this.#htmlElement.children.length - 1; i >= 0; i--) {
             this.#htmlElement.children[i].remove();
         }
+        this.#HTMLElementForItem.clear();
+        this.#childrenOfParent.clear();
+        this.#itemByID.clear();
+        this.#lastID = 0;
     }
 
     #bindNewID(item) {
@@ -42,7 +46,7 @@ class Browser {
         return id;
     }
 
-    #upgradeHTMLElementForItem(item) {
+    /*#upgradeHTMLElementForItem(item) {
         // Извлекаем старые данные
         let oldElement = this.#HTMLElementForItem.get(item);
         if (oldElement.tagName.toLowerCase() == "details") return; // Ничего не делаем, если он и так уже обновленный
@@ -71,14 +75,24 @@ class Browser {
         // Заменяем старый элемент на новый
         oldElement.replaceWith(element);
         this.#HTMLElementForItem.set(item, element);
-    }
+    }*/
 
     #makeNewHTMLElementForItem(item, title, extraClass = null) {
-        let element = document.createElement("span");
-        element.innerText = title;
-        element.setAttribute("item", this.#bindNewID(item));
-        element.classList.add("browserItemWithoutChildren");
+        let element = document.createElement("details");
+        element.classList.add("browserItemWithChildren");
         if (extraClass != null) element.classList.add(extraClass);
+        element.setAttribute("item", this.#bindNewID(item));
+
+        // Создаем summary
+        let titleElement = document.createElement("summary");
+        titleElement.innerText = title;
+        element.appendChild(titleElement);
+
+        // Создаем поле для дочерних объектов
+        let childrenDiv = document.createElement("div");
+        element.appendChild(childrenDiv);
+
+        // Заменяем старый элемент на новый
         this.#HTMLElementForItem.set(item, element);
         return element;
     }
@@ -102,7 +116,6 @@ class Browser {
         // Обновить интерфейс...
         let parentDiv = this.#htmlElement; // По умолчанию, вставлять в корень
         if (parentItem != null) { // Если передан какой-то родитель, кроме корня, вставлять в него
-            this.#upgradeHTMLElementForItem(parentItem);
             let children = this.#HTMLElementForItem.get(parentItem).children;
             for (let i = 0; i < children.length; i++) {
                 if (children[i].tagName.toLowerCase() == "div") {
