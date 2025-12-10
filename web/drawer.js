@@ -96,7 +96,27 @@ class Drawer {
         return gapEnd;
     }
 
-    static spaceBetween() {
+    static gapHorizontal() {
+
+        let group;
+
+        let arrowLeft = this.gapBeginArrow();
+        arrowLeft.position = (5, 0);
+        group.addChild(arrowLeft);
+
+        let arrowRight = this.gapEndArrow();
+        arrowRight.position = (95, 0);
+        group.addChild(arrowRight);
+
+        let line3 = this.horizontalLine();
+        line3.position = (50, 0);
+        group.addChild(line3);
+
+        return group;
+        
+    }
+
+    static sizeHorizontal(x) {
 
         let group;
 
@@ -105,7 +125,7 @@ class Drawer {
         group.addChild(line1);
 
         let line2 = this.verticalLine();
-        line2.position = (100, 100);
+        line2.position = (x, 100);
         group.addChild(line2);
 
         let arrowLeft = this.gapBeginArrow();
@@ -113,74 +133,38 @@ class Drawer {
         group.addChild(arrowLeft);
 
         let arrowRight = this.gapEndArrow();
-        arrowRight.position = (95, 100);
+        arrowRight.position = (x-5, 100);
         group.addChild(arrowRight);
 
         let line3 = this.horizontalLine();
-        line3.position = (50, 100);
+        line3.position = (x/2, 100);
         group.addChild(line3);
 
         return group;
         
     }
 
-    static spaceBetween(x) {
+    static gapVertical() {
 
         let group;
-
-        let line1 = this.verticalLine();
-        line1.position = (0, -100);
-        group.addChild(line1);
-
-        let line2 = this.verticalLine();
-        line2.position = (x, -100);
-        group.addChild(line2);
-
-        let arrowLeft = this.gapBeginArrow();
-        arrowLeft.position = (5, -100);
-        group.addChild(arrowLeft);
-
-        let arrowRight = this.gapEndArrow();
-        arrowRight.position = (x-5, -100);
-        group.addChild(arrowRight);
-
-        let line3 = this.horizontalLine();
-        line3.position = (x/2, -100);
-        group.addChild(line3);
-
-        return group;
-        
-    }
-
-    static spaceVertical() {
-
-        let group;
-
-        let line1 = this.horizontalLine();
-        line1.position = (100, 0);
-        group.addChild(line1);
-
-        let line2 = this.horizontalLine();
-        line2.position = (100, 100);
-        group.addChild(line2);
 
         let arrowDown = this.gapArrowDown();
-        arrowDown.position = (100, 5);
+        arrowDown.position = (0, 5);
         group.addChild(arrowDown);
 
         let arrowUp = this.gapArrowUp();
-        arrowUp.position = (100, 95);
+        arrowUp.position = (0, 95);
         group.addChild(arrowUp);
 
         let line3 = this.verticalLine();
-        line3.position = (100, 50);
+        line3.position = (0, 50);
         group.addChild(line3);
 
         return group;
         
     }
 
-    static spaceVertical(y) {
+    static sizeVertical(y) {
 
         let group;
 
@@ -238,12 +222,16 @@ class Drawer {
     static drawCellPattern(pattern, group) {
 
         let cell = squareCell('black');
-        cell.position = (50, 0);
+        cell.position = (0, 0);
         group.addChild(cell);
 
-        let space = this.spaceBetween();
-        space.position = (50, 100);
-        group.addChild(space);
+        let sizeH = this.sizeHorizontal(100);
+        sizeH.position = (0, 100);
+        group.addChild(sizeH);
+
+        let sizeV = this.sizeVertical(100);
+        sizeV.position = (-100, 0);
+        group.addChild(sizeV);
 
     }
 
@@ -303,10 +291,9 @@ class Drawer {
                         group.addChild(cell);
                         x += 50;
 
-                    let space = this.spaceBetween(x);
-                    space.position = (x/2, -100);
-
-                    group.addChild(space);
+                    let size = this.sizeHorizontal(x);
+                    size.position = (x/2, 100);
+                    group.addChild(size);
                 }
                 else {
                     for (i = 0; i < maxItemCount; i++) {
@@ -346,10 +333,9 @@ class Drawer {
                         group.addChild(cell);
                         x += 50;
 
-                    let space = this.spaceBetween(x);
-                    space.position = (x/2, -100);
-
-                    group.addChild(space);
+                    let size = this.sizeHorizontal(x);
+                    size.position = (x/2, 100);
+                    group.addChild(size);
                 }
                 else {
                     let blackCells = minItemCount;
@@ -393,13 +379,13 @@ class Drawer {
                         group.addChild(cell);
                         x += 50;
 
-                    let space = this.spaceBetween();
-                    space.position = (150, 100);
-                    group.addChild(space);
+                    let gap = this.gapHorizontal();
+                    gap.position = (50, 0);
+                    group.addChild(gap);
 
-                    let spaceLower = this.spaceBetween(x);
-                    spaceLower.position = (x/2, -100);
-                    group.addChild(spaceLower);
+                    let size = this.sizeHorizontal(x);
+                    size.position = (x/2, 100);
+                    group.addChild(size);
                 }
                 else {
                     for (i = 0; i < maxItemCount; i++) {
@@ -409,9 +395,9 @@ class Drawer {
                         x += 100;
                     }
 
-                    let space = this.spaceBetween();
-                    space.position = (150, 100);
-                    group.addChild(space);
+                    let gap = this.gapHorizontal();
+                    gap.position = (50, 0);
+                    group.addChild(gap);
                 }
             }
             else {
@@ -443,13 +429,13 @@ class Drawer {
                         group.addChild(cell);
                         x += 50;
 
-                    let space = this.spaceBetween();
-                    space.position = (150, 100);
-                    group.addChild(space);
+                    let gap = this.gapHorizontal();
+                    gap.position = (50, 0);
+                    group.addChild(gap);
 
-                    let spaceLower = this.spaceBetween(x);
-                    spaceLower.position = (x/2, -100);
-                    group.addChild(spaceLower);
+                    let size = this.sizeHorizontal(x);
+                    size.position = (x/2, 100);
+                    group.addChild(size);
                 }
                 else {
                     let blackCells = minItemCount;
@@ -468,9 +454,9 @@ class Drawer {
                         x += 100;
                     }
 
-                    let space = this.spaceBetween();
-                    space.position = (150, 100);
-                    group.addChild(space);
+                    let gap = this.gapHorizontal();
+                    gap.position = (50, 0);
+                    group.addChild(gap);
                 }
             }
         }
@@ -510,9 +496,9 @@ class Drawer {
                         group.addChild(cell);
                         x += 50;
 
-                    let space = this.spaceVertical(x);
-                    space.position = (-100, x/2);
-                    group.addChild(space);
+                    let size = this.sizeVertical(x);
+                    size.position = (-100, x/2);
+                    group.addChild(size);
                 }
                 else {
                     for (i = 0; i < maxItemCount; i++) {
@@ -552,9 +538,9 @@ class Drawer {
                         group.addChild(cell);
                         x += 50;
 
-                    let space = this.spaceVertical(x);
-                    space.position = (-100, x/2);
-                    group.addChild(space);
+                    let size = this.sizeVertical(x);
+                    size.position = (-100, x/2);
+                    group.addChild(size);
                 }
                 else {
                     let blackCells = minItemCount;
@@ -598,13 +584,13 @@ class Drawer {
                         group.addChild(cell);
                         x += 50;
 
-                    let space = this.spaceVertical(x);
-                    space.position = (100, 150);
-                    group.addChild(space);
+                    let gap = this.gapVertical();
+                    gap.position = (0, 50);
+                    group.addChild(gap);
 
-                    let spaceLower = this.spaceVertical(x);
-                    spaceLower.position = (-100, x/2);
-                    group.addChild(spaceLower);
+                    let size = this.sizeVertical(x);
+                    size.position = (-100, x/2);
+                    group.addChild(size);
                 }
                 else {
                     for (i = 0; i < maxItemCount; i++) {
@@ -614,9 +600,9 @@ class Drawer {
                         x += 100;
                     }
 
-                    let space = this.spaceVertical(x);
-                    space.position = (100, 150);
-                    group.addChild(space);
+                    let gap = this.gapVertical();
+                    gap.position = (0, 50);
+                    group.addChild(gap);
                 }
             }
             else {
@@ -648,13 +634,13 @@ class Drawer {
                         group.addChild(cell);
                         x += 50;
 
-                    let space = this.spaceVertical(x);
-                    space.position = (100, 150);
-                    group.addChild(space);
+                    let gap = this.gapVertical();
+                    gap.position = (0, 50);
+                    group.addChild(gap);
 
-                    let spaceLower = this.spaceVertical(x);
-                    spaceLower.position = (-100, x/2);
-                    group.addChild(spaceLower);
+                    let size = this.sizeVertical(x);
+                    size.position = (-100, x/2);
+                    group.addChild(size);
                 }
                 else {
                     let blackCells = minItemCount;
@@ -673,9 +659,9 @@ class Drawer {
                         x += 100;
                     }
 
-                    let space = this.spaceVertical(x);
-                    space.position = (100, 150);
-                    group.addChild(space);
+                    let gap = this.gapVertical();
+                    gap.position = (0, 50);
+                    group.addChild(gap);
                 }
             }
         }
