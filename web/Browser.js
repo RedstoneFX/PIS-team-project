@@ -52,6 +52,10 @@ class Browser {
         // Создаем новый элемент
         // Создаем details
         let element = document.createElement("details");
+        for (let [cls, _] of oldElement.classList.entries()) {
+            if (cls != "browserItemWithoutChildren")
+                element.classList.add(cls);
+        }
         element.classList.add("browserItemWithChildren");
         element.setAttribute("item", id);
 
@@ -69,16 +73,17 @@ class Browser {
         this.#HTMLElementForItem.set(item, element);
     }
 
-    #makeNewHTMLElementForItem(item, title) {
+    #makeNewHTMLElementForItem(item, title, extraClass = null) {
         let element = document.createElement("span");
         element.innerText = title;
         element.setAttribute("item", this.#bindNewID(item));
         element.classList.add("browserItemWithoutChildren");
+        if (extraClass != null) element.classList.add(extraClass);
         this.#HTMLElementForItem.set(item, element);
         return element;
     }
 
-    addItem(parentItem, childItem, title) {
+    addItem(parentItem, childItem, title, extraClass = null) {
 
         // Выбросить ошибку, если переданный родитель не находится в дереве и не является корнем
         if (parentItem != null && !this.#HTMLElementForItem.has(parentItem)) throw new Error("В браузере нет элемента " + parentItem);
@@ -106,7 +111,7 @@ class Browser {
                 }
             }
         }
-        parentDiv.appendChild(this.#makeNewHTMLElementForItem(childItem, title)); // Вставляем элемент
+        parentDiv.appendChild(this.#makeNewHTMLElementForItem(childItem, title, extraClass)); // Вставляем элемент
     }
 
     removeItem(item) {
