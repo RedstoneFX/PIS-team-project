@@ -1696,4 +1696,20 @@ class Interval {
         this.#end = end;
         return this;
     }
+
+    getMinBegin() {
+        return this.#minBegin;
+    }
+
+    getMaxEnd() {
+        return this.#maxEnd;
+    }
+
+    getDefaultBegin() {
+        return this.#defaultBegin;
+    }
+
+    getDefaultEnd() {
+        return this.#defaultEnd;
+    }
 }
