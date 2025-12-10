@@ -973,7 +973,7 @@ class Component {
 
         // Распознать и установить #isOptional, если такое поле есть в данных
         if (rawData.optional) {
-            let optional = data.optional;
+            let optional = rawData.optional;
             if (!(optional === true || optional === false)) throw new Error(`Не удалось распознать поле optional у компонента`);
             this.#isOptional = optional;
         }
