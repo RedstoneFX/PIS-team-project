@@ -597,7 +597,13 @@ class ArrayPatternExtension extends PatternExtension {
         if (!rawData.item_pattern) {
             throw new Error(`Не задан паттерн для массива.`);
         }
-        this.setItemPattern(rawData.item_pattern);
+
+        let pattern = grammar.getPatternByName(rawData.item_pattern);
+        if (pattern == null) {
+            throw new Error("Нет паттерна с названием: " + rawData.item_pattern);
+        }
+
+        this.setItemPattern(pattern);
 
         if (rawData.item_count) {
             this.#itemCount.fromString(rawData.item_count);
