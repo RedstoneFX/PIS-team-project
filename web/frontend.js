@@ -213,8 +213,8 @@ class Frontend {
      * @param {Pattern | Component | PatternByPatternDefinition} item 
      */
     static onItemSelected(item) {
-        this.toggleApplyableParameters(item);
         this.loadParameters(item);
+        this.toggleApplyableParameters(item);
         //console.log(item);
     }
 
@@ -233,11 +233,7 @@ class Frontend {
         this.disableAllParameters();
         if (item instanceof Pattern) {
             this.patternParams.hidden = false;
-            this.patternName.disabled = false;
-            if (item instanceof PatternByPatternDefinition) {
-                this.patternName.value = "Объявлен в компоненте";
-                this.patternName.disabled = true;
-            }
+            this.patternName.disabled = (item instanceof PatternByPatternDefinition);
             let kind = item.getKind();
             if (kind instanceof CellPatternExtension) {
                 this.cellParams.hidden = false;
@@ -255,5 +251,28 @@ class Frontend {
      * @param {Pattern | Component | PatternByPatternDefinition} item 
      */
     static loadParameters(item) {
+        if (item instanceof Pattern) {
+            if (item instanceof PatternByPatternDefinition) this.patternName.value = "Объявлен в компоненте";
+            else this.patternName.value = this.grammar.getPatternName(item);
+            this.patternKind.value = item.getKind().getKindName();
+            this.patternDesc.value = item.getDescription();
+
+            let width = item.getWidth();
+            if (width.getBegin() == width.getDefaultBegin()) this.patternWidthMin.value = null;
+            else this.patternWidthMin.value = width.getBegin();
+            if (width.getEnd() == width.getDefaultEnd()) this.patternWidthMax.value = null;
+            else this.patternWidthMax.value = width.getEnd();
+            let height = item.getHeight();
+            if (height.getBegin() == height.getDefaultBegin()) this.patternHeightMin.value = null;
+            else this.patternHeightMin.value = width.getBegin();
+            if (height.getEnd() == height.getDefaultEnd()) this.patternHeightMax.value = null;
+            else this.patternHeightMax.value = width.getEnd();
+
+            let count = item.getCountInDocument();
+            if (count.getBegin() == count.getDefaultBegin()) this.patternCountInDocMin.value = null;
+            else this.patternCountInDocMin.value = width.getBegin();
+            if (count.getEnd() == count.getDefaultEnd()) this.patternCountInDocMax.value = null;
+            else this.patternCountInDocMax.value = width.getEnd();
+        }
     }
 }
