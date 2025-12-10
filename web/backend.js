@@ -1524,6 +1524,29 @@ class Interval {
 
             this.setBegin(begin).setEnd(end);
         }
+        
+        // Если интервал односторонне бесконечный
+        if (stringInterval.endsWith('+') || stringInterval.endsWith('-')) {
+
+            let number = stringInterval.slice(0, -1);
+            const modifier = stringInterval.slice(-1);
+
+            // Парсим число
+            if (/^-?\d+$/.test(number)) {
+                number = parseInt(number);
+            } else {
+                throw new Error(`Не удается распознать число, задающее интервал: '${stringInterval}'.`);
+            }
+
+            // Установить значения интервала с бесконечным концом в зависимости от знака
+            if (modifier === '+') {
+                this.setBegin(number).setEnd(Infinity)
+            } else {
+                this.setBegin(-Infinity).setEnd(number);
+            }
+        }
+
+        throw new Error(`Не удается распознать интервал: '${stringInterval}'.`);
     }
 
     /**
