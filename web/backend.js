@@ -893,11 +893,11 @@ class AreaPatternExtension extends PatternExtension {
     }
 
     getInnerComponentsEntries() {
-        this.#innerComponents.entries();
+        return this.#innerComponents.entries();
     }
 
     getOuterComponentsEntries() {
-        this.#outerComponents.entries()
+        return this.#outerComponents.entries()
     }
 
     /**
