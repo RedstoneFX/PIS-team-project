@@ -35,6 +35,8 @@ let grammar = new Grammar();
 function onPageLoaded() {
     let testData = YAML.load(request("cnf/grammar_root.yml"));
     grammar = Grammar.fromRawData(testData);
+    Frontend.init();
+    Frontend.setGrammar(grammar);
     /*Drawer.init();
 
     try {
