@@ -160,7 +160,7 @@ class Browser {
         let links = this.#links.get(parentItem);
         if (links == null) {
             links = new Set();
-            this.#links.set(parentItem, links);
+            this.#links.set(targetChildren, links);
         }
 
         let link = new BrowserLink(targetChildren);
