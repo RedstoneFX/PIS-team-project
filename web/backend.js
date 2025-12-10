@@ -1330,7 +1330,7 @@ class ComponentLocation {
         word = word.toLowerCase().replaceAll(/\s+/g, "");
 
         // Проверить, может ли строка задавать сторону
-        if ((word !== 'left' && word !== 'top' && word !== 'right' && word !== 'bootom') && !(word.includes('padding') || word.includes('margin'))) {
+        if ((word !== 'left' && word !== 'top' && word !== 'right' && word !== 'bottom') && !(word.includes('padding') || word.includes('margin'))) {
             throw Error(`Переданная строка не задаёт сторону: ${word}.`);
         }
 
