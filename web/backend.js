@@ -302,7 +302,7 @@ class Pattern {
 
         // Обновить countInDocument из данных, если такое поле есть
         if (rawData.count_in_document) {
-            this.#countInDocument.fromString(rawData.count_in_document);
+            this.#countInDocument.fromString("" + rawData.count_in_document); // TODO: иногда тут появляется число
         }
 
         // Сохранить значение поля style, если такое поле есть (не терять неиспользуемые данные)
