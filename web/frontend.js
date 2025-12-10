@@ -7,6 +7,7 @@ class Frontend {
 
     static init() {
         this.browser = new Browser(document.getElementById("tree-browser"));
+        this.browser.onClickListeners().add((item) => this.onItemSelected(item));
     }
 
     static resetUI() {
@@ -52,5 +53,12 @@ class Frontend {
         } else {
             this.browser.addLink(component, componentPattern, this.grammar.getPatternName(componentPattern), "browser-item");
         }
+    }
+
+    /**
+     * @param {Pattern | Component | PatternByPatternDefinition} item 
+     */
+    static onItemSelected(item) {
+        console.log(item);
     }
 }

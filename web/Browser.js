@@ -11,11 +11,12 @@ class Browser {
     #childrenOfParent = new Map();
     /**  @type {Map<Object, HTMLElement>} */
     #HTMLElementForItem = new Map();
-    /** @type {Map<string, object>} */
+    /** @type {Map<string, any>} */
     #itemByID = new Map();
     #lastID = 0;
     /** @type {Map<object, Set<BrowserLink>>} */
     #links = new Map();
+    #onClickListeners = new Set();
 
     /**
      * @param {HTMLDivElement} htmlDiv 
@@ -82,6 +83,7 @@ class Browser {
         // Создаем summary
         let titleElement = document.createElement("summary");
         titleElement.innerText = title;
+        titleElement.onclick = (e) => this.#onClick(e);
         element.appendChild(titleElement);
 
         // Создаем поле для дочерних объектов
@@ -164,5 +166,30 @@ class Browser {
         let link = new BrowserLink(targetChildren);
         links.add(link);
         this.addItem(parentItem, link, title, extraClass);
+    }
+
+    onClickListeners() {
+        return this.#onClickListeners;
+    }
+
+    /**
+     * @param {PointerEvent} e 
+     */
+    #onClick(e) {
+        /** @type {HTMLElement} */
+        let itemElement = e.target.parentElement;
+        let id = itemElement.getAttribute("item");
+        let data = this.#itemByID.get(id);
+        if (data instanceof BrowserLink) {
+            this.notifyListeners(data.data);
+        } else {
+            this.notifyListeners(data);
+        }
+    }
+
+    notifyListeners(clickedEntity) {
+        for (let [listener, _] of this.#onClickListeners.entries()) {
+            listener(clickedEntity);
+        }
     }
 }
