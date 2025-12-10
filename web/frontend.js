@@ -215,7 +215,7 @@ class Frontend {
     static onItemSelected(item) {
         this.loadParameters(item);
         this.toggleApplyableParameters(item);
-        //console.log(item);
+        console.log(item);
     }
 
     static disableAllParameters() {
@@ -264,15 +264,34 @@ class Frontend {
             else this.patternWidthMax.value = width.getEnd();
             let height = item.getHeight();
             if (height.getBegin() == height.getDefaultBegin()) this.patternHeightMin.value = null;
-            else this.patternHeightMin.value = width.getBegin();
+            else this.patternHeightMin.value = height.getBegin();
             if (height.getEnd() == height.getDefaultEnd()) this.patternHeightMax.value = null;
-            else this.patternHeightMax.value = width.getEnd();
+            else this.patternHeightMax.value = height.getEnd();
 
             let count = item.getCountInDocument();
             if (count.getBegin() == count.getDefaultBegin()) this.patternCountInDocMin.value = null;
-            else this.patternCountInDocMin.value = width.getBegin();
+            else this.patternCountInDocMin.value = count.getBegin();
             if (count.getEnd() == count.getDefaultEnd()) this.patternCountInDocMax.value = null;
-            else this.patternCountInDocMax.value = width.getEnd();
+            else this.patternCountInDocMax.value = count.getEnd();
+
+            let kind = item.getKind();
+            if (kind instanceof CellPatternExtension) {
+                this.patternCellContentType.value = kind.getContentType();
+            } else if (kind instanceof ArrayPatternExtension) {
+                this.patternArrayDirection.value = kind.getDirection();
+                let gap = kind.getGap();
+                if (gap.getBegin() == gap.getDefaultBegin()) this.patternArrayGapMin.value = null;
+                else this.patternArrayGapMin.value = gap.getBegin();
+                if (gap.getEnd() == gap.getDefaultEnd()) this.patternArrayGapMax.value = null;
+                else this.patternArrayGapMax.value = gap.getEnd();
+                let itemCount = kind.getItemCount();
+                if (itemCount.getBegin() == itemCount.getDefaultBegin()) this.patternArrayCountMin.value = null;
+                else this.patternArrayCountMin.value = itemCount.getBegin();
+                if (itemCount.getEnd() == itemCount.getDefaultEnd()) this.patternArrayCountMax.value = null;
+                else this.patternArrayCountMax.value = itemCount.getEnd();
+            } else if (kind instanceof AreaPatternExtension) {
+                // Нет особых параметров
+            }
         }
     }
 }
