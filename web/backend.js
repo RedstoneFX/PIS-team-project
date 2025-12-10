@@ -71,7 +71,7 @@ class Grammar {
         // Для каждого паттерна в словаре и его исходных данных...
         for (const [patternName, patternData] of Object.entries(tmp)) {
             // Обработать специфичные данные типа через Pattern.resolveKindFromRawData(rawData)
-            grammar.getPatternByName(patternName).resolveKindFromRawData(patternData);
+            grammar.getPatternByName(patternName).resolveKindFromRawData(patternData, grammar);
         }
 
         // Вернуть созданный объект грамматики
@@ -247,7 +247,7 @@ class Pattern {
      * Генерирует расширение для текущего паттерна на основе сырых данных
      * @param {Object} rawData 
      */
-    resolveKindFromRawData(rawData) {
+    resolveKindFromRawData(rawData, grammar) {
         // Выбросить ошибку, если у паттерна уже есть kind
         if (this.#kind) {
             throw new Error(`Текущий паттерн уже имеет тип данных`);
@@ -262,13 +262,13 @@ class Pattern {
         // Если искомый тип паттерна - клетка...
         if (newKind === "CELL") {
             // Создать расширение клетки
-            this.#kind = new CellPatternExtension().fromRawData(rawData);
+            this.#kind = new CellPatternExtension().fromRawData(rawData, grammar);
         } else if (newKind === "ARRAY" || newKind === "ARRAY-IN-CONTEXT") { // Иначе если искомый тип паттерна - массив...
             // Создать расширение массива
-            this.#kind = new ArrayPatternExtension().fromRawData(rawData);
+            this.#kind = new ArrayPatternExtension().fromRawData(rawData, grammar);
         } else if (newKind === "AREA") { // Иначе если искомый тип паттерна - область...
             // Создать расширение массива
-            this.#kind = new AreaPatternExtension().fromRawData(rawData);
+            this.#kind = new AreaPatternExtension(this).fromRawData(rawData, grammar);
         } else { // Иначе
             // Выбросить ошибку о невозможности распознания вида паттерна по ключевому слову в поле rawData.kind
             throw new Error(`В поле kind указан неизвестный тип паттерна: ${newKind}. Поддерживаемые: CELL, ARRAY, ARRAY-IN-CONTEXT, AREA`);
@@ -722,9 +722,13 @@ class AreaPatternExtension extends PatternExtension {
     #innerComponents = new Map();
     /** @type {Map<string, Component>} */
     #outerComponents = new Map();
+    /** @type {Pattern} */
+    #pattern;
 
-    constructor() {
+    constructor(pattern) {
         super();
+        if (pattern == null) throw new Error("Для создания AreaPatternExtension необходимо указать целевой паттерн.");
+        this.#pattern = pattern;
     }
 
     /**
@@ -737,15 +741,15 @@ class AreaPatternExtension extends PatternExtension {
         super.fromRawData(rawData, grammar);
 
         if (rawData.inner) { // Если область имеет внутренние компоненты
-            for (const [componentName, componentData] of Object.entries(data.inner)) { // Для каждого внутреннего компонента...
-                const component = new Component().fromRawData(this, componentData, true, grammar); // Распознаем компонент
+            for (const [componentName, componentData] of Object.entries(rawData.inner)) { // Для каждого внутреннего компонента...
+                const component = new Component().fromRawData(this.#pattern, componentData, true, grammar); // Распознаем компонент
                 this.#innerComponents.set(componentName, component);
             }
         }
 
         if (rawData.outer) { // Если область имеет внешние компоненты
-            for (const [componentName, componentData] of Object.entries(data.outer)) { // Для каждого внешнего компонента...
-                const component = new Component().fromRawData(this, componentData, false, grammar); // Распознаем компонент
+            for (const [componentName, componentData] of Object.entries(rawData.outer)) { // Для каждого внешнего компонента...
+                const component = new Component().fromRawData(this.#pattern, componentData, false, grammar); // Распознаем компонент
                 this.#outerComponents.set(componentName, component);
             }
         }
@@ -910,6 +914,7 @@ class AreaPatternExtension extends PatternExtension {
         // Очистить списки
         this.#innerComponents.clear();
         this.#outerComponents.clear();
+        this.#pattern = null;
     }
 }
 
