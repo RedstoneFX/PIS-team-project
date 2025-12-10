@@ -29,6 +29,116 @@ class Drawer {
         this.elements = [];
     }
 
+    static squareCell(color) {
+        return new paper.Path.Rectangle({
+            point: [0, 0],
+            size: [100, 100],
+            strokeColor: color,
+            strokeWidth: 2,
+            fillColor: null
+        });
+    }
+
+    static squareDot() {
+        return new paper.Path.Rectangle({
+            point: [0, 0],
+            size: [10, 10],
+            strokeColor: 'black',
+            strokeWidth: 2,
+            fillColor: null
+        });
+    }
+
+    static verticalLine() {
+        return new paper.Path.Rectangle({
+            point: [0, 0],
+            size: [0, 100],
+            strokeColor: 'black',
+            strokeWidth: 2,
+            fillColor: 'black'
+        });
+    }
+
+    static horizontalLine() {
+        return new paper.Path.Rectangle({
+            point: [0, 0],
+            size: [100, 0],
+            strokeColor: 'black',
+            strokeWidth: 2,
+            fillColor: 'black'
+        });
+    }
+
+    static gapBeginArrow() {
+        let gapBegin = new paper.Path.RegularPolygon(new Point(0, 0), 3, 5);
+        gapBegin.fillColor = 'black';
+        gapBegin.rotate(-90);
+        return gapBegin;
+    }
+
+    static gapEndArrow() {
+        let gapEnd = new paper.Path.RegularPolygon(new Point(0, 0), 3, 5);
+        gapEnd.fillColor = 'black';
+        gapEnd.rotate(90);
+        return gapEnd;
+    }
+
+    static spaceBetween() {
+
+        let group;
+
+        let line1 = this.verticalLine();
+        line1.position = (0, 100);
+        group.addChild(line1);
+
+        let line2 = this.verticalLine();
+        line2.position = (100, 100);
+        group.addChild(line2);
+
+        let arrowLeft = this.gapBeginArrow();
+        arrowLeft.position = (5, 100);
+        group.addChild(arrowLeft);
+
+        let arrowRight = this.gapEndArrow();
+        arrowRight.position = (95, 100);
+        group.addChild(arrowRight);
+
+        let line3 = this.verticalLine();
+        line3.position = (50, 100);
+        group.addChild(line3);
+
+        return group;
+        
+    }
+
+    static spaceBetween(x) {
+
+        let group;
+
+        let line1 = this.verticalLine();
+        line1.position = (0, -100);
+        group.addChild(line1);
+
+        let line2 = this.verticalLine();
+        line2.position = (x, -100);
+        group.addChild(line2);
+
+        let arrowLeft = this.gapBeginArrow();
+        arrowLeft.position = (5, -100);
+        group.addChild(arrowLeft);
+
+        let arrowRight = this.gapEndArrow();
+        arrowRight.position = (x-5, -100);
+        group.addChild(arrowRight);
+
+        let line3 = this.verticalLine();
+        line3.position = (x/2, -100);
+        group.addChild(line3);
+
+        return group;
+        
+    }
+
     /**
      * Метод, который будет вызван для отрисовки паттерна неизвестного вида
      * @param {Pattern} pattern 
@@ -36,16 +146,18 @@ class Drawer {
     static drawPattern(pattern) {
         this.clearCanvas();
 
+        let group;
+
         if (pattern instanceof CellPattern) {
-            const figure = this.drawCellPattern(pattern);
+            const figure = this.drawCellPattern(pattern, group);
             this.elements.push(figure);
         }
         else if (pattern instanceof ArrayPattern) {
-            const figure = this.drawArrayPattern(pattern);
+            const figure = this.drawArrayPattern(pattern, group);
             this.elements.push(figure);
         }
         else if (pattern instanceof AreaPattern) {
-            const figure = this.drawAreaPattern(pattern);
+            const figure = this.drawAreaPattern(pattern, group);
             this.elements.push(figure);
         }
         else throw new Error("Нельзя отрисовать данный объект!");
@@ -53,121 +165,248 @@ class Drawer {
 
     /**
      * Отрисовать паттерн-ячейку
-     * @param {CellPattern} pattern 
      */
-    static drawCellPattern(pattern) {
+    static drawCellPattern(pattern, group) {
 
-        // Получаем значения ширины и высоты из диапазонов
-        const pattern_width_avg = this.getValueFromYamlRange(pattern.width);
-        const pattern_height_avg = this.getValueFromYamlRange(pattern.height);
+        let cell = squareCell('black');
+        cell.position = (50, 0);
+        group.addChild(cell);
 
-        const width = Math.max(pattern_width_avg, 10);
-        const height = Math.max(pattern_height_avg, 10);
+        let space = this.spaceBetween();
+        space.position = (50, 100);
+        group.addChild(space);
 
-        const cell = this.drawCell(width, height);
-
-        return cell;
-    }
-
-    /**
-     * Отрисовать паттерн-ячейку
-     * @param {Number} width 
-     * @param {Number} height 
-     */
-    static drawCell(width, height) {
-        // Создаем прямоугольник ячейки
-        const cell = new paper.Path.Rectangle({
-            point: [0, 0],
-            size: [width, height],
-            strokeColor: 'black',
-            strokeWidth: 2,
-            fillColor: null
-        });
-
-        return cell;
     }
 
     /**
      * Отрисовать паттерн-массив
      * @param {ArrayPattern} pattern 
      */
-    static drawArrayPattern(pattern) {
-        let group = new paper.Group();
-
-        const gap = this.getValueFromYamlRange(pattern.gap);
-
-        const max_item_count = pattern.itemCount.getEnd();
-        const min_item_count = Math.max(pattern.itemCount.getBegin(), 0);        
-        const itemCount = max_item_count == Infinity ? Math.max(min_item_count, 4) : Math.ceil((max_item_count + min_item_count) / 2);
-
-        // Получаем размеры ячейки из внутреннего паттерна
-        const cell_width_avg = this.getValueFromYamlRange(pattern.pattern.width);
-        const cell_height_avg = this.getValueFromYamlRange(pattern.pattern.height);
-    
-        const cellWidth = Math.max(cell_width_avg, 0);
-        const cellHeight = Math.max(cell_height_avg, 0);
-
-        let min_pattern_width = cellWidth;
-        let min_pattern_height = cellHeight;
-
-        switch (pattern.direction) {
-            case 'ROW':
-                min_pattern_width += itemCount * (cellWidth + gap);
-                break;
-            case 'COLUMN':
-                min_pattern_height += itemCount * (cellHeight + gap);
-                break;
-            case 'FILL':
-                const squareRoot = Math.ceil(Math.sqrt(itemCount));
-                min_pattern_width += squareRoot * (cellWidth + gap);
-                min_pattern_height += squareRoot * (cellHeight + gap);
-                break;
-        }
-
-        // Получаем значения ширины и высоты из диапазонов
-        const pattern_width_avg = this.getValueFromYamlRange(pattern.width);
-        const pattern_height_avg = this.getValueFromYamlRange(pattern.height);
-
-        const width = Math.max(pattern_width_avg, min_pattern_width);
-        const height = Math.max(pattern_height_avg, min_pattern_height);
-
-        // Создаем прямоугольник массива
-        const array_cell = new paper.Path.Rectangle({
-            point: [0, 0],
-            size: [width, height],
-            strokeColor: 'black',
-            strokeWidth: 2,
-            fillColor: null
-        });
-
-        group.addChild(array_cell);
+    static drawArrayPattern(pattern, group) {
     
         // Создаем ячейки в зависимости от направления
         switch (pattern.direction) {
             case 'ROW':
-                this.drawRowArray(group, pattern.pattern, itemCount, gap, cellWidth);
+                this.drawRowArray(pattern, group);
                 break;
             case 'COLUMN':
-                this.drawColumnArray(group, pattern.pattern, itemCount, gap, cellHeight);
+                this.drawColumnArray(pattern, group);
                 break;
             case 'FILL':
-                this.drawFillArray(group, pattern.pattern, itemCount, gap, cellWidth, cellHeight);
+                this.drawFillArray(pattern, group);
                 break;
         }
-    
+
         return group;
+
     }
 
     /**
      * Отрисовать массив в строку
      */
-    static drawRowArray(group, cellPattern, itemCount, gap, cellWidth) {
-        for (let i = 0; i < itemCount; i++) {
-            let cell = this.drawCellPattern(cellPattern);
-            cell.position = [i * (cellWidth + gap), 0];
-            group.addChild(cell);
+    static drawRowArray(pattern, group) {
+
+        const minItemCount = Math.max(pattern.itemCount.getBegin(), 0);
+        const maxItemCount = Math.max(pattern.itemCount.getEnd(), 0);
+
+        const maxGap = Math.max(pattern.gap.getEnd(), 0);
+        
+        let x = 50;
+
+        if (maxGap == 0) {
+            if (minItemCount == maxItemCount) {
+                if (maxItemCount > 5) {
+                    for (i = 0; i < 2; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < 3; i++) {
+                        let dot = this.squareDot();
+                        dot.position = (x, 0);
+                        group.addChild(cell);
+                        x += 50;
+                    }
+                        x += 50;
+                        let cell = this.squareCell('black');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 50;
+
+                    let space = this.spaceBetween(x);
+                    space.position = (x/2, -100);
+
+                    group.addChild(space);
+                }
+                else {
+                    for (i = 0; i < maxItemCount; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                }
+            }
+            else {
+                if (maxItemCount > 5) {
+                    let blackCells = Math.min(2, minItemCount);
+                    let greyCells = 2 - blackCells;
+
+                    for (i = 0; i < blackCells; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < greyCells; i++) {
+                        let cell = this.squareCell('grey');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < 3; i++) {
+                        let dot = this.squareDot();
+                        dot.position = (x, 0);
+                        group.addChild(cell);
+                        x += 50;
+                    }
+                        x += 50;
+                        let cell = this.squareCell('grey');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 50;
+
+                    let space = this.spaceBetween(x);
+                    space.position = (x/2, -100);
+
+                    group.addChild(space);
+                }
+                else {
+                    let blackCells = minItemCount;
+                    let greyCells = maxItemCount - blackCells;
+
+                    for (i = 0; i < blackCells; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < greyCells; i++) {
+                        let cell = this.squareCell('grey');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                }
+            }
+        }
+        else {
+            if (minItemCount == maxItemCount) {
+                if (maxItemCount > 5) {
+
+                    for (i = 0; i < 2; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+
+                    for (i = 0; i < 3; i++) {
+                        let dot = this.squareDot();
+                        dot.position = (x, 0);
+                        group.addChild(cell);
+                        x += 50;
+                    }
+                        x += 50;
+                        let cell = this.squareCell('black');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 50;
+
+                    let space = this.spaceBetween();
+                    space.position = (150, 100);
+                    group.addChild(space);
+
+                    let spaceLower = this.spaceBetween(x);
+                    spaceLower.position = (x/2, -100);
+                    group.addChild(spaceLower);
+                }
+                else {
+                    for (i = 0; i < maxItemCount; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+
+                    let space = this.spaceBetween();
+                    space.position = (150, 100);
+                    group.addChild(space);
+                }
+            }
+            else {
+                if (maxItemCount > 5) {
+                    let blackCells = Math.min(2, minItemCount);
+                    let greyCells = 2 - blackCells;
+
+                    for (i = 0; i < blackCells; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < greyCells; i++) {
+                        let cell = this.squareCell('grey');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < 3; i++) {
+                        let dot = this.squareDot();
+                        dot.position = (x, 0);
+                        group.addChild(cell);
+                        x += 50;
+                    }
+                        x += 50;
+                        let cell = this.squareCell('grey');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 50;
+
+                    let space = this.spaceBetween();
+                    space.position = (150, 100);
+                    group.addChild(space);
+
+                    let spaceLower = this.spaceBetween(x);
+                    spaceLower.position = (x/2, -100);
+                    group.addChild(spaceLower);
+                }
+                else {
+                    let blackCells = minItemCount;
+                    let greyCells = maxItemCount - blackCells;
+
+                    for (i = 0; i < blackCells; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < greyCells; i++) {
+                        let cell = this.squareCell('grey');
+                        cell.position = (x, 0);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+
+                    let space = this.spaceBetween();
+                    space.position = (150, 100);
+                    group.addChild(space);
+                }
+            }
         }
     }
+
 
     /**
      * Отрисовать массив в колонку
