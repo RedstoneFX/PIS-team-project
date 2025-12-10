@@ -950,13 +950,7 @@ class Component {
                 throw new Error(`Не удаётся найти паттерн с указанным названием (${rawData.pattern}) для компонента.`)
             }
         } else if (rawData.pattern_definition && !rawData.pattern) { // Иначе если в данных есть pattern_definition и нет названия паттерна...
-            try {
-                // Распознать pattern_definition
-                pattern = new PatternByPatternDefinition(this).fromRawData(rawData);
-            } catch (e) {
-                // Выбросить ошибку, если не удалось распознать паттерн
-                throw new Error(`Не удаётся распознать вложнный паттерн в компоненте: ${e.message}`);
-            }
+            pattern = new PatternByPatternDefinition(this).fromRawData(rawData);
         } else {
             throw new Error(`Компонент должен содержать pattern или pattern_definition`);
         }
