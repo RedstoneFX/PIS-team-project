@@ -1570,7 +1570,7 @@ class Interval {
      * @returns возвращает себя для цепного вызова
      */
     restoreDefault() {
-        if (this.#defaultBegin && this.#defaultEnd) {
+        if (this.#defaultBegin != null && this.#defaultEnd != null) {
             this.#begin = this.#defaultBegin;
             this.#end = this.#defaultEnd;
         } else {
