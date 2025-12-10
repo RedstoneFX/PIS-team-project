@@ -83,6 +83,19 @@ class Drawer {
         return gapEnd;
     }
 
+    static gapArrowUp() {
+        let gapBegin = new paper.Path.RegularPolygon(new Point(0, 0), 3, 5);
+        gapBegin.fillColor = 'black';
+        return gapBegin;
+    }
+
+    static gapArrowDown() {
+        let gapEnd = new paper.Path.RegularPolygon(new Point(0, 0), 3, 5);
+        gapEnd.fillColor = 'black';
+        gapEnd.rotate(180);
+        return gapEnd;
+    }
+
     static spaceBetween() {
 
         let group;
@@ -103,7 +116,7 @@ class Drawer {
         arrowRight.position = (95, 100);
         group.addChild(arrowRight);
 
-        let line3 = this.verticalLine();
+        let line3 = this.horizontalLine();
         line3.position = (50, 100);
         group.addChild(line3);
 
@@ -131,8 +144,64 @@ class Drawer {
         arrowRight.position = (x-5, -100);
         group.addChild(arrowRight);
 
-        let line3 = this.verticalLine();
+        let line3 = this.horizontalLine();
         line3.position = (x/2, -100);
+        group.addChild(line3);
+
+        return group;
+        
+    }
+
+    static spaceVertical() {
+
+        let group;
+
+        let line1 = this.horizontalLine();
+        line1.position = (100, 0);
+        group.addChild(line1);
+
+        let line2 = this.horizontalLine();
+        line2.position = (100, 100);
+        group.addChild(line2);
+
+        let arrowDown = this.gapArrowDown();
+        arrowDown.position = (100, 5);
+        group.addChild(arrowDown);
+
+        let arrowUp = this.gapArrowUp();
+        arrowUp.position = (100, 95);
+        group.addChild(arrowUp);
+
+        let line3 = this.verticalLine();
+        line3.position = (100, 50);
+        group.addChild(line3);
+
+        return group;
+        
+    }
+
+    static spaceVertical(y) {
+
+        let group;
+
+        let line1 = this.horizontalLine();
+        line1.position = (-100, 0);
+        group.addChild(line1);
+
+        let line2 = this.horizontalLine();
+        line2.position = (-100, y);
+        group.addChild(line2);
+
+        let arrowDown = this.gapArrowDown();
+        arrowDown.position = (-100, 5);
+        group.addChild(arrowDown);
+
+        let arrowUp = this.gapArrowUp();
+        arrowUp.position = (-100, y-5);
+        group.addChild(arrowUp);
+
+        let line3 = this.verticalLine();
+        line3.position = (-100, y/2);
         group.addChild(line3);
 
         return group;
@@ -412,10 +481,203 @@ class Drawer {
      * Отрисовать массив в колонку
      */
     static drawColumnArray(group, cellPattern, itemCount, gap, cellHeight) {
-        for (let i = 0; i < itemCount; i++) {
-            let cell = this.drawCellPattern(cellPattern);
-            cell.position = [0, i * (cellHeight + gap)];
-            group.addChild(cell);
+
+        const minItemCount = Math.max(pattern.itemCount.getBegin(), 0);
+        const maxItemCount = Math.max(pattern.itemCount.getEnd(), 0);
+
+        const maxGap = Math.max(pattern.gap.getEnd(), 0);
+        
+        let x = 50;
+
+        if (maxGap == 0) {
+            if (minItemCount == maxItemCount) {
+                if (maxItemCount > 5) {
+                    for (i = 0; i < 2; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < 3; i++) {
+                        let dot = this.squareDot();
+                        dot.position = (0, x);
+                        group.addChild(cell);
+                        x += 50;
+                    }
+                        x += 50;
+                        let cell = this.squareCell('black');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 50;
+
+                    let space = this.spaceVertical(x);
+                    space.position = (-100, x/2);
+                    group.addChild(space);
+                }
+                else {
+                    for (i = 0; i < maxItemCount; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                }
+            }
+            else {
+                if (maxItemCount > 5) {
+                    let blackCells = Math.min(2, minItemCount);
+                    let greyCells = 2 - blackCells;
+
+                    for (i = 0; i < blackCells; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < greyCells; i++) {
+                        let cell = this.squareCell('grey');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < 3; i++) {
+                        let dot = this.squareDot();
+                        dot.position = (0, x);
+                        group.addChild(cell);
+                        x += 50;
+                    }
+                        x += 50;
+                        let cell = this.squareCell('grey');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 50;
+
+                    let space = this.spaceVertical(x);
+                    space.position = (-100, x/2);
+                    group.addChild(space);
+                }
+                else {
+                    let blackCells = minItemCount;
+                    let greyCells = maxItemCount - blackCells;
+
+                    for (i = 0; i < blackCells; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < greyCells; i++) {
+                        let cell = this.squareCell('grey');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                }
+            }
+        }
+        else {
+            if (minItemCount == maxItemCount) {
+                if (maxItemCount > 5) {
+
+                    for (i = 0; i < 2; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+
+                    for (i = 0; i < 3; i++) {
+                        let dot = this.squareDot();
+                        dot.position = (0, x);
+                        group.addChild(cell);
+                        x += 50;
+                    }
+                        x += 50;
+                        let cell = this.squareCell('black');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 50;
+
+                    let space = this.spaceVertical(x);
+                    space.position = (100, 150);
+                    group.addChild(space);
+
+                    let spaceLower = this.spaceVertical(x);
+                    spaceLower.position = (-100, x/2);
+                    group.addChild(spaceLower);
+                }
+                else {
+                    for (i = 0; i < maxItemCount; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+
+                    let space = this.spaceVertical(x);
+                    space.position = (100, 150);
+                    group.addChild(space);
+                }
+            }
+            else {
+                if (maxItemCount > 5) {
+                    let blackCells = Math.min(2, minItemCount);
+                    let greyCells = 2 - blackCells;
+
+                    for (i = 0; i < blackCells; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < greyCells; i++) {
+                        let cell = this.squareCell('grey');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < 3; i++) {
+                        let dot = this.squareDot();
+                        dot.position = (0, x);
+                        group.addChild(cell);
+                        x += 50;
+                    }
+                        x += 50;
+                        let cell = this.squareCell('grey');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 50;
+
+                    let space = this.spaceVertical(x);
+                    space.position = (100, 150);
+                    group.addChild(space);
+
+                    let spaceLower = this.spaceVertical(x);
+                    spaceLower.position = (-100, x/2);
+                    group.addChild(spaceLower);
+                }
+                else {
+                    let blackCells = minItemCount;
+                    let greyCells = maxItemCount - blackCells;
+
+                    for (i = 0; i < blackCells; i++) {
+                        let cell = this.squareCell('black');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+                    for (i = 0; i < greyCells; i++) {
+                        let cell = this.squareCell('grey');
+                        cell.position = (0, x);
+                        group.addChild(cell);
+                        x += 100;
+                    }
+
+                    let space = this.spaceVertical(x);
+                    space.position = (100, 150);
+                    group.addChild(space);
+                }
+            }
         }
     }
 
