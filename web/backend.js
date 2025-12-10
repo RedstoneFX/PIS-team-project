@@ -98,7 +98,7 @@ class Grammar {
             // Для каждого известного паттерна...
             for (const [patternName, pattern] of this.#patterns) {
                 // Добавить в поле patterns объект, созданный сериализацией паттерна через Pattern.serialize()
-                result.patterns[patternName] = pattern.serialize();
+                result.patterns[patternName] = pattern.serialize(this);
             }
         }
 
@@ -302,7 +302,7 @@ class Pattern {
 
         // Обновить countInDocument из данных, если такое поле есть
         if (rawData.count_in_document) {
-            this.#countInDocument.fromString("" + rawData.count_in_document); // TODO: иногда тут появляется число
+            this.#countInDocument.fromString(rawData.count_in_document);
         }
 
         // Сохранить значение поля style, если такое поле есть (не терять неиспользуемые данные)
@@ -317,7 +317,7 @@ class Pattern {
      * Сериализирует данные объекта
      * @param {Object} rawData 
      */
-    serialize() {
+    serialize(grammar) {
         // Выкинуть ошибку, если у текущего паттерна нет типа
         if (!this.#kind) {
             throw new Error(`Невозможно сериализовать, так как текущий паттерн не имеет типа`);
@@ -331,7 +331,7 @@ class Pattern {
             result.description = this.#description;
         }
         // Записать в объект данные, зависящие от типа, с помощью PatternExtension.serializeTo(rawData)
-        this.#kind.serializeTo(result);
+        this.#kind.serializeTo(result, grammar);
         // Записать в объект поле size, если width и height не являются значениями по умолчанию
         if (!(this.#width.isDefault() && this.#height.isDefault())) {
             result.size = `${this.#width.toString()} x ${this.#height.toString()}`;
@@ -341,7 +341,7 @@ class Pattern {
             result.count_in_document = this.#countInDocument.toString();
         }
         // Записать в объект поле style, если this.style не пустой
-        if (this.#style) {
+        if (this.#style && Object.keys(this.#style).length > 0) {
             result.style = this.#style;
         }
 
@@ -407,7 +407,7 @@ class Pattern {
         if (this.#width === null) {
             throw new Error(`Объект уничтожен`);
         }
-        this.#width.setBegin(widthBegin).setEnd(widthEnd);
+        this.#width.update(widthBegin, widthEnd);
         return this;
     }
 
@@ -424,7 +424,7 @@ class Pattern {
         if (this.#height === null) {
             throw new Error(`Объект уничтожен`);
         }
-        this.#height.setBegin(heightBegin).setEnd(heightEnd);
+        this.#height.update(heightBegin, heightEnd);
         return this;
     }
 
@@ -441,7 +441,7 @@ class Pattern {
         if (this.#countInDocument === null) {
             throw new Error(`Объект уничтожен`);
         }
-        this.#countInDocument.setBegin(countBegin).setEnd(countEnd);
+        this.#countInDocument.update(countBegin, countEnd);
         return this;
     }
 
@@ -562,7 +562,7 @@ class CellPatternExtension extends PatternExtension {
         if (typeof contentType !== 'string') {
             throw new Error(`Тип данных ячейки должен быть задан строкой`);
         }
-        this.#contentType = contentType.toUpperCase();
+        this.#contentType = contentType;
         return this;
     }
 
@@ -691,7 +691,7 @@ class ArrayPatternExtension extends PatternExtension {
         if (this.#itemCount === null) {
             throw new Error(`Объект уничтожен`);
         }
-        this.#itemCount.setBegin(countBegin).setEnd(countEnd);
+        this.#itemCount.update(countBegin, countEnd);
         return this;
     }
 
@@ -708,7 +708,7 @@ class ArrayPatternExtension extends PatternExtension {
         if (this.#gap === null) {
             throw new Error(`Объект уничтожен`);
         }
-        this.#gap.setBegin(gapBegin).setEnd(gapEnd);
+        this.#gap.update(gapBegin, gapEnd);
         return this;
     }
 
@@ -766,9 +766,9 @@ class AreaPatternExtension extends PatternExtension {
         super.serializeTo(rawData, grammar);
 
         // Если у области есть внутренние компоненты
-        if (this.#innerComponents.size() > 0) {
+        if (this.#innerComponents.size > 0) {
             // Создать поле inner, если его нет
-            if (!rawData.inner) { result.inner = {} };
+            if (!rawData.inner) { rawData.inner = {} };
             // Записать все внутренние компоненты
             for (const [name, component] of this.#innerComponents) {
                 rawData.inner[name] = component.serialize(grammar);
@@ -776,9 +776,9 @@ class AreaPatternExtension extends PatternExtension {
         }
 
         // Если у области есть внешние компоненты
-        if (this.#outerComponents.size() > 0) {
+        if (this.#outerComponents.size > 0) {
             // Создать поле outer, если его нет
-            if (!rawData.outer) { result.outer = {} };
+            if (!rawData.outer) { rawData.outer = {} };
             // Записать все внешние компоненты
             for (const [name, component] of this.#outerComponents) {
                 rawData.outer[name] = component.serialize(grammar);
@@ -962,7 +962,8 @@ class Component {
                 throw new Error(`Не удаётся найти паттерн с указанным названием (${rawData.pattern}) для компонента.`)
             }
         } else if (rawData.pattern_definition && !rawData.pattern) { // Иначе если в данных есть pattern_definition и нет названия паттерна...
-            pattern = new PatternByPatternDefinition(this).fromRawData(rawData);
+            pattern = new PatternByPatternDefinition(this).fromRawData(rawData.pattern_definition);
+            pattern.resolveKindFromRawData(rawData.pattern_definition, grammar);
         } else {
             throw new Error(`Компонент должен содержать pattern или pattern_definition`);
         }
@@ -1005,7 +1006,7 @@ class Component {
         // Если паттерн является pattern_definition...
         if (this.#pattern instanceof PatternByPatternDefinition) {
             // Сериализовать паттерн и добавить в поле pattern_definition
-            result.pattern_definition = this.#pattern.serialize();
+            result.pattern_definition = this.#pattern.serialize(grammar);
         } else { // Иначе...
             // Узнать название паттерна в грамматике
             let name = grammar.getPatternName(this.#pattern);
@@ -1290,22 +1291,22 @@ class ComponentLocation {
         // Если слово - "left"...
         if (word === 'left') {
             // Установить дефолтное значение left
-            this.#left.setBegin(0).setEnd(isInner ? 0 : Infinity);
+            this.#left.update(0, isInner ? 0 : Infinity);
             // Установить #isLeftPadding в истину, если компонент внутренний, иначе - в ложь
             this.#isLeftPadding = isInner;
         } else if (word === 'top') { // Иначе если слово - "top"...
             // Установить дефолтное значение top
-            this.#top.setBegin(0).setEnd(isInner ? 0 : Infinity);
+            this.#top.update(0, isInner ? 0 : Infinity);
             // Установить #isTopPadding в истину, если компонент внутренний, иначе - в ложь
             this.#isTopPadding = isInner;
         } else if (word === 'right') { // Иначе если слово - "right"...
             // Установить дефолтное значение right
-            this.#right.setBegin(0).setEnd(isInner ? 0 : Infinity);
+            this.#right.update(0, isInner ? 0 : Infinity);
             // Установить #isRightPadding в истину, если компонент внутренний, иначе - в ложь
             this.#isRightPadding = isInner;
         } else if (word === 'bottom') { // Иначе если слово - "bottom"...
             // Установить дефолтное значение bottom
-            this.#bottom.setBegin(0).setEnd(isInner ? 0 : Infinity);
+            this.#bottom.update(0, isInner ? 0 : Infinity);
             // Установить #isBottomPadding в истину, если компонент внутренний, иначе - в ложь
             this.#isBottomPadding = isInner;
         } else { // Иначе...
@@ -1466,19 +1467,35 @@ class Interval {
         }
     }
 
+    update(begin, end) {
+        if (begin > end) {
+            throw new Error('Конец диапазона не может быть меньше начала');
+        }
+        if (begin < this.#minBegin) {
+            throw new Error(`Начало не может быть меньше минимально допустимого (${this.#minBegin})`);
+        }
+        if (end > this.#maxEnd) {
+            throw new Error(`Начало не может быть больше максимально допустимого (${this.#maxEnd})`);
+        }
+        this.#begin = begin;
+        this.#end = end;
+    }
+
     /**
      * Парсит диапазон значений из строки
      * @param {String} stringInterval
      * @returns возвращает себя для цепного вызова
      */
     fromString(stringInterval) {
-        if (!stringInterval) {
+        if (stringInterval == null) { // TODO: зачем это?
             return this;
         }
 
         // Если переданно число, то интервал сокращается до точки
         if (typeof stringInterval === 'number') {
-            this.setBegin(stringInterval).setEnd(stringInterval);
+            this.#begin = stringInterval;
+            this.#end = stringInterval;
+            return;
         } else if (typeof stringInterval !== "string") { // Выбросить ошибку, если интервал не является строкой или числом
             throw new Error(`Не удается распознать интервал: '${stringInterval}'.`);
         }
@@ -1489,12 +1506,14 @@ class Interval {
         // Вернуть единичный интервал, если в строке только число (одно)
         if (/^-?\d+$/.test(stringInterval)) {
             let num = parseInt(stringInterval);
-            this.setBegin(num).setEnd(num);
+            this.update(num, num);
+            return;
         }
 
         // Если передана * - то интервал бесконечен с обоих концов
         if (stringInterval === '*') {
-            this.setBegin(-Infinity).setEnd(Infinity);
+            this.update(this.#minBegin, this.#maxEnd);
+            return;
         }
 
         // Если в строке точно есть интервал...
@@ -1508,7 +1527,7 @@ class Interval {
             if (/^-?\d+$/.test(parts[0])) {
                 begin = parseInt(parts[0]);
             } else if (parts[0] == "*") {
-                begin = -Infinity;
+                begin = this.#minBegin;
             } else {
                 throw new Error(`Не удается распознать левую часть (${parts[0]}) интервала: '${stringInterval}'.`);
             }
@@ -1517,14 +1536,15 @@ class Interval {
             if (/^-?\d+$/.test(parts[1])) {
                 end = parseInt(parts[1]);
             } else if (parts[1] == "*") {
-                end = Infinity;
+                end = this.#maxEnd;
             } else {
                 throw new Error(`Не удается распознать правую часть (${parts[1]}) интервала: '${stringInterval}'.`);
             }
 
-            this.setBegin(begin).setEnd(end);
+            this.update(begin, end);
+            return;
         }
-        
+
         // Если интервал односторонне бесконечный
         if (stringInterval.endsWith('+') || stringInterval.endsWith('-')) {
 
@@ -1540,10 +1560,11 @@ class Interval {
 
             // Установить значения интервала с бесконечным концом в зависимости от знака
             if (modifier === '+') {
-                this.setBegin(number).setEnd(Infinity)
+                this.update(number, this.#maxEnd)
             } else {
-                this.setBegin(-Infinity).setEnd(number);
+                this.update(this.#minBegin, number);
             }
+            return;
         }
 
         throw new Error(`Не удается распознать интервал: '${stringInterval}'.`);
