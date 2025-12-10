@@ -455,6 +455,7 @@ class PatternByPatternDefinition extends Pattern {
     #parentComponent;
 
     constructor(parentComponent) {
+        super();
         if (!(parentComponent instanceof Component)) {
             throw new Error(`Вписанный паттерн должен быть определён в компоненте.`);
         }
