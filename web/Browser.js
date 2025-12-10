@@ -192,4 +192,8 @@ class Browser {
             listener(clickedEntity);
         }
     }
+
+    getElementFor(item) {
+        return this.#HTMLElementForItem.get(item);
+    }
 }
