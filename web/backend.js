@@ -1189,7 +1189,7 @@ class ComponentLocation {
         } else if (typeof rawData === 'object') { // Иначе если тип данных - объект...
             for (const [key, value] of Object.entries(rawData)) {
                 let side = key.trim();
-                let interval = value.trim();
+                let interval = ("" + value).trim(); // TODO: иногда тут появляются числа
 
                 // Обработка смешанной записи, где только часть заданных направлений имеют стандартный промежуток, а не указанный явно
                 if (typeof value === 'string' && (value.includes('top') || value.includes('bottom')
