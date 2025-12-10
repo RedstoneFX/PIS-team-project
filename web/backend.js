@@ -968,7 +968,7 @@ class Component {
         // Если в данных есть location...
         if (rawData.location) {
             // Обновить позицию компонента
-            this.#location.parse(rawData, isInner);
+            this.#location.parse(rawData.location, isInner);
         }
 
         // Распознать и установить #isOptional, если такое поле есть в данных
