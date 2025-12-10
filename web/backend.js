@@ -1182,6 +1182,9 @@ class ComponentLocation {
                 if (['left', 'top', 'right', 'bottom'].includes(part)) {
                     // Установить позицию по слову
                     this.setPositionByWord(part, isInner);
+                } else if (typeof part == "object") {
+                    let key = Object.keys(part)[0]; // TODO: нужна проверка на адекватный формат
+                    this.setPositionByWordAndInterval(key, isInner, part[key]);
                 } else {
                     throw new Error(`Нечитаемое обозначение стороны: '${part}'`);
                 }
