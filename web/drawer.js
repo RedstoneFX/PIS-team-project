@@ -148,4 +148,224 @@ class Drawer {
         
     }
 
+    /**
+     * Отрисовать ряд ячеек
+     * @param {Number} cellsLeft 
+     * @param {Number} blackCellsLeft 
+     * @param {Number} x 
+     * @param {Number} y 
+     * @param {Number} gap 
+     */
+    static rowOfCells(cellsLeft, blackCellsLeft, x, y, gap) {
+
+        let row;
+        
+        // если длина ряда больше 5
+        if (cellsLeft > 5)
+        {
+
+            //// отрисовать 2 ячейки с учётом разрыва и цвета
+            for (let i = 0; i < 2; i++) {
+                let cell;
+                if (blackCellsLeft > 0)
+                {
+                    cell = this.squareCell(new Color(1));
+                    blackCellsLeft -= 1;
+                }
+                else cell = this.squareCell(new Color(0.5));
+                cell.position = (x, y);
+                row.addChild(cell);
+                x += 100 + gap;
+            }
+
+            //// отрисовать 3 точки с учётом разрыва
+            for (let i = 0; i < 2; i++) {
+                let dot = this.squareDot();
+                dot.position = (x, y);
+                row.addChild(dot);
+                x += 50;
+            }
+            
+                x += 50;
+
+        }
+
+        // иначе
+        else {
+
+            //// отрисовать все ячейки, кроме последней, с учётом разрыва и цвета
+            for (let i = 0; i < cellsLeft - 1; i++) {
+                let cell;
+                if (blackCellsLeft > 0)
+                {
+                    cell = this.squareCell(new Color(1));
+                    blackCellsLeft -= 1;
+                }
+                else cell = this.squareCell(new Color(0.5));
+                cell.position = (x, y);
+                row.addChild(cell);
+                x += 100 + gap;
+            }
+
+        }
+
+        // отрисовать последнюю ячейку с учётом цвета
+        let lastCell;
+        if (blackCellsLeft > 0)
+        {
+            lastCell = this.squareCell(new Color(1));
+            blackCellsLeft -= 1;
+        }
+        else lastCell = this.squareCell(new Color(0.5));
+        lastCell.position = (x, y);
+        row.addChild(lastCell);
+        x += 50;
+
+        return row, x;
+        
+    }
+
+    /**
+     * Отрисовать паттерн-массив
+     */
+    static squareDot(x) {
+        return new paper.Path.Rectangle({
+            point: [x, 0],
+            size: [10, 10],
+            strokeColor: 'black',
+            strokeWidth: 2,
+            fillColor: 'black'
+        });
+    }
+
+    /**
+     * Отрисовать паттерн-массив
+     */
+    static squareDot() {
+        return squareDot(0);
+    }
+
+    /**
+     * Отрисовать паттерн-массив
+     * @param {Number} x 
+     */
+    static rowOfDots(x) {
+
+        let row;
+
+        while (x > 0) {
+
+            let dot = squareDot(x);
+            row.addChild(dot);
+            x -= 50;
+
+        }
+
+        return row;
+    }
+
+    /**
+     * Отрисовать паттерн-массив
+     * @param {ArrayPattern} pattern 
+     */
+    static drawArrayPattern(pattern, kind, group) {
+
+        let array;
+
+        let maxCells = kind.itemCount().getEnd();
+        // определить количество гарантированных ячеек
+        let blackCells = kind.itemCount().getBegin();
+        // определить, есть разрыв или нет
+        let gap = kind.gap().getEnd() > 0 ? 100 : 0;
+        // определить начальную позицию отрисовки
+        let x = 50; let y = -50;
+        let maxX; let maxY;
+        // определить длину ряда (в ячейках)
+        let direction = kind.getDirection();
+        let rowNumber; let rowLength;
+        //// определить длину ряда как максимальное кол-во ячеек, если направление = 'ROW'
+        if (direction = "ROW") rowLength = maxCells;
+        //// определить длину ряда как 1, если направление = 'COLUMN'
+        else if (direction = "ROW") rowLength = 1;
+        //// определить длину ряда как ближайший целый корень максимального кол-ва ячеек
+        else if (direction = "FILL") rowLength = Math.ceil(Math.sqrt(maxCells));
+        // определить количество рядов как округлённое частное макс. кол-ва ячеек и длины ряда 
+        rowNumber = Math.ceil(maxCells / rowLength);
+        // если рядов больше 5
+        if (rowNumber > 5) {
+            
+            //// отрисовать 2 ряда ячеек с учётом разрыва 
+            for (let i = 0; i < 2; i++) {
+                
+                x = 50; 
+                let row;
+                row, x = this.rowOfCells(maxCells, blackCells, x, y, gap); 
+                row.position = (x/2, y);
+                array.addChild(row);
+                maxCells -= rowLength;
+                y -= 100 + gap;
+
+            }
+
+            maxX = x;
+
+            //// отрисовать ряд точек с учётом разрыва
+            let dots = this.rowOfDots(x);
+            dots.position = (x/2, y); //[изменить позицию, добавить расчёт позиции]
+            array.addChild(dots);
+            y -= 100;
+            
+        }
+
+        // иначе
+        else {
+            
+            //// отрисовать все ряды, кроме последнего, с учётом разрыва
+            for (let i = 0; i < rowNumber - 1; i++) {
+                
+                x = 50; 
+                let row;
+                row, x = this.rowOfCells(maxCells, blackCells, x, y, gap); 
+                row.position = (x/2, y); //[изменить позицию, добавить расчёт позиции]
+                array.addChild(row);
+                maxCells -= rowLength;
+                y -= 100 + gap;
+
+            }
+
+        }
+
+        // отрисовать последний ряд ячеек с учётом кол-ва оставшихся для отрисовки ячеек
+        x = 50; 
+        let row;
+        row, x = this.rowOfCells(maxCells, blackCells, x, y, gap); 
+        row.position = (x/2, y);
+        array.addChild(row);
+        y -= 50;
+
+        maxY = y;
+
+        if (rowLength > 5) {
+            let sizeOutH = this.figureSize(true, true, x);
+            sizeOutH.position = (x/2, 50);
+            array.addChild(sizeOutH);
+        }
+        
+        if (rowNumber > 5) {
+            let sizeOutV = this.figureSize(true, false, -y);
+            sizeOutV.position = (-50, y/2);
+            array.addChild(sizeOutV);
+        }
+
+        if (gap) {
+            let sizeInH = this.figureSize(false, true, x);
+            sizeInH.position = (x/2, -50);
+            let sizeInV = this.figureSize(false, false, -y);
+            sizeInV.position = (50, y/2);
+        }
+
+        return array;
+        
+    }
+
 }
