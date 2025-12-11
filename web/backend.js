@@ -174,6 +174,49 @@ class Grammar {
         return this;
     }
 
+
+    /**
+     * Возвращает все массивы имеющие ссылку на указанный паттерн
+     * @param {Pattern} pattern 
+     * @returns множество массивов
+     */
+    getAllArraysWithPattern(pattern) {
+        let queue = [];
+        let arrays = new Set();
+
+        // Добавить все паттерны массивы и области в очередь
+        for (const [n, p] of this.#patterns.entries()) {
+            queue.push(p);
+        }
+
+        // Пока очередь не пуста
+        while (queue.length > 0) {
+            let p = queue.pop();
+            let kind = p.getKind();
+
+            // Если паттерн является массивом и имеет ссылку на указанный паттерн
+            if (kind instanceof ArrayPatternExtension && kind.getItemPattern() == pattern) {
+                // Добавить массив в множество
+                arrays.add(p);
+            } else if (kind instanceof AreaPatternExtension) { // Иначе если паттерн являестя областью
+                // Добавить в очередь паттерны, определёные внутри компонентов
+                for (const [n, c] of kind.getInnerComponentsEntries()) {
+                    if (c.getPattern() instanceof PatternByPatternDefinition) {
+                        queue.push(c.getPattern());
+                    }
+                }
+                for (const [n, c] of kind.getOuterComponentsEntries()) {
+                    if (c.getPattern() instanceof PatternByPatternDefinition) {
+                        queue.push(c.getPattern());
+                    }
+                }
+            }
+        }
+
+        // Вернуть множество массивов
+        return arrays;
+    }
+    
     /**
      * @param {Pattern} pattern 
      * @returns {Set<Component>}
