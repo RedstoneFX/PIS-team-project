@@ -599,6 +599,37 @@ class PatternByPatternDefinition extends Pattern {
     getParentComponent() {
         return this.#parentComponent;
     }
+
+    /**
+     * Составляет путь от вписанного паттерна до независимого
+     * @param {Grammar} grammar 
+     * @returns путь
+     */
+    getPath(grammar) {
+        /** @type {string} */
+        let path = '';
+        
+        /** @type {Pattern | PatternByPatternDefinition} */
+        let currentPattern = this;
+        /** @type {Component} */
+        let currentComponent;
+        /** @type {Pattern} */
+        let parentPattern;
+        /** @type {string} */
+        let currentName;
+
+        while (currentPattern instanceof PatternByPatternDefinition) {
+            currentComponent = currentPattern.getParentComponent();
+            parentPattern = currentComponent.getParentPattern();
+            currentName = parentPattern.getKind().getComponentName(currentComponent, parentPattern.getKind().isComponentInner(currentComponent));
+            path = currentName + ' > ' + path;
+            currentPattern = parentPattern;
+        }
+
+        path = grammar.getPatternName(currentPattern) + ' > ' + path;
+
+        return path;
+    }
 }
 
 class PatternExtension {
