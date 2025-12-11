@@ -243,6 +243,7 @@ class Frontend {
     static onPatternNameChange(e) {
         try {
             this.grammar.renamePattern(this.lastClickedItem, e.target.value);
+            this.browser.updateTitle(this.lastClickedItem, e.target.value);
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);

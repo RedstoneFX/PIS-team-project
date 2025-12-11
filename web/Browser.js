@@ -196,4 +196,31 @@ class Browser {
     getElementFor(item) {
         return this.#HTMLElementForItem.get(item);
     }
+
+    /**
+     * @param {HTMLDetailsElement} element 
+     * @param {String} newTitle 
+     */
+    #renameSummary(element, newTitle) {
+        let children = element.children;
+        for(let i = 0; i < children.length; i++) {
+            let child = children[i];
+            if(child.tagName == "SUMMARY") {
+                child.innerText = newTitle;
+                return;
+            }
+        }
+    }
+
+    updateTitle(item, newTitle) {
+        let element = this.#HTMLElementForItem.get(item);
+        if(element == null) throw new Error('У данного объекта нет элемента в браузере!');
+        this.#renameSummary(element, newTitle);
+
+        let links = this.#links.get(item);
+        if(links == null) return;
+        for(let link of links.values()) {
+            this.updateTitle(link, newTitle);
+        }
+    }
 }
