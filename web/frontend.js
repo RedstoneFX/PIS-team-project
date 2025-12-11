@@ -94,6 +94,9 @@ class Frontend {
     /** @type {Grammar} */
     static grammar;
 
+    /** @type {Pattern | Component | PatternByPatternDefinition} */
+    static lastClickedItem;
+
     static init() {
         this.browser = new Browser(document.getElementById("tree-browser"));
         this.browser.onClickListeners().add((item) => this.onItemSelected(item));
@@ -150,7 +153,7 @@ class Frontend {
 
         this.resetUI();
 
-        /*this.patternName.addEventListener("change", (e) => this.onPatternNameChange(e));
+        this.patternName.addEventListener("change", (e) => this.onPatternNameChange(e));
         this.patternDesc.addEventListener("change", (e) => this.onPatternDescChanged(e));
         this.patternWidthMin.addEventListener("change", (e) => this.onPatternSizeChanged(e, true, true));
         this.patternWidthMax.addEventListener("change", (e) => this.onPatternSizeChanged(e, false, true));
@@ -159,8 +162,133 @@ class Frontend {
         this.patternCountInDocMin.addEventListener("change", (e) => this.onCountInDocChange(e, true));
         this.patternCountInDocMax.addEventListener("change", (e) => this.onCountInDocChange(e, false));
         this.patternCellContentType.addEventListener("change", (e) => this.onCellTypeChange(e));
-        this.patternKind.addEventListener("change", (e) => this.onPatternTypeChange(e));*/
+        this.patternArrayDirection.addEventListener("change", (e) => this.onArrayDirectionChange(e));
+        this.patternArrayGapMin.addEventListener("change", (e) => this.onArrayGapChanged(e, true));
+        this.patternArrayGapMax.addEventListener("change", (e) => this.onArrayGapChanged(e, false));
+        this.patternArrayCountMin.addEventListener("change", (e) => this.onArrayItemCountChanged(e, true));
+        this.patternArrayCountMax.addEventListener("change", (e) => this.onArrayItemCountChanged(e, false));
+        /*this.patternKind.addEventListener("change", (e) => this.onPatternTypeChange(e));*/
     }
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @param {PointerEvent} e 
+     */
+    static onPatternNameChange(e) {
+        try {
+            this.grammar.renamePattern(this.lastClickedItem, e.target.value);
+        } catch (err) {
+            alert(err.message);
+            this.loadParameters(this.lastClickedItem);
+        }
+    }
+
+    /**
+     * @param {PointerEvent} e 
+     */
+    static onPatternDescChanged(e) {
+        try {
+            this.lastClickedItem.setDescription(e.target.value);
+        } catch (err) {
+            alert(err.message);
+            this.loadParameters(this.lastClickedItem);
+        }
+    }
+
+    /**
+     * @param {PointerEvent} e 
+     */
+    static onPatternSizeChanged(e, isMin, isWidth) {
+        try {
+            let dim = isWidth ? this.lastClickedItem.getWidth() : this.lastClickedItem.getHeight();
+            if (isMin) dim.setBegin(e.target.value);
+            else dim.setEnd(e.target.value);
+        } catch (err) {
+            alert(err.message);
+            this.loadParameters(this.lastClickedItem);
+        }
+    }
+
+    /**
+     * @param {PointerEvent} e 
+     */
+    static onCountInDocChange(e, isMin) {
+        try {
+            let dim = this.lastClickedItem.getCountInDocument();
+            if (isMin) dim.setBegin(e.target.value);
+            else dim.setEnd(e.target.value);
+        } catch (err) {
+            alert(err.message);
+            this.loadParameters(this.lastClickedItem);
+        }
+    }
+
+    /**
+     * @param {PointerEvent} e 
+     */
+    static onCellTypeChange(e) {
+        try {
+            /** @type {CellPatternExtension} */
+            let kind = this.lastClickedItem.getKind();
+            kind.setContentType(e.target.value);
+        } catch (err) {
+            alert(err.message);
+            this.loadParameters(this.lastClickedItem);
+        }
+    }
+
+    /**
+     * @param {PointerEvent} e 
+     */
+    static onArrayDirectionChange(e) {
+        try {
+            /** @type {ArrayPatternExtension} */
+            let kind = this.lastClickedItem.getKind();
+            kind.setDirection(e.target.value);
+        } catch (err) {
+            alert(err.message);
+            this.loadParameters(this.lastClickedItem);
+        }
+    }
+
+    /**
+     * @param {PointerEvent} e 
+     */
+    static onArrayGapChanged(e, isMin) {
+        try {
+            /** @type {ArrayPatternExtension} */
+            let kind = this.lastClickedItem.getKind();
+            let dim = kind.getGap();
+            if (isMin) dim.setBegin(e.target.value);
+            else dim.setEnd(e.target.value);
+        } catch (err) {
+            alert(err.message);
+            this.loadParameters(this.lastClickedItem);
+        }
+    }
+
+    /**
+     * @param {PointerEvent} e 
+     */
+    static onArrayItemCountChanged(e, isMin) {
+        try {
+            /** @type {ArrayPatternExtension} */
+            let kind = this.lastClickedItem.getKind();
+            let dim = kind.getItemCount();
+            if (isMin) dim.setBegin(e.target.value);
+            else dim.setEnd(e.target.value);
+        } catch (err) {
+            alert(err.message);
+            this.loadParameters(this.lastClickedItem);
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
     static resetUI() {
         this.browser.clear();
@@ -213,6 +341,7 @@ class Frontend {
      * @param {Pattern | Component | PatternByPatternDefinition} item 
      */
     static onItemSelected(item) {
+        this.lastClickedItem = item;
         this.loadParameters(item);
         this.toggleApplyableParameters(item);
         console.log(item);

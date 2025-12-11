@@ -154,6 +154,7 @@ class Grammar {
      * @returns возвращает себя для цепного вызова
      */
     renamePattern(pattern, newName) {
+        if (this.#patterns.has(newName)) throw new Error("Такое имя уже используется");
         this.#patterns.delete(this.getPatternName(pattern));
         this.#patterns.set(newName, pattern);
         return this;
