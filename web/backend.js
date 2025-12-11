@@ -102,6 +102,11 @@ class Grammar {
             }
         }
 
+        // Записать корневой паттерн, если он есть
+        if (this.#rootPattern != null) {
+            result.patterns[this.getPatternName(this.#rootPattern)].root = true;
+        }
+
         // Вернуть созданный объект
         return result;
     }
