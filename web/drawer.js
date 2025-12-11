@@ -43,6 +43,7 @@ class Drawer {
             fillColor: null
         });
     }
+
     /**
      * Отрисовать треугольную стрелку
      * @param {Number} angle 
@@ -365,6 +366,30 @@ class Drawer {
         }
 
         return array;
+        
+    }
+
+    /**
+     * Отрисовать паттерн-область
+     * @param {AreaPattern} pattern 
+     */
+    static drawAreaPattern(pattern, kind, group) {
+        
+        // отрисовать прямоугольник 100 на 100
+        let area = this.squareCell(new Color(1));
+        // установить центр прямоугольника (50, -50)
+        area.position = (50, -50);
+        group.addChild(area);
+        // отрисовать фигуру "размер" с параметрами "внешний", "по вертикали",  "100"
+        sizeV = figureSize(true, false, 100);
+        // установить центр фигуры (-50, -50)
+        sizeV.position = (-50, -50);
+        group.addChild(sizeV);
+        // отрисовать фигуру "размер" с параметрами "внешний", "по горизонтали",  "100"
+        sizeH = figureSize(true, true, 100);
+        // установить центр фигуры (50, 50)
+        sizeH.position = (50, 50);
+        group.addChild(sizeH);
         
     }
 
