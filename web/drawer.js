@@ -1,5 +1,5 @@
 
-/// <reference path="converter.js" />
+/// <reference path="backend.js" />
 /// <reference path="lib/paper-core.js" />
 
 class Drawer {
@@ -22,9 +22,11 @@ class Drawer {
      * @param {Pattern} pattern 
      */
     static drawPattern(pattern) {
-        if (pattern instanceof CellPattern) this.drawCellPattern(pattern);
-        else if (pattern instanceof ArrayPattern) this.drawArrayPattern(pattern);
-        else if (pattern instanceof AreaPattern) this.drawAreaPattern(pattern);
+        let kind = pattern.getKind();
+        let group;
+        if (kind instanceof CellPatternExtension) this.drawCellPattern(pattern, kind, group);
+        else if (kind instanceof ArrayPatternExtension) this.drawArrayPattern(pattern, kind, group);
+        else if (kind instanceof AreaPatternExtension) this.drawAreaPattern(pattern, kind, group);
         else throw new Error("Нельзя отрисовать данный объект!");
     }
 
