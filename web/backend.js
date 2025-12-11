@@ -133,7 +133,7 @@ class Grammar {
      * @returns извлеченный паттерн
      */
     popPattern(name) {
-        const pattern = this.#patterns.get(name);
+        const pattern = this.getPatternByName(name);
         // Вернуть null, если паттерна с таким именем нет
         if (!pattern) {
             return null;
@@ -150,6 +150,15 @@ class Grammar {
 
         // Вернуть извлеченный паттерн
         return pattern;
+    }
+
+    /**
+     * Обёртка метода popPattern для вызова через ссылку, а не имя
+     * @param {Pattern} pattern 
+     * @returns извлеченный паттерн
+     */
+    popPatternNotByName(pattern) {
+        this.popPattern(this.getPatternName(pattern));
     }
 
     /**
