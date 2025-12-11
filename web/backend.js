@@ -1642,7 +1642,7 @@ class Interval {
         const end = this.#end;
 
         if (begin === end) { // Если начало и конец равны, возвращается одно число
-            return begin.toString();
+            return begin;
         } else if (begin === -Infinity && end === Infinity) { // Если начало и конец бесконечны, возвращается "*"
             return '*';
         } else if (begin === -Infinity) { // Если бесконечно начало, возвращается конец с минусом
