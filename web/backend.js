@@ -343,8 +343,18 @@ class Pattern {
     #countInDocument = new Interval().default(0, Infinity).limit(0, Infinity);
     /** @type {Object} */
     #style = {};
+    /** @type {number} */
+    #id;
+    /** @type {number} */
+    static #idCouner = 0;
 
-    constructor() { }
+    constructor() {
+        this.#id = Pattern.#idCouner++;
+    }
+
+    getID() {
+        return this.#id;
+    }
 
     /**
      * Генерирует расширение для текущего паттерна на основе сырых данных
