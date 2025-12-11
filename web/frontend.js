@@ -175,7 +175,7 @@ class Frontend {
 
     static halt(err) {
         this.browser.clear();
-        alert("Произошла  критическая ошибка! Необходимо перезагрузить страницу.");
+        alert("Произошла критическая ошибка! Необходимо перезагрузить страницу.");
         throw err;
     }
 
@@ -244,6 +244,7 @@ class Frontend {
         try {
             this.grammar.renamePattern(this.lastClickedItem, e.target.value);
             this.browser.updateTitle(this.lastClickedItem, e.target.value);
+            this.regenerateSelections();
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -353,17 +354,34 @@ class Frontend {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+    static regenerateSelections() {
+        let selections = document.getElementsByClassName("pattern-selection");
+        for(let i = 0; i < selections.length; i++) {
+            selections[i].innerHTML = "";
+            for(let [name, pattern] of this.grammar.getAllPatternEntries()){
+                let el = document.createElement("option");
+                el.innerText = name;
+                el.value = pattern.getId();
+                selections[i].appendChild(el);
+            }
+        }
+    }
 
     static resetUI() {
         this.browser.clear();
         this.disableAllParameters();
         this.deleteSelectedButton.disabled = true;
+        let selections = document.getElementsByClassName("pattern-selection");
+        for(let i = 0; i < selections.length; i++) {
+            selections[i].innerHTML = "";
+        }
     }
 
     static setGrammar(grammar) {
         this.resetUI();
         this.grammar = grammar;
         this.drawEverythingInGrammar();
+         this.regenerateSelections();
     }
 
     static drawEverythingInGrammar() {
