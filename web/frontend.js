@@ -169,6 +169,7 @@ class Frontend {
 
         this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
         this.deleteSelectedButton.onclick = (e) => this.onDeleteSelectedClicked(e);
+        this.patternArrayPattern.addEventListener("charge", (e)=> this.onArrayItemPatternChanged(e));
         //this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
         //this.createComponentDefinitionButton.onclick = () => this.onCreateComponentDefinitionClicked();
     }
@@ -182,6 +183,18 @@ class Frontend {
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static onArrayItemPatternChanged(e) {
+        let id = e.target.value - 0;
+        try {
+            let pattern = this.grammar.getPatternById(id);
+            /** @type {ArrayPatternExtension} */
+            let kind = this.lastClickedItem.getKind();
+            kind.setItemPattern(pattern);
+        } catch (e) {
+            this.halt(e);
+        }
+    }
 
     static onCreatePatternClicked(e) {
         try{
@@ -506,6 +519,7 @@ class Frontend {
                 else this.patternArrayCountMin.value = itemCount.getBegin();
                 if (itemCount.getEnd() == itemCount.getDefaultEnd()) this.patternArrayCountMax.value = null;
                 else this.patternArrayCountMax.value = itemCount.getEnd();
+                this.patternArrayPattern.value = kind.getItemPattern().getId();
             } else if (kind instanceof AreaPatternExtension) {
                 // Нет особых параметров
             }
