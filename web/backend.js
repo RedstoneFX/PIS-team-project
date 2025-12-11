@@ -510,7 +510,7 @@ class PatternExtension {
     destroy() { }
 
     getKindName() {
-        return this.#kindName;
+        return this.#kindName.toLowerCase();
     }
 
     /**
@@ -630,7 +630,7 @@ class ArrayPatternExtension extends PatternExtension {
             throw new Error(`Не задан паттерн элемента массива`);
         }
 
-        rawData.direction = this.#direction;
+        rawData.direction = this.#direction.toLowerCase();
         rawData.item_pattern = grammar.getPatternName(this.#itemPattern);
         if (!this.#itemCount.isDefault()) {
             rawData.item_count = this.#itemCount.toString();
@@ -664,7 +664,7 @@ class ArrayPatternExtension extends PatternExtension {
     }
 
     getDirection() {
-        return this.#direction;
+        return this.#direction.toLowerCase();
     }
 
     /**
