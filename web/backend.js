@@ -275,6 +275,16 @@ class Grammar {
     getCellTypesFilepath() {
         return this.#cellTypesFilepath;
     }
+
+    getTemplateName(base="example") {
+        let name = base;
+        let i = 2;
+        while(this.#patterns.has(name)){
+            name = base + `(${i})`;
+            i += 1;
+        }
+        return name;
+    }
 }
 
 class Pattern {
