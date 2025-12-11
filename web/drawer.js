@@ -915,9 +915,20 @@ class Drawer {
         y = (y1+y2)/2;
     
         // Рисуем ячейку компонента
-        let cell = this.squareCell('black');
+        let cell = new paper.Path.Rectangle({
+            point: [x, y],
+            size: [x2-x1, y2-y1],
+            strokeColor: color,
+            strokeWidth: 2,
+            fillColor: null
+        });
         cell.position = [x, y];
         group.addChild(cell);
+    
+        // Рисуем ячейку области
+        let area = this.squareArea('black');
+        area.position = [250, -250];
+        group.addChild(area);
         
         return group;
     }
