@@ -39,6 +39,16 @@ class Drawer {
         });
     }
 
+    static squareArea() {
+        return new paper.Path.Rectangle({
+            point: [0, 0],
+            size: [500, 500],
+            strokeColor: color,
+            strokeWidth: 2,
+            fillColor: null
+        });
+    }
+
     static squareDot() {
         return new paper.Path.Rectangle({
             point: [0, 0],
@@ -221,7 +231,7 @@ class Drawer {
      */
     static drawCellPattern(pattern, group) {
 
-        let cell = squareCell('black');
+        let cell = this.squareCell('black');
         cell.position = (0, 0);
         group.addChild(cell);
 
@@ -807,7 +817,7 @@ class Drawer {
             let gapV = this.gapVertical();
             gapV.position = (50, -150);
             group.addChild(gapV);
-            
+
         }
 
     }
@@ -816,58 +826,30 @@ class Drawer {
      * Отрисовать паттерн-структуру
      * @param {AreaPattern} pattern 
      */
-    static drawAreaPattern(pattern) {
-        let group = new paper.Group();
+    static drawAreaPattern(pattern, group) {
 
-        let area_needed_width = 0;
-        let area_needed_height = 0;
+        let cell = this.squareArea();
+        cell.position = (250, 250);
+        group.addChild(cell);
 
-        for (const component of pattern.components) {
-            let component_needed_width = this.getValueFromYamlRange(component.pattern.width);
-            let component_needed_height = this.getValueFromYamlRange(component.pattern.height);
-                
-            component_needed_width += this.getValueFromYamlRange(component.location.padding.left);
-            component_needed_width += this.getValueFromYamlRange(component.location.padding.right);
+        let sizeH = this.sizeHorizontal(500);
+        sizeH.position = (250, 550);
+        group.addChild(sizeH);
 
-            component_needed_height += this.getValueFromYamlRange(component.location.padding.bottom);
-            component_needed_height += this.getValueFromYamlRange(component.location.padding.top);
+        let sizeV = this.sizeVertical(500);
+        sizeV.position = (-50, 250);
+        group.addChild(sizeV);
 
-            area_needed_width = Math.max(area_needed_width, component_needed_width);
-            area_needed_height = Math.max(area_needed_height, component_needed_height);
-        }
+        return group
 
-        // Получаем значения ширины и высоты из диапазонов
-        const width = this.getValueFromYamlRange(pattern.width);
-        const height = this.getValueFromYamlRange(pattern.height);
-    
-        // Рисуем основную область
-        const areaRect = new paper.Path.Rectangle({
-            point: [0, 0],
-            size: [width, height],
-            strokeColor: 'black',
-            strokeWidth: 3,
-            fillColor: 'white'
-        });
-        group.addChild(areaRect);
-    
-        // Отрисовываем все компоненты
-        for (const component of pattern.components) {
-            const componentGroup = this.drawComponent(component, pattern, width, height);
-            group.addChild(componentGroup);
-        }
-    
-        return group;
     }
 
 
     /**
      * Отрисовать компонент
-     * @param {Component} component 
-     * @param {AreaPattern} parentPattern 
-     * @param {number} areaWidth 
-     * @param {number} areaHeight 
+     * @param {Component} component
      */
-    static drawComponent(component, parentPattern, areaWidth, areaHeight) {
+    static drawComponent(component) {
         let group = new paper.Group();
     
         // Получаем отступы из location
@@ -875,111 +857,67 @@ class Drawer {
         const cellPadding = cellLocation.padding;
         const cellMargin = cellLocation.margin;
 
-        const paddingTop = this.getValueFromYamlRange(cellPadding.top);
-        const paddingLeft = this.getValueFromYamlRange(cellPadding.left);
-        const paddingBottom = this.getValueFromYamlRange(cellPadding.bottom);
-        const paddingRight = this.getValueFromYamlRange(cellPadding.right);
+        const paddingTop = cellPadding.top.getBegin();
+        const paddingLeft = cellPadding.left.getBegin();
+        const paddingBottom = cellPadding.bottom.getBegin();
+        const paddingRight = cellPadding.right.getBegin();
         
-        const marginTop = this.getValueFromYamlRange(cellMargin.top);
-        const marginLeft = this.getValueFromYamlRange(cellMargin.left);
-        const marginBottom = this.getValueFromYamlRange(cellMargin.bottom);
-        const marginRight = this.getValueFromYamlRange(cellMargin.right);
+        const marginTop = cellMargin.top.getBegin();
+        const marginLeft = cellMargin.left.getBegin();
+        const marginBottom = cellMargin.bottom.getBegin();
+        const marginRight = cellMargin.right.getBegin();
 
-        const paddings = {paddingTop, paddingLeft, paddingBottom, paddingRight};
-        const margins = {marginTop, marginLeft, marginBottom, marginRight};
+        x1 = 0; x2 = 500;
+        y1 = -500; y2 = 0;
+        
+        if (component.isInner) {
+            // Внутренний компонент - позиционируем внутри родителя
+            if (cellPadding.left.isDefined() && cellPadding.left.getBegin() > 0)
+                x1 += 100; 
+            if (cellPadding.right.isDefined() && cellPadding.right.getBegin() > 0)
+                x2 -= 100; 
 
-        const located = {paddings, margins};
-    
-        // Вычисляем позицию и ширину компонента
-        let x = 0;
-        let y = 0;
-
-        const cellWidth = Math.max(pattern_width_avg, 10);
-        const cellHeight = Math.max(pattern_height_avg, 10);
-
-        let width = cellWidth;
-        let height = cellHeight;
-    
-        if (component.inner) {
-            // Внутренний компонент - позиционируем внутри 
-            if (cellPadding.left.isDefined()) {
-                x = paddingLeft;
-                if (cellPadding.right.isDefined()) {
-                    width = areaWidth - paddingLeft - paddingRight;
-                }
-            }
-            else if (cellPadding.right.isDefined()) {
-                x = areaWidth - cellWidth - paddingRight;
-            }
-            else {
-                width = areaWidth;
-            }
-
-            if (cellPadding.bottom.isDefined()) {
-                y = paddingTop;
-                if (cellPadding.top.isDefined()) {
-                    height = areaHeight - paddingBottom - paddingTop;
-                }
-            }
-            else if (cellPadding.top.isDefined()) {
-                y = areaHeight - cellHeight - paddingTop;
-            }
-            else {
-                height = areaHeight;
-            }
-
-        } else {
+            if (cellPadding.bottom.isDefined() && cellPadding.bottom.getBegin() > 0)
+                y1 += 100; 
+            if (cellPadding.top.isDefined() && cellPadding.top.getBegin() > 0)
+                y2 -= 100; 
+        } 
+        else {
             // Внешний компонент - позиционируем снаружи родителя
-            if (cellMargin.right.isDefined()) {
-                x = areaWidth + marginRight;
+            if (cellMargin.right.isDefined() && cellMargin.right.getBegin() > 0) {
+                x1 = x2; x1 += 100; x2 = x1; x2 += 500;
             }
-            else if (cellMargin.left.isDefined()) {
-                x = - marginLeft - cellWidth;
+            else if (cellMargin.left.isDefined() && cellMargin.left.getBegin() > 0) {
+                x2 = x1; x2 -= 100; x1 = x2; x1 -= 500;
             }
             else {
-                if (cellPadding.left.isDefined()) {
-                    x = paddingLeft;
-                    if (cellPadding.right.isDefined()) {
-                        width = areaWidth - paddingLeft - paddingRight;
-                    }
-                }
-                else if (cellPadding.right.isDefined()) {
-                    x = areaWidth - cellWidth - paddingRight;
-                }
-                else {
-                    width = areaWidth;
-                }
+                if (cellPadding.left.isDefined() && cellPadding.left.getBegin() > 0)
+                    x1 -= 100; 
+                if (cellPadding.right.isDefined() && cellPadding.right.getBegin() > 0)
+                    x2 += 100; 
             }
             
-            if (cellMargin.top.isDefined()) {
-                y = areaHeight + marginTop;
+            if (cellMargin.top.isDefined() && cellMargin.top.getBegin() > 0) {
+                y1 = y2; y1 += 100; y2 = y1; y2 += 500;
             }
-            else if (cellMargin.bottom.isDefined()) {
-                y = - marginBottom - cellHeight;
+            else if (cellMargin.bottom.isDefined() && cellMargin.bottom.getBegin() > 0) {
+                y2 = y1; y2 -= 100; y1 = y2; y1 -= 500;
             }
             else {
-                if (cellPadding.bottom.isDefined()) {
-                    y = paddingTop;
-                    if (cellPadding.top.isDefined()) {
-                        height = areaHeight - paddingBottom - paddingTop;
-                    }
-                }
-                else if (cellPadding.top.isDefined()) {
-                    y = areaHeight - cellHeight - paddingTop;
-                }
-                else {
-                    height = areaHeight;
-                }
+                if (cellPadding.bottom.isDefined() && cellPadding.bottom.getBegin() > 0)
+                    y1 -= 100; 
+                if (cellPadding.top.isDefined() && cellPadding.top.getBegin() > 0)
+                    y2 += 100; 
             }
         }
+
+        x = (x1+x2)/2;
+        y = (y1+y2)/2;
     
         // Рисуем ячейку компонента
-        let cell = this.drawCell(width, height);
+        let cell = this.squareCell('black');
         cell.position = [x, y];
         group.addChild(cell);
-    
-        // Рисуем стрелки для отступов
-        this.drawOffsetArrows(group, component, parentPattern, x, y, cellWidth, cellHeight, areaWidth, areaHeight, located);
         
         return group;
     }
