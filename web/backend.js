@@ -218,6 +218,41 @@ class Grammar {
     }
     
     /**
+     * @param {Pattern} pattern 
+     * @returns {Set<Component>}
+     */
+    getAllComponentsWithPattern(pattern) {        
+        let queue = [];
+        let foundComponents = new Set();
+
+        for(let patternOfGrammar of this.#patterns.values()) {
+            let kind = patternOfGrammar.getKind();
+            if(kind instanceof AreaPatternExtension) queue.push(kind);
+        }
+
+        while(queue.length > 0) {
+            let kind = queue.pop();
+            for(let [name, comp] of kind.getInnerComponentsEntries()) {
+                let compPattern = comp.getPattern();
+                if(compPattern == pattern) foundComponents.add(comp);
+                else if(compPattern instanceof PatternByPatternDefinition)  {
+                    let kind = compPattern.getKind();
+                    if(kind instanceof AreaPatternExtension) queue.push(kind);
+                }
+            }
+            for(let [name, comp] of kind.getOuterComponentsEntries()) {
+                let compPattern = comp.getPattern();
+                if(compPattern == pattern) foundComponents.add(comp);
+                else if(compPattern instanceof PatternByPatternDefinition)  {
+                    let kind = compPattern.getKind();
+                    if(kind instanceof AreaPatternExtension) queue.push(kind);
+                }
+            }
+        }
+        return foundComponents;
+    }
+
+    /**
      * Обнуляет ссылки объекта
      */
     destroy() {
