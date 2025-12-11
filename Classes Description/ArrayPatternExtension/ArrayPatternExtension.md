@@ -23,8 +23,8 @@ class ArrayPatternExtension extends PatternExtension {
 	#direction;
 	/** @type {Pattern} */
 	#itemPattern;
-	#gap = new Range().default(0, 0).limit(0, Infinity);
-	#itemCount = new Range().default(1, Infinity).limit(1, Infinity);
+	#gap = new Interval().default(0, 0).limit(0, Infinity);
+	#itemCount = new Interval().default(1, Infinity).limit(1, Infinity);
 	
 	getDirection() {}
 	setDirection(direction) {}

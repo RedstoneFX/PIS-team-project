@@ -1,8 +1,8 @@
 Поля:
 - `#description`
-- `#countInDocument` - [[Range]]
-- `#width` - [[Range]]
-- `#height` - [[Range]]
+- `#countInDocument` - [[Interval]]
+- `#width` - [[Interval]]
+- `#height` - [[Interval]]
 - `#kind` - [[PatternExtension]]
 - `#style` - объект, сохраняющий неиспользуемые данные стиля (пусть не будут теряться)
 
@@ -22,9 +22,9 @@
 
 ```js
 class Pattern {
-	#countInDocument = new Range().default(0,Infinity).limit(0, Infinity);
-	#width = new Range().default(1, Infinity).limit(1, Infinity);
-	#height = new Range().default(1, Infinity).limit(1, Infinity);
+	#countInDocument = new Interval().default(0,Infinity).limit(0, Infinity);
+	#width = new Interval().default(1, Infinity).limit(1, Infinity);
+	#height = new Interval().default(1, Infinity).limit(1, Infinity);
 	#style = {};
 	/** @type {PatternExtension} */
 	#kind;

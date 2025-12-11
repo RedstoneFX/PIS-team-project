@@ -22,7 +22,7 @@ class Component {
 	#pattern;
 	/** @type {Pattern | PatternByPatternDefinition} */
 	#parentPattern;
-	#isOptional = false; // Хз, по умолчанию, они все опциональны, или нет? Что это вообще значит?
+	#isOptional = false;
 	#location = new ComponentLocation();
 
 	constructor(parentPattern) {}
