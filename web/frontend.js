@@ -1,3 +1,5 @@
+/// <reference path="backend.js" />
+/// <reference path="Browser.js" />
 
 class Frontend {
 
@@ -122,13 +124,9 @@ class Frontend {
         this.patternArrayCountMax = document.getElementById("pattern-array-count-max");
         this.patternCellContentType = document.getElementById("pattern-cell-content-type");
         this.createPatternButton = document.getElementById("create-pattern-button");
-        this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
         this.deleteSelectedButton = document.getElementById("delete-selected-button");
-        this.deleteSelectedButton.onclick = (e) => this.onDeleteSelectedClicked(e);
         this.createComponentLinkButton = document.getElementById("create-component-link-button");
-        this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
         this.createComponentDefinitionButton = document.getElementById("create-component-definition-button");
-        this.createComponentDefinitionButton.onclick = () => this.onCreateComponentDefinitionClicked();
         this.componentLocationList = document.getElementById("component-location-list");
         this.newComponentName = document.getElementById("new-component-name");
         this.newComponentPattern = document.getElementById("new-component-pattern");
@@ -168,11 +166,65 @@ class Frontend {
         this.patternArrayCountMin.addEventListener("change", (e) => this.onArrayItemCountChanged(e, true));
         this.patternArrayCountMax.addEventListener("change", (e) => this.onArrayItemCountChanged(e, false));
         /*this.patternKind.addEventListener("change", (e) => this.onPatternTypeChange(e));*/
+
+        //this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
+        this.deleteSelectedButton.onclick = (e) => this.onDeleteSelectedClicked(e);
+        //this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
+        //this.createComponentDefinitionButton.onclick = () => this.onCreateComponentDefinitionClicked();
+    }
+
+    static halt(err) {
+        this.browser.clear();
+        alert("Произошла  критическая ошибка! Необходимо перезагрузить страницу.");
+        throw err;
     }
 
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static onDeleteSelectedClicked(e) {
+        try {
+            if(this.lastClickedItem instanceof PatternByPatternDefinition) {
+                let component = this.lastClickedItem.getParentComponent();
+                let parentAreaPattern = component.getParentPattern();
+                /** @type {AreaPatternExtension} */
+                let kind = parentAreaPattern.getKind();
+                kind.popComponent(component, kind.isComponentInner(component)).destroy();
+                this.browser.removeItem(component);
+            } else if (this.lastClickedItem instanceof Component) {
+                let component = this.lastClickedItem;
+                let parentAreaPattern = component.getParentPattern();
+                /** @type {AreaPatternExtension} */
+                let kind = parentAreaPattern.getKind();
+                kind.popComponent(component, kind.isComponentInner(component)).destroy();
+                this.browser.removeItem(component);
+            } else if (this.lastClickedItem instanceof Pattern) {
+                let components = this.grammar.getAllComponentsWithPattern(this.lastClickedItem);
+                let arrays = this.grammar.getAllArraysWithPattern(this.lastClickedItem);
+                if(arrays.size > 0) {
+                    throw Error("Не могу удалить паттерн, так как на него ссылаются массивы")
+                }
+
+                // Удаляем компоненты из дерева и из браузера
+                for(let comp of components.values()) {
+                    /** @type {AreaPatternExtension} */
+                    let kind = comp.getParentPattern().getKind();
+                    kind.popComponent(comp, kind.isComponentInner(comp)).destroy();
+                    this.browser.removeItem(comp);
+                }
+
+                // Удаляем сам паттерн
+                this.grammar.popPattern(this.grammar.getPatternName(this.lastClickedItem)).destroy();
+                this.browser.removeItem(this.lastClickedItem);
+            } else {
+                throw Error("Не могу удалить этот элемент");
+            }
+            this.unselectItem();
+        } catch(e) {
+            this.halt(e);
+        }
+    }
 
     /**
      * @param {PointerEvent} e 
@@ -344,7 +396,13 @@ class Frontend {
         this.lastClickedItem = item;
         this.loadParameters(item);
         this.toggleApplyableParameters(item);
-        console.log(item);
+        this.deleteSelectedButton.disabled = false;
+    }
+
+    static unselectItem() {
+        this.disableAllParameters();
+        this.lastClickedItem = null;
+        this.deleteSelectedButton.disabled = true;
     }
 
     static disableAllParameters() {
