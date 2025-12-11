@@ -174,6 +174,19 @@ class Grammar {
         return this;
     }
 
+    /**
+     * Возвращает паттерн по его идентификатору
+     * @param {number} id
+     * @returns паттерн
+     */
+    getPatternById(id) {
+        for (const pattern of this.#patterns.values()) {
+            if (pattern.getId() == id) {
+                return pattern;
+            }
+        }
+        throw new Error(`Не существует паттерна с идентификатором ${id}`);
+    }
 
     /**
      * Возвращает все массивы имеющие ссылку на указанный паттерн
@@ -352,7 +365,7 @@ class Pattern {
         this.#id = Pattern.#idCouner++;
     }
 
-    getID() {
+    getId() {
         return this.#id;
     }
 
