@@ -167,7 +167,7 @@ class Frontend {
         this.patternArrayCountMax.addEventListener("change", (e) => this.onArrayItemCountChanged(e, false));
         /*this.patternKind.addEventListener("change", (e) => this.onPatternTypeChange(e));*/
 
-        //this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
+        this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
         this.deleteSelectedButton.onclick = (e) => this.onDeleteSelectedClicked(e);
         //this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
         //this.createComponentDefinitionButton.onclick = () => this.onCreateComponentDefinitionClicked();
@@ -182,6 +182,17 @@ class Frontend {
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static onCreatePatternClicked(e) {
+        try{
+            let pattern = new Pattern().setKind(new CellPatternExtension().setContentType("None"));
+            let name = this.grammar.getTemplateName();
+            this.grammar.addPattern(name, pattern);
+            this.browser.addItem(null, pattern, name, "browser-item");
+        } catch(e) {
+            this.halt(e);
+        }
+    }
 
     static onDeleteSelectedClicked(e) {
         try {
