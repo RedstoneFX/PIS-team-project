@@ -197,19 +197,19 @@ class Frontend {
     }
 
     static onCreatePatternClicked(e) {
-        try{
+        try {
             let pattern = new Pattern().setKind(new CellPatternExtension().setContentType("None"));
             let name = this.grammar.getTemplateName();
             this.grammar.addPattern(name, pattern);
             this.browser.addItem(null, pattern, name, "browser-item");
-        } catch(e) {
+        } catch (e) {
             this.halt(e);
         }
     }
 
     static onDeleteSelectedClicked(e) {
         try {
-            if(this.lastClickedItem instanceof PatternByPatternDefinition) {
+            if (this.lastClickedItem instanceof PatternByPatternDefinition) {
                 let component = this.lastClickedItem.getParentComponent();
                 let parentAreaPattern = component.getParentPattern();
                 /** @type {AreaPatternExtension} */
@@ -226,12 +226,12 @@ class Frontend {
             } else if (this.lastClickedItem instanceof Pattern) {
                 let components = this.grammar.getAllComponentsWithPattern(this.lastClickedItem);
                 let arrays = this.grammar.getAllArraysWithPattern(this.lastClickedItem);
-                if(arrays.size > 0) {
+                if (arrays.size > 0) {
                     throw Error("Не могу удалить паттерн, так как на него ссылаются массивы")
                 }
 
                 // Удаляем компоненты из дерева и из браузера
-                for(let comp of components.values()) {
+                for (let comp of components.values()) {
                     /** @type {AreaPatternExtension} */
                     let kind = comp.getParentPattern().getKind();
                     kind.popComponent(comp, kind.isComponentInner(comp)).destroy();
@@ -245,7 +245,7 @@ class Frontend {
                 throw Error("Не могу удалить этот элемент");
             }
             this.unselectItem();
-        } catch(e) {
+        } catch (e) {
             this.halt(e);
         }
     }
@@ -255,6 +255,7 @@ class Frontend {
      */
     static onPatternNameChange(e) {
         try {
+            if (e.target.value.search(/\s/g) != -1) throw new Error("Название компонента не должно содержать пробелов!");
             this.grammar.renamePattern(this.lastClickedItem, e.target.value);
             this.browser.updateTitle(this.lastClickedItem, e.target.value);
             this.regenerateSelections();
@@ -369,9 +370,9 @@ class Frontend {
 
     static regenerateSelections() {
         let selections = document.getElementsByClassName("pattern-selection");
-        for(let i = 0; i < selections.length; i++) {
+        for (let i = 0; i < selections.length; i++) {
             selections[i].innerHTML = "";
-            for(let [name, pattern] of this.grammar.getAllPatternEntries()){
+            for (let [name, pattern] of this.grammar.getAllPatternEntries()) {
                 let el = document.createElement("option");
                 el.innerText = name;
                 el.value = pattern.getId();
@@ -385,7 +386,7 @@ class Frontend {
         this.disableAllParameters();
         this.deleteSelectedButton.disabled = true;
         let selections = document.getElementsByClassName("pattern-selection");
-        for(let i = 0; i < selections.length; i++) {
+        for (let i = 0; i < selections.length; i++) {
             selections[i].innerHTML = "";
         }
     }
@@ -394,7 +395,7 @@ class Frontend {
         this.resetUI();
         this.grammar = grammar;
         this.drawEverythingInGrammar();
-         this.regenerateSelections();
+        this.regenerateSelections();
     }
 
     static drawEverythingInGrammar() {
