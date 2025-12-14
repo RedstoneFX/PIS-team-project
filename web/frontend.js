@@ -169,7 +169,7 @@ class Frontend {
 
         this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
         this.deleteSelectedButton.onclick = (e) => this.onDeleteSelectedClicked(e);
-        this.patternArrayPattern.addEventListener("charge", (e)=> this.onArrayItemPatternChanged(e));
+        this.patternArrayPattern.addEventListener("change", (e)=> this.onArrayItemPatternChanged(e));
         //this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
         //this.createComponentDefinitionButton.onclick = () => this.onCreateComponentDefinitionClicked();
     }
