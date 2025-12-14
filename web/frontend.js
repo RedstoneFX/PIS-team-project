@@ -1,6 +1,10 @@
 /// <reference path="backend.js" />
 /// <reference path="Browser.js" />
 
+function isNameValid(name) {
+    return name.search(/\s/gm) == -1 && name.replaceAll(/\s/gm, "") != "";
+}
+
 class Frontend {
 
     /** @type {HTMLElement} */
@@ -169,8 +173,8 @@ class Frontend {
 
         this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
         this.deleteSelectedButton.onclick = (e) => this.onDeleteSelectedClicked(e);
-        this.patternArrayPattern.addEventListener("change", (e)=> this.onArrayItemPatternChanged(e));
-        //this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
+        this.patternArrayPattern.addEventListener("change", (e) => this.onArrayItemPatternChanged(e));
+        this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
         //this.createComponentDefinitionButton.onclick = () => this.onCreateComponentDefinitionClicked();
     }
 
@@ -183,6 +187,29 @@ class Frontend {
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static onCreateComponentLinkClicked(e) {
+        try {
+            // Извлекаем имя
+            let name = this.newComponentName.value;
+            if (!isNameValid(name)) throw new Error("Имя компонента не должно содержать пробелов и не должно быть пустым.");
+
+            // Создаем компонент, связанный
+            let targetPattern = this.grammar.getPatternById(this.newComponentPattern.value - 0);
+            let newComp = new Component(this.lastClickedItem).setPattern(targetPattern);
+
+            // Привязываем компонент к текущему паттерну
+            this.lastClickedItem.getKind().addComponent(name, newComp, false);
+
+            // Добавляем все в браузер
+            this.browser.addItem(this.lastClickedItem, newComp, name);
+            this.browser.addLink(newComp, targetPattern, this.grammar.getPatternName(targetPattern));
+
+        } catch (err) {
+            alert(err.message);
+            throw err;
+        }
+    }
 
     static onArrayItemPatternChanged(e) {
         let id = e.target.value - 0;
