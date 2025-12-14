@@ -228,7 +228,7 @@ class Frontend {
             let pattern = new Pattern().setKind(new CellPatternExtension().setContentType("None"));
             let name = this.grammar.getTemplateName();
             this.grammar.addPattern(name, pattern);
-            this.browser.addItem(null, pattern, name, "browser-item");
+            this.browser.addItem(null, pattern, name);
         } catch (e) {
             this.halt(e);
         }
@@ -427,7 +427,7 @@ class Frontend {
 
     static drawEverythingInGrammar() {
         for (let [name, pattern] of this.grammar.getAllPatternEntries()) {
-            this.browser.addItem(null, pattern, name, "browser-item");
+            this.browser.addItem(null, pattern, name);
             this.addComponentsOf(pattern);
         }
     }
@@ -450,13 +450,13 @@ class Frontend {
      * @param {String} name
      */
     static addComponent(pattern, component, name) {
-        this.browser.addItem(pattern, component, name, "browser-item");
+        this.browser.addItem(pattern, component, name);
         let componentPattern = component.getPattern();
         if (componentPattern instanceof PatternByPatternDefinition) {
-            this.browser.addItem(component, componentPattern, "pattern-definition", "browser-item");
+            this.browser.addItem(component, componentPattern, "pattern-definition");
             this.addComponentsOf(componentPattern);
         } else {
-            this.browser.addLink(component, componentPattern, this.grammar.getPatternName(componentPattern), "browser-item");
+            this.browser.addLink(component, componentPattern, this.grammar.getPatternName(componentPattern));
         }
     }
 
