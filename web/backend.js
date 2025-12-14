@@ -7,6 +7,30 @@ class Grammar {
     /** @type {Pattern} */
     #rootPattern = null;
 
+    /**
+     * Валидирует название
+     * @param {string} name 
+     * @returns является ли название допустимым
+     */
+    static isNameValid(name) {
+        // Название должно быть строкой
+        if (typeof name !== 'string') {
+            return false;
+        }
+
+        // Название не должно быть пустым
+        if (name.length === 0) {
+            return false;
+        }
+
+        // Название не должно содержать пробелов
+        if (/\s/.test(name)) {
+            return false;
+        }
+
+        return true;
+    }
+
     constructor() { }
 
     /**
