@@ -229,36 +229,36 @@ class Grammar {
         // Вернуть множество массивов
         return arrays;
     }
-    
+
     /**
      * @param {Pattern} pattern 
      * @returns {Set<Component>}
      */
-    getAllComponentsWithPattern(pattern) {        
+    getAllComponentsWithPattern(pattern) {
         let queue = [];
         let foundComponents = new Set();
 
-        for(let patternOfGrammar of this.#patterns.values()) {
+        for (let patternOfGrammar of this.#patterns.values()) {
             let kind = patternOfGrammar.getKind();
-            if(kind instanceof AreaPatternExtension) queue.push(kind);
+            if (kind instanceof AreaPatternExtension) queue.push(kind);
         }
 
-        while(queue.length > 0) {
+        while (queue.length > 0) {
             let kind = queue.pop();
-            for(let [name, comp] of kind.getInnerComponentsEntries()) {
+            for (let [name, comp] of kind.getInnerComponentsEntries()) {
                 let compPattern = comp.getPattern();
-                if(compPattern == pattern) foundComponents.add(comp);
-                else if(compPattern instanceof PatternByPatternDefinition)  {
+                if (compPattern == pattern) foundComponents.add(comp);
+                else if (compPattern instanceof PatternByPatternDefinition) {
                     let kind = compPattern.getKind();
-                    if(kind instanceof AreaPatternExtension) queue.push(kind);
+                    if (kind instanceof AreaPatternExtension) queue.push(kind);
                 }
             }
-            for(let [name, comp] of kind.getOuterComponentsEntries()) {
+            for (let [name, comp] of kind.getOuterComponentsEntries()) {
                 let compPattern = comp.getPattern();
-                if(compPattern == pattern) foundComponents.add(comp);
-                else if(compPattern instanceof PatternByPatternDefinition)  {
+                if (compPattern == pattern) foundComponents.add(comp);
+                else if (compPattern instanceof PatternByPatternDefinition) {
                     let kind = compPattern.getKind();
-                    if(kind instanceof AreaPatternExtension) queue.push(kind);
+                    if (kind instanceof AreaPatternExtension) queue.push(kind);
                 }
             }
         }
@@ -332,10 +332,10 @@ class Grammar {
         return this.#cellTypesFilepath;
     }
 
-    getTemplateName(base="example") {
+    getTemplateName(base = "example") {
         let name = base;
         let i = 2;
-        while(this.#patterns.has(name)){
+        while (this.#patterns.has(name)) {
             name = base + `(${i})`;
             i += 1;
         }
@@ -608,7 +608,7 @@ class PatternByPatternDefinition extends Pattern {
     getPath(grammar) {
         /** @type {string} */
         let path = '';
-        
+
         /** @type {Pattern | PatternByPatternDefinition} */
         let currentPattern = this;
         /** @type {Component} */
@@ -634,7 +634,7 @@ class PatternByPatternDefinition extends Pattern {
 
 class PatternExtension {
     /** @type {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} */
-    #kindName = "";
+    #kindName = "UNDEFINITED";
 
     constructor() { }
 
@@ -656,7 +656,6 @@ class PatternExtension {
         if (!rawData.kind) {
             throw new Error(`Паттерн не имеет типа`);
         }
-        this.setKindName(rawData.kind);
         return this;
     }
 
@@ -683,6 +682,11 @@ class PatternExtension {
 class CellPatternExtension extends PatternExtension {
     /** @type {string} */
     #contentType = "";
+
+    constructor() {
+        super();
+        this.setKindName("CELL");
+    }
 
     /**
      * Извлекает необходимые для объекта данные
@@ -738,6 +742,12 @@ class ArrayPatternExtension extends PatternExtension {
     /** @type {Interval} */
     #gap = new Interval().default(0, 0).limit(0, Infinity);
 
+
+    constructor() {
+        super();
+        this.setKindName("ARRAY");
+    }
+
     /**
      * Извлекает необходимые для объекта данные
      * @param {Object} rawData 
@@ -770,6 +780,8 @@ class ArrayPatternExtension extends PatternExtension {
         if (rawData.gap) {
             this.#gap.fromString(rawData.gap);
         }
+
+        this.setKindName(rawData.kind);
 
         return this;
     }
@@ -886,6 +898,7 @@ class AreaPatternExtension extends PatternExtension {
         super();
         if (pattern == null) throw new Error("Для создания AreaPatternExtension необходимо указать целевой паттерн.");
         this.#pattern = pattern;
+        this.setKindName("AREA");
     }
 
     /**
