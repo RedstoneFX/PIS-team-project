@@ -1384,7 +1384,10 @@ class ComponentLocation {
                     // Установить позицию по слову
                     this.setPositionByWord(part, isInner);
                 } else if (typeof part == "object") {
-                    let key = Object.keys(part)[0]; // TODO: нужна проверка на адекватный формат
+                    let key = Object.keys(part)[0];
+                    if (typeof key !== 'string') {
+                        throw new Error(`Сторона расположения должна быть задана строкой`);
+                    }
                     this.setPositionByWordAndInterval(key, isInner, part[key]);
                 } else {
                     throw new Error(`Нечитаемое обозначение стороны: '${part}'`);
@@ -1393,7 +1396,14 @@ class ComponentLocation {
         } else if (typeof rawData === 'object') { // Иначе если тип данных - объект...
             for (const [key, value] of Object.entries(rawData)) {
                 let side = key.trim();
-                let interval = ("" + value).trim(); // TODO: иногда тут появляются числа
+                let interval;
+                if (typeof value === 'string') {
+                    interval = ("" + value).trim();
+                } else if (typeof value === 'number') {
+                    interval = value;
+                } else {
+                    throw new Error(`Недопустимое значение в качестве интервала: ${value}`);
+                }
 
                 // Обработка смешанной записи, где только часть заданных направлений имеют стандартный промежуток, а не указанный явно
                 if (typeof value === 'string' && (value.includes('top') || value.includes('bottom')
@@ -1681,9 +1691,6 @@ class Interval {
      * @returns возвращает себя для цепного вызова
      */
     fromString(stringInterval) {
-        if (stringInterval == null) { // TODO: зачем это?
-            return this;
-        }
 
         // Если переданно число, то интервал сокращается до точки
         if (typeof stringInterval === 'number') {
