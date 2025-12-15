@@ -3,14 +3,23 @@
 Поля:
 - `#cell_types_filepath` - путь к файлу типов клеток
 - `#patterns` - словарь (Map), сопоставляющий название его паттерну [[Pattern]]
+- `#rootPattern` - указатель на корневой паттерн
 
 Методы:
-- [[Grammar.constructor()]]
-- [[Grammar.destroy()]]
-- [[Grammar.addPattern(name, pattern)]]
--  [[Grammar.popPattern(name)]]
+- [[static isNameValid(name) ]]- валидирует название (статический метод)
+- [[Grammar.constructor()]] - конструктор
+- [[static Grammar.fromRawData(rawData)]] - создает новую грамматику на основе исходных данных (статический метод)
+- [[Grammar.serialize()]] - создает объект в формате исходных данных с информацией из грамматики
+- [[Grammar.addPattern(name, pattern)]] - добавляет переданный паттерн в словарь грамматики
+- [[Grammar.popPattern(name)]] - находит паттерн и извлекает его из грамматики
+- [[popPatternNotByName(pattern)]] - обёртка метода popPattern() для вызова через ссылку, а не имя
+- [[Grammar.renamePattern(pattern, newName)]] - переименовывает существующий паттерн
+- [[getPatternById(id)]] - возвращает паттерн по его идентификатору
+- [[getAllArraysWithPattern(pattern)]] - возвращает все массивы имеющие ссылку на указанный паттерн
+- [[getAllComponentsWithPattern(pattern)]] - возвращает все компоненты имеющие ссылку на указанный паттерн
+- [[Grammar.destroy()]]  - обнуляет ссылки объекта
+- [[getTemplateName(base = "example")]] - создаёт уникальное название
 - [[Grammar.getPatternByName(name)]]
-- [[Grammar.renamePattern(pattern, newName)]]
 - [[Grammar.getPatternName(pattern)]]
 - [[Grammar.getAllPatternEntries()]]
 - [[static Grammar.fromRawData(rawData)]]
@@ -18,28 +27,38 @@
 - [[Grammar.getRoot()]]
 - [[Grammar.setCellTypesFilepath(filepath)]]
 - [[Grammar.getCellTypesFilepath()]]
-- [[Grammar.serialize()]]
+- 
 
 #### Шаблон кода
 ```js
 class Grammar {
-	#cell_types_filepath = "";
-	/** @type {Map<string, Pattern} */
-	#patterns = new Map();
-	/** @type {Pattern} */
-	#rootPattern = null;
+	/** @type {string} */
+    #cellTypesFilepath = "";
+    /** @type {Map<string, Pattern>} */
+    #patterns = new Map();
+    /** @type {Pattern} */
+    #rootPattern = null;
 
 	constructor() {}
-	destroy() {}
-	getPatternByName(name) {}
-	getAllPatternEntries() {}
+	static isNameValid(name) {}
+	static fromRawData(rawData) {}
+	serialize() {}
 	addPattern(name, pattern) {}
 	popPattern(name) {}
+	popPatternNotByName(pattern) {}
+	renamePattern(pattern, newName) {}
+	getPatternById(id) {}
+	getAllArraysWithPattern(pattern) {}
+	getAllComponentsWithPattern(pattern) {}
+	destroy() {}
+	getPatternName(pattern) {}
+	getPatternByName(name) {}
+	getAllPatternEntries() {}
 	setRoot(pattern) {}
-	getRoot(pattern) {}
+	getRoot() {}
 	setCellTypesFilepath(filepath) {}
 	getCellTypesFilepath() {}
-	static fromRawData(rawData) {}
+	getTemplateName(base = "example") {}
 }
 ```
 

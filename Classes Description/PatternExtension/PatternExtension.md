@@ -1,24 +1,23 @@
 Поля:
-- `#kindName`
+- `#kindName` - тип расширения паттерна
 
 Методы:
-- [[PatternExtension.constructor(relatedPattern)]]
-- [[PatternExtension.destroy()]]
-- [[PatternExtension.getKindName()]]
+- [[PatternExtension.constructor()]] - конструктор
+- [[PatternExtension.serializeTo(rawData, grammar)]] - сериализирует данные объекта
+- [[PatternExtension.fromRawData(rawData, gramamr)]] - извлекает необходимые для объекта данные
+- [[PatternExtension.destroy()]] - обнуляет ссылки объекта
 - [[PatternExtension.setKindName(name)]]
-- [[PatternExtension.serializeTo(rawData)]]
-- [[PatternExtension.fromRawData(rawData)]]
+- [[PatternExtension.getKindName()]]
 
 ```js
 class PatternExtension {
-	#kindName = "";
-	#relatedPattern;
+    /** @type {"CELL" | "AREA" | "ARRAY" | "ARRAY-IN-CONTEXT"} */
+    #kindName = "UNDEFINITED";
 
-constructor(relatedPattern) {}
-destroy() {}
-getKindName() {}
-setKindName(name) {}
-serializeTo(rawData) {/*Дописать в rawData в поле kind значение #kindName*/}
-fromRawData(rawData) {/*Считать текстовое название паттерна из rawData.kind в #kindName*/}
+	serializeTo(rawData, grammar) {}
+	fromRawData(rawData, grammar) {}
+	destroy() {}
+	getKindName() {}
+	setKindName(kindName) {}
 }
 ```

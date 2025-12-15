@@ -480,7 +480,7 @@ class Pattern {
         if (this.#description.length !== 0) {
             result.description = this.#description;
         }
-        // Записать в объект данные, зависящие от типа, с помощью PatternExtension.serializeTo(rawData)
+        // Записать в объект данные, зависящие от типа, с помощью PatternExtension.serializeTo(rawData, grammar)
         this.#kind.serializeTo(result, grammar);
         // Записать в объект поле size, если width и height не являются значениями по умолчанию
         if (!(this.#width.isDefault() && this.#height.isDefault())) {

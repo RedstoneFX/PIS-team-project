@@ -1,19 +1,21 @@
 Наследуется от [[Pattern]]
 Поля:
-- `#parrentComponent`
+- `#parrentComponent` - родительский паттерн
 
 Методы:
-- [[PatternByPatternDefinition.constructor(parrentComponent)]]
-- [[PatternByPatternDefinition.destroy()]]
-- [[PatternByPatternDefinition.getParentComponent()]]
+- [[PatternByPatternDefinition.constructor(parentComponent)]] - конструктор
+- [[PatternByPatternDefinition.destroy()]] - обнуляет ссылки объекта
+- [[PatternByPatternDefinition.getParentComponent()]] - возвращает родительский компонент
+- [[PatternByPatternDefinition.getPath(grammar)]] - составляет путь от вписанного паттерна до независимого
 
 ```js
 class PatternByPatternDefinition extends Pattern {
-	/** @type {Component} */
-	#parentComponent;
+    /** @type {Component} */
+    #parentComponent;
 	
-	constructor(parrentComponent) {}
+	constructor(parentComponent) {}
 	destroy() {}
 	getParentComponent() {}
+	getPath(grammar) {}
 }
 ```

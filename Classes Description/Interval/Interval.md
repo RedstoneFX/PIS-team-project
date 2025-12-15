@@ -7,37 +7,54 @@
 - `#maxEnd`
 
 Методы:
-- [[Interval.constructor(begin, end)]]
-- [[Interval.fromString(strRange)]]
-- [[Interval.default(begin, end)]]
-- [[Interval.limit(minBegin, maxEnd)]]
-- [[Interval.isDefault()]]
-- [[Interval.toString()]]
+- [[Interval.constructor(begin, end)]] - конструктор
+- [[Interval.update(begin, end)]] - устанавливает начало и конец интервала
+- [[Interval.fromString(stringInterval)]] - парсит диапазон значений из строки
+- [[Interval.default(begin, end)]] - устанавливает дефолтные значения и приводит к ним значение объекта
+- [[Interval.restoreDefault()]] - приводит значение объекта к дефолтному
+- [[Interval.isDefault()]] - проверяет, соответствует ли значение объекта дефолтному; возвращает false, если значения по умолчанию не заданы
+- [[Interval.limit(minBegin, maxEnd)]] - устанавливает лимиты значений
+- [[Interval.toString()]] - конвертирует промежуток в строку или число, если возможно
 - [[Interval.getBegin()]]
 - [[Interval.setBegin()]]
 - [[Interval.getEnd()]]
 - [[Interval.setEnd()]]
-- [[Interval.restoreDefault()]]
+- [[getMinBegin()]]
+- [[getMaxEnd() {}]]
+- [[getDefaultBegin()]]
+- [[getDefaultEnd() {}]]
+
 
 ```js
 class Interval {
-	#begin;
-	#end;
-	#defaultBegin;
-	#defaultEnd;
-	#minBegin = -Infinity;
-	#maxEnd = infinity;
+    /** @type {number} */
+    #begin;
+    /** @type {number} */
+    #end;
+    /** @type {number} */
+    #defaultBegin;
+    /** @type {number} */
+    #defaultEnd;
+    /** @type {number} */
+    #minBegin = -Infinity;
+    /** @type {number} */
+    #maxEnd = Infinity;
 
-	constructor(begin, end) {this.#begin = begin; this.#end = end;}
-	fromString(stringInterval) {}
-	default(begin, end) {this.#defaultBegin = begin, this.#defaultEnd = end; restoreDefault()}
-	limit(minBegin, maxEnd) {}
-	isDefault() {} // Всегда false, если нет значений по умолчнию
-	restoreDefault() {}
-	toString() {}
-	getBegin() {}
-	setBegin() {}
-	getEnd() {}
-	setEnd() {}
+    constructor(begin, end) {}
+    update(begin, end) {}
+    fromString(stringInterval) {}
+    default(begin, end) {}
+    restoreDefault() {}
+    isDefault() {}
+    limit(minBegin, maxEnd) {}
+    toString() {}
+    getBegin() {}
+    setBegin(begin) {}
+    getEnd() {}
+    setEnd(end) {}
+    getMinBegin() {}
+    getMaxEnd() {}
+    getDefaultBegin() {}
+    getDefaultEnd() {}
 }
 ```

@@ -3,37 +3,44 @@
 Поля:
 - `#direction`
 - `#itemPattern`
-- `#gap`
 - `#itemCount`
+- `#gap`
 
 Методы:
-- [[ArrayPatternExtension.destroy()]]
-- [[ArrayPatternExtension.getDirection()]]
+- [[ArrayPatternExtension.constructor]] - конструктор
+- [[ArrayPatternExtension.fromRawData(rawData, grammar)]] - извлекает необходимые для объекта данные
+- [[ArrayPatternExtension.serializeTo(rawData, grammar)]] - сериализирует данные объекта
+- [[ArrayPatternExtension.destroy()]] - обнуляет ссылки объекта
 - [[ArrayPatternExtension.setDirection(direction)]]
-- [[ArrayPatternExtension.gap()]]
-- [[ArrayPatternExtension.getItemPattern()]]
+- [[ArrayPatternExtension.getDirection()]]
 - [[ArrayPatternExtension.setItemPattern(pattern)]]
-- [[ArrayPatternExtension.itemCount()]]
-- [[ArrayPatternExtension.serializeTo(rawData)]]
-- [[ArrayPatternExtension.fromRawData(rawData)]]
+- [[ArrayPatternExtension.getItemPattern()]]
+- [[ArrayPatternExtension.setItemCount(countBegin, countEnd)]]
+- [[ArrayPatternExtension.getItemCount()]]
+- [[ArrayPatternExtension.setGap(gapBegin, gapEnd) {]]
+- [[ArrayPatternExtension.getGap()]]
 
 ```js
 class ArrayPatternExtension extends PatternExtension {
-	/** @type {"COLUMN" | "ROW" | "FILL"} */
-	#direction;
-	/** @type {Pattern} */
-	#itemPattern;
-	#gap = new Interval().default(0, 0).limit(0, Infinity);
-	#itemCount = new Interval().default(1, Infinity).limit(1, Infinity);
+    /** @type {"COLUMN" | "ROW" | "FILL"} */
+    #direction = "ROW";
+    /** @type {Pattern} */
+    #itemPattern = null;
+    /** @type {Interval} */
+    #itemCount = new Interval().default(1, Infinity).limit(1, Infinity);
+    /** @type {Interval} */
+    #gap = new Interval().default(0, 0).limit(0, Infinity);
 	
-	getDirection() {}
-	setDirection(direction) {}
+	constructor() {}
+	fromRawData(rawData, grammar) {}
+	serializeTo(rawData, grammar) {}
 	destroy() {}
-	gap() {}
-	getItemPattern() {}
+	setDirection(direction) {}
+	getDirection() {}
 	setItemPattern(pattern) {}
-	itemCount() {}
-	serializeTo(rawData) {}
-	fromRawData(rawData) {}
+	getItemPattern() {}
+	setItemCount(countBegin, countEnd) {}
+	setGap(gapBegin, gapEnd) {}
+	getGap() {}
 }
 ```

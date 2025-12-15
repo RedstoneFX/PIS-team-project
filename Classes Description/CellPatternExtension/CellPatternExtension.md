@@ -1,20 +1,24 @@
 Наследуется от [[PatternExtension]]
 
 Поля:
-- `#contentType`
+- `#contentType` - тип содержимого ячейки
 
 Методы:
+- [[CellPatternExtension.constructor]] - конструктор
+- [[CellPatternExtension.fromRawData(rawData, grammar)]] - извлекает необходимые для объекта данные
+- [[CellPatternExtension.serializeTo(rawData, grammar)]] - сериализирует данные объекта
 - [[CellPatternExtension.setContentType(contentType)]]
 - [[CellPatternExtension.getContentType()]]
-- [[CellPatternExtension.fromRawData(rawData)]]
-- [[CellPatternExtension.serializeTo(rawData)]]
 
 ```js
 class CellPatternExtension extends PatternExtension{
-	#contentType = "";
+    /** @type {string} */
+    #contentType = "";
+    
+    constructor() {}
+    fromRawData(rawData, grammar) {}
+	serializeTo(rawData, grammar) {}
 	setContentType(contentType) {}
 	getContentType() {}
-	fromRawData(rawData) {}
-	serializeTo(rawData) {/* Всегда записывать content_type, даже если он "" */}
 }
 ```

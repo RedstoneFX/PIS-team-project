@@ -1,39 +1,44 @@
 Наследуется от [[PatternExtension]]
 
 Поля:
-- `#innerComponents` - Map<string, Component>
-- `#outerComponents` - Map<string, Component>
+- `#innerComponents` (Map<string, Component>) - внутренние компоненты
+- `#outerComponents` (Map<string, Component>) - внешние компоненты
+- `#pattern` - родительский паттерн
 
 Методы:
-- [[AreaPatternExtension.destroy()]]
-- [[AreaPatternExtension.serializeTo(rawData)]]
-- [[AreaPatternExtension.getComponentName(component, isInner)]] (выбрасывать ошибку, если такого компонента нет)
-- [[AreaPatternExtension.renameComponent(component, newName, isInner)]] (выбрасывать ошибку, если такого компонента нет, имя уже занято, или не подходит по формату)
-- [[AreaPatternExtension.setComponentInner(component)]]  (Выбрасывать ошибку, если компонент не считает этот паттерн своим родителем, или его имя уже занято в `inner`)
-- [[AreaPatternExtension.setComponentOuter(component)]] (Выбрасывать ошибку, если компонент не считает этот паттерн своим родителем, или его имя уже занято в `outer`)
-- [[AreaPatternExtension.addComponent(componentName, component, isInner)]] (Выбрасывать ошибку, если компонент не считает этот паттерн своим родителем, имя занято, или не подходит по формату)
-- [[AreaPatternExtension.isComponentInner(component)]] (`true`, если компонент есть в `inner`, `false`, если в `outer`, ошибка, если ни там и ни там)
-- [[AreaPatternExtension.popComponent(component, isInner)]] (извлечь и вернуть компонент из указанного раздела или выкинуть ошибку, если его там нет)
-- [[AreaPatternExtension.getInnerComponentsEntries()]] (`this.#innerComponents.entries()`)
-- [[AreaPatternExtension.getOuterComponentsEntries()]] (`this.#outerComponents.entries()`)
+- [[AreaPatternExtension.constructor(pattern)]] - конструктор
+- [[AreaPatternExtension.fromRawData(rawData, grammar)]] - извлекает необходимые для объекта данные
+- [[AreaPatternExtension.serializeTo(rawData, grammar)]] - сериализирует данные объекта
+- [[AreaPatternExtension.addComponent(componentName, component, isInner)]] - добавляет компонент в область
+- [[AreaPatternExtension.popComponent(component, isInner)]] - удаляет компонент из области
+- [[AreaPatternExtension.renameComponent(component, newName, isInner)]] - меняет имя компонента
+- [[AreaPatternExtension.isComponentInner(component)]] - определить тип расположения компонента
+- [[AreaPatternExtension.updateComponentInner(component, isInner)]] - изменить тип расположения компонента
+- [[AreaPatternExtension.getComponentName(component, isInner)]] - определить имя компонента
+- [[AreaPatternExtension.getInnerComponentsEntries()]]
+- [[AreaPatternExtension.getOuterComponentsEntries()]]
+- [[AreaPatternExtension.destroy()]] - обнуляет ссылки объекта
 
 ```js
 class AreaPatternExtension extends PatternExtension {
-	/** @type {string, Component} */
-	#innerComponents = new Map();
-	/** @type {string, Component} */
-	#outerComponents = new Map();
+    /** @type {Map<string, Component>} */
+    #innerComponents = new Map();
+    /** @type {Map<string, Component>} */
+    #outerComponents = new Map();
+    /** @type {Pattern} */
+    #pattern;
 	
-	destroy() {/*Вызвать деструкторы компонентов и очистить списки*/}
-	serializeTo(rawData) {}
-	getComponentName(component, isInner) {}
-	renameComponent(component, newName, isInner) {}
-	setComponentInner(component) {}
-	setComponentOuter(component) {}
+	constructor(pattern) {}
+	fromRawData(rawData, grammar) {}
+	serializeTo(rawData, grammar) {}
 	addComponent(componentName, component, isInner) {}
-	isComponentInner(component) {}
 	popComponent(component, isInner) {}
+	renameComponent(component, newName, isInner) {}
+	isComponentInner(component) {}
+	updateComponentInner(component, isInner) {}
+	getComponentName(component, isInner) {}
 	getInnerComponentsEntries() {}
-	getOuterComponentsEntries() {}
+	getOuterComponentsEntries() {}	
+	destroy() {}
 }
 ```
