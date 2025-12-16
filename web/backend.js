@@ -1622,6 +1622,14 @@ class ComponentLocation {
         return this.#isBottomPadding;
     }
 
+    setSideMode(side, isPadding) {
+        if (side == "left") this.#isLeftPadding = isPadding;
+        else if (side == "top") this.#isTopPadding = isPadding;
+        else if (side == "right") this.#isRightPadding = isPadding;
+        else if (side == "bottom") this.#isBottomPadding = isPadding;
+        else throw new Error("Не удалось определить сторону: " + side);
+    }
+
     /**
      * Обнуляет ссылки объекта
      */

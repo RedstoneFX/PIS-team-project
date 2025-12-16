@@ -61,38 +61,29 @@ class Frontend {
     static newComponentPattern;
 
     /** @type {HTMLInputElement} */
-    static componentLeftMarginMin;
+    static componentLeftMin;
     /** @type {HTMLInputElement} */
-    static componentLeftMarginMax;
+    static componentLeftMax;
+    /** @type {HTMLSelectElement} */
+    static componentLeftMode;
     /** @type {HTMLInputElement} */
-    static componentTopMarginMin;
+    static componentTopMin;
     /** @type {HTMLInputElement} */
-    static componentTopMarginMax;
+    static componentTopMax;
+    /** @type {HTMLSelectElement} */
+    static componentTopMode;
     /** @type {HTMLInputElement} */
-    static componentRightMarginMin;
+    static componentRightMin;
     /** @type {HTMLInputElement} */
-    static componentRightMarginMax;
+    static componentRightMax;
+    /** @type {HTMLSelectElement} */
+    static componentRightMode;
     /** @type {HTMLInputElement} */
-    static componentBottomMarginMin;
+    static componentBottomMin;
     /** @type {HTMLInputElement} */
-    static componentBottomMarginMax;
-
-    /** @type {HTMLInputElement} */
-    static componentLeftPaddingMin;
-    /** @type {HTMLInputElement} */
-    static componentLeftPaddingMax;
-    /** @type {HTMLInputElement} */
-    static componentTopPaddingMin;
-    /** @type {HTMLInputElement} */
-    static componentTopPaddingMax;
-    /** @type {HTMLInputElement} */
-    static componentRightPaddingMin;
-    /** @type {HTMLInputElement} */
-    static componentRightPaddingMax;
-    /** @type {HTMLInputElement} */
-    static componentBottomPaddingMin;
-    /** @type {HTMLInputElement} */
-    static componentBottomPaddingMax;
+    static componentBottomMax;
+    /** @type {HTMLSelectElement} */
+    static componentBottomMode;
     /** @type {HTMLInputElement} */
     static isPatternRoot;
 
@@ -137,23 +128,20 @@ class Frontend {
         this.newComponentName = document.getElementById("new-component-name");
         this.newComponentPattern = document.getElementById("new-component-pattern");
 
-        this.componentLeftMarginMin = document.getElementById("left-margin-min");
-        this.componentLeftMarginMax = document.getElementById("left-margin-max");
-        this.componentTopMarginMin = document.getElementById("top-margin-min");
-        this.componentTopMarginMax = document.getElementById("top-margin-max");
-        this.componentRightMarginMin = document.getElementById("right-margin-min");
-        this.componentRightMarginMax = document.getElementById("right-margin-max");
-        this.componentBottomMarginMin = document.getElementById("bottom-margin-min");
-        this.componentBottomMarginMax = document.getElementById("bottom-margin-max");
+        this.componentLeftMode = document.getElementById("left-mode");
+        this.componentTopMode = document.getElementById("top-mode");
+        this.componentRightMode = document.getElementById("right-mode");
+        this.componentBottomMode = document.getElementById("bottom-mode");
 
-        this.componentLeftPaddingMin = document.getElementById("left-padding-min");
-        this.componentLeftPaddingMax = document.getElementById("left-padding-max");
-        this.componentTopPaddingMin = document.getElementById("top-padding-min");
-        this.componentTopPaddingMax = document.getElementById("top-padding-max");
-        this.componentRightPaddingMin = document.getElementById("right-padding-min");
-        this.componentRightPaddingMax = document.getElementById("right-padding-max");
-        this.componentBottomPaddingMin = document.getElementById("bottom-padding-min");
-        this.componentBottomPaddingMax = document.getElementById("bottom-padding-max");
+        this.componentLeftMin = document.getElementById("left-min");
+        this.componentLeftMax = document.getElementById("left-max");
+        this.componentTopMin = document.getElementById("top-min");
+        this.componentTopMax = document.getElementById("top-max");
+        this.componentRightMin = document.getElementById("right-min");
+        this.componentRightMax = document.getElementById("right-max");
+        this.componentBottomMin = document.getElementById("bottom-min");
+        this.componentBottomMax = document.getElementById("bottom-max");
+
         this.isPatternRoot = document.getElementById("is-pattern-root");
 
         this.resetUI();
@@ -180,6 +168,20 @@ class Frontend {
         this.patternArrayPattern.addEventListener("change", (e) => this.onArrayItemPatternChanged(e));
         this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
         this.createComponentDefinitionButton.onclick = () => this.onCreateComponentDefinitionClicked();
+
+        this.componentLeftMode.addEventListener("change", (e) => this.onLocationModeChanged(e, "left"));
+        this.componentTopMode.addEventListener("change", (e) => this.onLocationModeChanged(e, "top"));
+        this.componentRightMode.addEventListener("change", (e) => this.onLocationModeChanged(e, "right"));
+        this.componentBottomMode.addEventListener("change", (e) => this.onLocationModeChanged(e, "bottom"));
+
+        this.componentLeftMin.addEventListener("change", (e) => this.onLocationChange(e, "left", "min"));
+        this.componentLeftMax.addEventListener("change", (e) => this.onLocationChange(e, "left", "max"));
+        this.componentTopMin.addEventListener("change", (e) => this.onLocationChange(e, "top", "min"));
+        this.componentTopMax.addEventListener("change", (e) => this.onLocationChange(e, "top", "max"));
+        this.componentRightMin.addEventListener("change", (e) => this.onLocationChange(e, "right", "min"));
+        this.componentRightMax.addEventListener("change", (e) => this.onLocationChange(e, "right", "max"));
+        this.componentBottomMin.addEventListener("change", (e) => this.onLocationChange(e, "bottom", "min"));
+        this.componentBottomMax.addEventListener("change", (e) => this.onLocationChange(e, "bottom", "max"));
     }
 
     static halt(err) {
@@ -189,8 +191,38 @@ class Frontend {
     }
 
 
+    // TODO: Это должно быть в бекенде
+    /**
+     * @param {String} sideName 
+     * @returns {Interval}
+     */
+    static getLocationBySideName(sideName) {
+        if (sideName == "left") return this.lastClickedItem.location().getLeft();
+        if (sideName == "top") return this.lastClickedItem.location().getTop();
+        if (sideName == "right") return this.lastClickedItem.location().getRight();
+        if (sideName == "bottom") return this.lastClickedItem.location().getBottom();
+        throw new Error("Не удалось определить сторону: " + sideName);
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static onLocationModeChanged(e, side) {
+        try {
+            this.lastClickedItem.location().setSideMode(side, e.target.value == "PADDING");
+        } catch (err) {
+            this.halt(err);
+        }
+    }
+
+    static onLocationChange(e, side, limit) {
+        try {
+            let dim = this.getLocationBySideName(side);
+            if (limit == "min") dim.setBegin(e.target.value - 0);
+            else dim.setEnd(e.target.value - 0);
+        } catch (err) {
+            this.halt(err);
+        }
+    }
 
     static onRootChanged(e) {
         try {
@@ -607,6 +639,46 @@ class Frontend {
             }
         } else if (item instanceof Component) {
             //TODO: загрузка данных компонента
+            let loc = item.location();
+            let left = loc.getLeft();
+            if (left.isDefault()) {
+                this.componentLeftMin.value = "";
+                this.componentLeftMax.value = "";
+            } else {
+                this.componentLeftMin.value = "" + left.getBegin();
+                this.componentLeftMax.value = "" + left.getEnd();
+                this.componentLeftMode.value = loc.isLeftPadding() ? "PADDING" : "MARGIN";
+            }
+
+            let top = loc.getTop();
+            if (top.isDefault()) {
+                this.componentTopMin.value = "";
+                this.componentTopMax.value = "";
+            } else {
+                this.componentTopMin.value = "" + top.getBegin();
+                this.componentTopMax.value = "" + top.getEnd();
+                this.componentTopMode.value = loc.isTopPadding() ? "PADDING" : "MARGIN";
+            }
+
+            let right = loc.getRight();
+            if (right.isDefault()) {
+                this.componentRightMin.value = "";
+                this.componentRightMax.value = "";
+            } else {
+                this.componentRightMin.value = "" + right.getBegin();
+                this.componentRightMax.value = "" + right.getEnd();
+                this.componentRightMode.value = loc.isRightPadding() ? "PADDING" : "MARGIN";
+            }
+
+            let bottom = loc.getBottom();
+            if (bottom.isDefault()) {
+                this.componentBottomMin.value = "";
+                this.componentBottomMax.value = "";
+            } else {
+                this.componentBottomMin.value = "" + bottom.getBegin();
+                this.componentBottomMax.value = "" + bottom.getEnd();
+                this.componentBottomMode.value = loc.isBottomPadding() ? "PADDING" : "MARGIN";
+            }
         } else {
             this.halt(new Error("Не удается загрузить данные объекта"));
         }
