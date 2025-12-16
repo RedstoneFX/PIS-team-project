@@ -1,5 +1,7 @@
 
-/// <reference path="converter.js" />
+/// <reference path="backend.js" />
+/// <reference path="frontend.js" />
+/// <reference path="drawer.js" />
 
 function writeFile(name, value) {
 
@@ -13,22 +15,31 @@ function writeFile(name, value) {
     console.log(blobdtMIME)
 }
 
-function saveToLocalStorage() {
-    localStorage.setItem("GrammarData", JSON.stringify(Grammar.toYamlObject()));
+/**
+ * @param {Grammar} grammar 
+ */
+function saveToLocalStorage(grammar) {
+    localStorage.setItem("GrammarData", JSON.stringify(grammar.serialize()));
 }
 
 function loadFromLocalStorage() {
     const savedData = localStorage.getItem("GrammarData");
     if (savedData) {
-        Grammar.parse(JSON.parse(savedData));
+        return Grammar.fromRawData(savedData);
     }
 }
 
-function onPageLoaded() {
-    Drawer.init();
-    UI.init();
 
-    try {
+let grammar = new Grammar();
+
+function onPageLoaded() {
+    //let testData = YAML.load(request("cnf/grammar_root.yml"));
+    //grammar = Grammar.fromRawData(testData);
+    Frontend.init();
+    //Frontend.setGrammar(grammar);
+    Drawer.init();
+
+    /*try {
         loadFromLocalStorage();
         UI.loadFromGrammar();
     } catch (e) {
@@ -37,7 +48,7 @@ function onPageLoaded() {
         throw e;
     }
 
-    setInterval(saveToLocalStorage, 1000);
+    setInterval(saveToLocalStorage, 1000);*/
 }
 
 function onFileUpload(e) {
@@ -47,10 +58,11 @@ function onFileUpload(e) {
         let text = e.target.result;
         try {
             let yaml = YAML.load(text);
-            Grammar.parse(yaml)
-            UI.loadFromGrammar();
+            grammar.destroy();
+            grammar = Grammar.fromRawData(yaml);
+            Frontend.setGrammar(grammar);
         } catch (e) {
-            UI.resetUI();
+            //UI.resetUI();
             alert(e.message);
             throw e;
         }
@@ -59,7 +71,12 @@ function onFileUpload(e) {
 }
 
 function onFileSave() {
-    writeFile("grammar.yml", YAML.dump(Grammar.toYamlObject()))
+    try {
+        writeFile("grammar.yml", YAML.dump(grammar.serialize()))
+    } catch (err) {
+        console.log(err.message);
+        if (!/[а-яА-Я]/.test(err.message)) Frontend.halt(); // TODO: полностью завершает работу приложения, если ошибка была не через throw. Сломается, если изменить язык.
+    }
 }
 
 document.getElementById("load-from-file").addEventListener("change", (e) => onFileUpload(e));
