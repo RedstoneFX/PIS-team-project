@@ -174,3 +174,7 @@ button:hover,
     justify-items: center;
     align-items: center;
 }
+
+#tree-browser .root-pattern>summary::before {
+    content: "⭐";
+}

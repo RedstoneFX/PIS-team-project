@@ -93,6 +93,8 @@ class Frontend {
     static componentBottomPaddingMin;
     /** @type {HTMLInputElement} */
     static componentBottomPaddingMax;
+    /** @type {HTMLInputElement} */
+    static isPatternRoot;
 
 
     /** @type {Browser} */
@@ -152,6 +154,7 @@ class Frontend {
         this.componentRightPaddingMax = document.getElementById("right-padding-max");
         this.componentBottomPaddingMin = document.getElementById("bottom-padding-min");
         this.componentBottomPaddingMax = document.getElementById("bottom-padding-max");
+        this.isPatternRoot = document.getElementById("is-pattern-root");
 
         this.resetUI();
 
@@ -169,6 +172,7 @@ class Frontend {
         this.patternArrayGapMax.addEventListener("change", (e) => this.onArrayGapChanged(e, false));
         this.patternArrayCountMin.addEventListener("change", (e) => this.onArrayItemCountChanged(e, true));
         this.patternArrayCountMax.addEventListener("change", (e) => this.onArrayItemCountChanged(e, false));
+        this.isPatternRoot.addEventListener("change", (e) => this.onRootChanged(e));
         /*this.patternKind.addEventListener("change", (e) => this.onPatternTypeChange(e));*/
 
         this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
@@ -188,6 +192,22 @@ class Frontend {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    static onRootChanged(e) {
+        try {
+            if (e.target.checked) {
+                let previousRoot = this.grammar.getRoot();
+                if (previousRoot) this.browser.removeClass(previousRoot, "root-pattern");
+                this.grammar.setRoot(this.lastClickedItem);
+                this.browser.addClass(this.lastClickedItem, "root-pattern");
+            } else {
+                alert("В документе должен быть корень, выберите другой паттерн у становите его как корень.");
+                e.target.value = "on";
+            }
+        } catch (err) {
+            this.halt(err);
+        }
+    }
+
     static onCreateComponentDefinitionClicked(e) {
         try {
             // Извлекаем имя
@@ -197,7 +217,7 @@ class Frontend {
             // Создаем компонент с пустым pattern-definition
             let newComp = new Component(this.lastClickedItem);
             let targetPattern = new PatternByPatternDefinition(newComp).setKind(new CellPatternExtension().setContentType("None"));
-            
+
 
             // Привязываем компонент к текущему паттерну
             this.lastClickedItem.getKind().addComponent(name, newComp, false);
@@ -455,6 +475,8 @@ class Frontend {
             this.browser.addItem(null, pattern, name);
             this.addComponentsOf(pattern);
         }
+        let root = this.grammar.getRoot();
+        this.browser.addClass(root, "root-pattern");
     }
 
     static addComponentsOf(pattern) {
@@ -576,6 +598,11 @@ class Frontend {
             } else if (kind instanceof AreaPatternExtension) {
                 // Нет особых параметров
             }
+            this.isPatternRoot.checked = this.grammar.getRoot() == item;
+        } else if (item instanceof Component) {
+            //TODO: загрузка данных компонента
+        } else {
+            this.halt(new Error("Не удается загрузить данные объекта"));
         }
     }
 }
