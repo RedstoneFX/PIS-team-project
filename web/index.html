@@ -41,6 +41,11 @@
                     <label>Название</label>
                     <input type="text" id="pattern-name" placeholder="example_pattern" />
 
+                    <label>root</label>
+                    <div>
+                        <input type="checkbox" id="is-pattern-wroot">
+                    </div>
+
                     <label>Вид</label>
                     <select id="pattern-kind">
                         <option value="cell">Клетка</option>
@@ -137,53 +142,47 @@
                 <div>
                     <label>Позиционирование</label>
                     <div class="component-location">
+                        <span>Вид</span>
+                        <select id="component-type">
+                            <option value="INNER">Inner</option>
+                            <option value="OUTER">Outer</option>
+                        </select>
+                        <div></div>
+                        <div></div>
 
-                        <span>left-margin</span>
-                        <input type="number" class="numeric" id="left-margin-min" min="0" max="100"
-                            placeholder="-inf" />
-                        <input type="number" class="numeric" id="left-margin-max" min="0" max="100"
-                            placeholder="+inf" />
+                        <span>left</span>
+                        <input type="number" class="numeric" id="left-min" min="0" max="100" placeholder="-inf" />
+                        <input type="number" class="numeric" id="left-max" min="0" max="100" placeholder="+inf" />
+                        <select id="left-mode">
+                            <option value="PADDING">Padding</option>
+                            <option value="MARGIN">Margin</option>
+                        </select>
 
-                        <span>top-margin</span>
-                        <input type="number" class="numeric" id="top-margin-min" min="0" max="100" placeholder="-inf" />
-                        <input type="number" class="numeric" id="top-margin-max" min="0" max="100" placeholder="+inf" />
+                        <span>top</span>
+                        <input type="number" class="numeric" id="top-min" min="0" max="100" placeholder="-inf" />
+                        <input type="number" class="numeric" id="top-max" min="0" max="100" placeholder="+inf" />
+                        <select id="left-mode">
+                            <option value="PADDING">Padding</option>
+                            <option value="MARGIN">Margin</option>
+                        </select>
 
-                        <span>right-margin</span>
-                        <input type="number" class="numeric" id="right-margin-min" min="0" max="100"
-                            placeholder="-inf" />
-                        <input type="number" class="numeric" id="right-margin-max" min="0" max="100"
-                            placeholder="+inf" />
 
-                        <span>bottom-margin</span>
-                        <input type="number" class="numeric" id="bottom-margin-min" min="0" max="100"
-                            placeholder="-inf" />
-                        <input type="number" class="numeric" id="bottom-margin-max" min="0" max="100"
-                            placeholder="+inf" />
+                        <span>right</span>
+                        <input type="number" class="numeric" id="right-min" min="0" max="100" placeholder="-inf" />
+                        <input type="number" class="numeric" id="right-max" min="0" max="100" placeholder="+inf" />
+                        <select id="left-mode">
+                            <option value="PADDING">Padding</option>
+                            <option value="MARGIN">Margin</option>
+                        </select>
 
-                        <span>left-padding</span>
-                        <input type="number" class="numeric" id="left-padding-min" min="0" max="100"
-                            placeholder="-inf" />
-                        <input type="number" class="numeric" id="left-padding-max" min="0" max="100"
-                            placeholder="+inf" />
 
-                        <span>top-padding</span>
-                        <input type="number" class="numeric" id="top-padding-min" min="0" max="100"
-                            placeholder="-inf" />
-                        <input type="number" class="numeric" id="top-padding-max" min="0" max="100"
-                            placeholder="+inf" />
-
-                        <span>right-padding</span>
-                        <input type="number" class="numeric" id="right-padding-min" min="0" max="100"
-                            placeholder="-inf" />
-                        <input type="number" class="numeric" id="right-padding-max" min="0" max="100"
-                            placeholder="+inf" />
-
-                        <span>bottom-padding</span>
-                        <input type="number" class="numeric" id="bottom-padding-min" min="0" max="100"
-                            placeholder="-inf" />
-                        <input type="number" class="numeric" id="bottom-padding-max" min="0" max="100"
-                            placeholder="+inf" />
-
+                        <span>bottom</span>
+                        <input type="number" class="numeric" id="bottom-min" min="0" max="100" placeholder="-inf" />
+                        <input type="number" class="numeric" id="bottom-max" min="0" max="100" placeholder="+inf" />
+                        <select id="left-mode">
+                            <option value="PADDING">Padding</option>
+                            <option value="MARGIN">Margin</option>
+                        </select>
                     </div>
                 </div>
             </details>

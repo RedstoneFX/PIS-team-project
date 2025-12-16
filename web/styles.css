@@ -58,7 +58,7 @@ input.numeric {
 
 .component-location {
     display: grid;
-    grid-template-columns: auto 1fr 1fr;
+    grid-template-columns: auto 1fr 1fr 1fr;
     gap: 0.3rem;
     margin-left: 1rem;
 }
@@ -121,11 +121,6 @@ input[type=file] {
 
 #parameters details[open]>div {
     margin: 10px;
-}
-
-#component-location-add-segment {
-    display: grid;
-    grid-template-columns: auto 4fr;
 }
 
 .selected-browserItemWithChildren>summary {
