@@ -33,10 +33,10 @@ function loadFromLocalStorage() {
 let grammar = new Grammar();
 
 function onPageLoaded() {
-    let testData = YAML.load(request("cnf/grammar_root.yml"));
-    grammar = Grammar.fromRawData(testData);
+    //let testData = YAML.load(request("cnf/grammar_root.yml"));
+    //grammar = Grammar.fromRawData(testData);
     Frontend.init();
-    Frontend.setGrammar(grammar);
+    //Frontend.setGrammar(grammar);
     /*Drawer.init();
 
     try {
@@ -60,7 +60,7 @@ function onFileUpload(e) {
             let yaml = YAML.load(text);
             grammar.destroy();
             grammar = Grammar.fromRawData(yaml);
-            //UI.loadFromGrammar();
+            Frontend.setGrammar(grammar);
         } catch (e) {
             //UI.resetUI();
             alert(e.message);
@@ -71,7 +71,12 @@ function onFileUpload(e) {
 }
 
 function onFileSave() {
-    writeFile("grammar.yml", YAML.dump(grammar.serialize()))
+    try {
+        writeFile("grammar.yml", YAML.dump(grammar.serialize()))
+    } catch (err) {
+        console.log(err.message);
+        if (!/[а-яА-Я]/.test(err.message)) Frontend.halt(); // TODO: полностью завершает работу приложения, если ошибка была не через throw. Сломается, если изменить язык.
+    }
 }
 
 document.getElementById("load-from-file").addEventListener("change", (e) => onFileUpload(e));
