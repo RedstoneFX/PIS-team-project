@@ -557,8 +557,15 @@ class Frontend {
      */
     static loadParameters(item) {
         if (item instanceof Pattern) {
-            if (item instanceof PatternByPatternDefinition) this.patternName.value = "Объявлен в компоненте";
-            else this.patternName.value = this.grammar.getPatternName(item);
+            if (item instanceof PatternByPatternDefinition) {
+                this.patternName.value = "Объявлен в компоненте";
+                this.isPatternRoot.checked = false;
+                this.isPatternRoot.disabled = true;
+            } else {
+                this.patternName.value = this.grammar.getPatternName(item);
+                this.isPatternRoot.checked = this.grammar.getRoot() == item;
+                this.isPatternRoot.disabled = false;
+            }
             this.patternKind.value = item.getKind().getKindName();
             this.patternDesc.value = item.getDescription();
 
@@ -598,7 +605,6 @@ class Frontend {
             } else if (kind instanceof AreaPatternExtension) {
                 // Нет особых параметров
             }
-            this.isPatternRoot.checked = this.grammar.getRoot() == item;
         } else if (item instanceof Component) {
             //TODO: загрузка данных компонента
         } else {
