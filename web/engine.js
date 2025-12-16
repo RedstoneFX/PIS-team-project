@@ -37,9 +37,9 @@ function onPageLoaded() {
     //grammar = Grammar.fromRawData(testData);
     Frontend.init();
     //Frontend.setGrammar(grammar);
-    /*Drawer.init();
+    Drawer.init();
 
-    try {
+    /*try {
         loadFromLocalStorage();
         UI.loadFromGrammar();
     } catch (e) {

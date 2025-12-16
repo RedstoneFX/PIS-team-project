@@ -588,6 +588,10 @@ class Frontend {
         this.lastClickedItem = item;
         this.loadParameters(item);
         this.deleteSelectedButton.disabled = false;
+        if (item instanceof Pattern)
+            Drawer.drawPattern(item);
+        else
+            Drawer.drawComponent(item);
     }
 
     static unselectItem() {
