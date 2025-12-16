@@ -175,7 +175,7 @@ class Frontend {
         this.deleteSelectedButton.onclick = (e) => this.onDeleteSelectedClicked(e);
         this.patternArrayPattern.addEventListener("change", (e) => this.onArrayItemPatternChanged(e));
         this.createComponentLinkButton.onclick = () => this.onCreateComponentLinkClicked();
-        //this.createComponentDefinitionButton.onclick = () => this.onCreateComponentDefinitionClicked();
+        this.createComponentDefinitionButton.onclick = () => this.onCreateComponentDefinitionClicked();
     }
 
     static halt(err) {
@@ -187,6 +187,31 @@ class Frontend {
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static onCreateComponentDefinitionClicked(e) {
+        try {
+            // Извлекаем имя
+            let name = this.newComponentName.value;
+            if (!isNameValid(name)) throw new Error("Имя компонента не должно содержать пробелов и не должно быть пустым.");
+
+            // Создаем компонент с пустым pattern-definition
+            let newComp = new Component(this.lastClickedItem);
+            let targetPattern = new PatternByPatternDefinition(newComp).setKind(new CellPatternExtension().setContentType("None"));
+            
+
+            // Привязываем компонент к текущему паттерну
+            this.lastClickedItem.getKind().addComponent(name, newComp, false);
+
+            // Добавляем все в браузер
+            this.browser.addItem(this.lastClickedItem, newComp, name);
+            this.browser.addLink(newComp, targetPattern, "pattern-definition");
+
+        } catch (err) {
+            alert(err.message);
+            throw err;
+        }
+    }
+
 
     static onCreateComponentLinkClicked(e) {
         try {
