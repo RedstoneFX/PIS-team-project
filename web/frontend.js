@@ -84,6 +84,8 @@ class Frontend {
     static componentBottomMax;
     /** @type {HTMLSelectElement} */
     static componentBottomMode;
+    /** @type {HTMLSelectElement} */
+    static componentType;
     /** @type {HTMLInputElement} */
     static isPatternRoot;
 
@@ -141,6 +143,7 @@ class Frontend {
         this.componentRightMax = document.getElementById("right-max");
         this.componentBottomMin = document.getElementById("bottom-min");
         this.componentBottomMax = document.getElementById("bottom-max");
+        this.componentType = document.getElementById("component-type");
 
         this.isPatternRoot = document.getElementById("is-pattern-root");
 
@@ -182,6 +185,8 @@ class Frontend {
         this.componentRightMax.addEventListener("change", (e) => this.onLocationChange(e, "right", "max"));
         this.componentBottomMin.addEventListener("change", (e) => this.onLocationChange(e, "bottom", "min"));
         this.componentBottomMax.addEventListener("change", (e) => this.onLocationChange(e, "bottom", "max"));
+
+        this.componentType.addEventListener("change", (e) => this.onComponentTypeChange(e));
     }
 
     static halt(err) {
@@ -205,6 +210,17 @@ class Frontend {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static onComponentTypeChange(e) {
+        /** @type {AreaPatternExtension} */
+        let k = this.lastClickedItem.getParentPattern().getKind();
+        try {
+            k.updateComponentInner(this.lastClickedItem, e.target.value == "INNER");
+        } catch (err) {
+            alert(err.message);
+            this.componentType.value = k.isComponentInner(this.lastClickedItem) ? "INNER" : "OUTER";
+        }
+    }
 
     static onLocationModeChanged(e, side) {
         try {
@@ -638,7 +654,7 @@ class Frontend {
                 // Нет особых параметров
             }
         } else if (item instanceof Component) {
-            //TODO: загрузка данных компонента
+            this.componentType.value = item.getParentPattern().getKind().isComponentInner(item) ? "INNER" : "OUTER";
             let loc = item.location();
             let left = loc.getLeft();
             if (left.isDefault()) {
