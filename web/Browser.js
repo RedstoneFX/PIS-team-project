@@ -26,6 +26,13 @@ class Browser {
         this.clear();
     }
 
+    clearChildren(item) {
+        let children = this.#childrenOfParent.get(item);
+        for (let child of children.values()) {
+            this.removeItem(child);
+        }
+    }
+
     clear() {
         for (let i = this.#htmlElement.children.length - 1; i >= 0; i--) {
             this.#htmlElement.children[i].remove();

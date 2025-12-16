@@ -164,7 +164,7 @@ class Frontend {
         this.patternArrayCountMin.addEventListener("change", (e) => this.onArrayItemCountChanged(e, true));
         this.patternArrayCountMax.addEventListener("change", (e) => this.onArrayItemCountChanged(e, false));
         this.isPatternRoot.addEventListener("change", (e) => this.onRootChanged(e));
-        /*this.patternKind.addEventListener("change", (e) => this.onPatternTypeChange(e));*/
+        this.patternKind.addEventListener("change", (e) => this.onPatternTypeChange(e));
 
         this.createPatternButton.onclick = (e) => this.onCreatePatternClicked(e);
         this.deleteSelectedButton.onclick = (e) => this.onDeleteSelectedClicked(e);
@@ -210,6 +210,32 @@ class Frontend {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static onPatternTypeChange(e) {
+        let newKindName = e.target.value;
+        let oldKindName = this.lastClickedItem.getKind().getKindName();
+        if (newKindName.includes("array") && oldKindName.includes("array")) {
+            this.lastClickedItem.getKind().setKindName(newKindName);
+        } else {
+            try {
+                this.lastClickedItem.getKind().destroy();
+                let newKind;
+                if (newKindName == "cell") newKind = new CellPatternExtension().setContentType("none");
+                else if (newKindName == "area") newKind = new AreaPatternExtension(this.lastClickedItem);
+                else if (newKindName == "array") newKind = new ArrayPatternExtension().setDirection("COLUMN").setItemPattern(null); // инициализировать начальный паттерн
+                else if (newKindName == "array-in-context") newKind = new ArrayPatternExtension().setDirection("COLUMN").setItemPattern(null).setKindName("array-in-context"); // инициализировать начальный паттерн
+                else throw new Error("Неизвестный тип паттерна: " + newKindName);
+
+                if (oldKindName == "area") {
+                    this.browser.clearChildren(this.lastClickedItem);
+                }
+                this.lastClickedItem.setKind(newKind);
+                this.loadParameters(this.lastClickedItem);
+            } catch (err) {
+                this.halt(err);
+            }
+        }
+    }
 
     static onComponentTypeChange(e) {
         /** @type {AreaPatternExtension} */
@@ -561,7 +587,6 @@ class Frontend {
     static onItemSelected(item) {
         this.lastClickedItem = item;
         this.loadParameters(item);
-        this.toggleApplyableParameters(item);
         this.deleteSelectedButton.disabled = false;
     }
 
@@ -604,6 +629,7 @@ class Frontend {
      * @param {Pattern | Component | PatternByPatternDefinition} item 
      */
     static loadParameters(item) {
+        this.toggleApplyableParameters(item);
         if (item instanceof Pattern) {
             if (item instanceof PatternByPatternDefinition) {
                 this.patternName.value = "Объявлен в компоненте";
@@ -638,7 +664,7 @@ class Frontend {
             if (kind instanceof CellPatternExtension) {
                 this.patternCellContentType.value = kind.getContentType();
             } else if (kind instanceof ArrayPatternExtension) {
-                this.patternArrayDirection.value = kind.getDirection();
+                this.patternArrayDirection.value = kind.getDirection().toUpperCase();
                 let gap = kind.getGap();
                 if (gap.getBegin() == gap.getDefaultBegin()) this.patternArrayGapMin.value = null;
                 else this.patternArrayGapMin.value = gap.getBegin();
