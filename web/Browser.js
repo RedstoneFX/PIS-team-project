@@ -43,36 +43,19 @@ class Browser {
         return id;
     }
 
-    /*#upgradeHTMLElementForItem(item) {
-        // Извлекаем старые данные
-        let oldElement = this.#HTMLElementForItem.get(item);
-        if (oldElement.tagName.toLowerCase() == "details") return; // Ничего не делаем, если он и так уже обновленный
-        let title = oldElement.innerText;
-        let id = oldElement.getAttribute("item");
-
-        // Создаем новый элемент
-        // Создаем details
-        let element = document.createElement("details");
-        for (let [cls, _] of oldElement.classList.entries()) {
-            if (cls != "browserItemWithoutChildren")
-                element.classList.add(cls);
+    addClass(item, cls) {
+        let elem = this.#HTMLElementForItem.get(item);
+        if (elem != null) {
+            elem.classList.add(cls);
         }
-        element.classList.add("browserItemWithChildren");
-        element.setAttribute("item", id);
+    }
 
-        // Создаем summary
-        let titleElement = document.createElement("summary");
-        titleElement.innerText = title;
-        element.appendChild(titleElement);
-
-        // Создаем поле для дочерних объектов
-        let childrenDiv = document.createElement("div");
-        element.appendChild(childrenDiv);
-
-        // Заменяем старый элемент на новый
-        oldElement.replaceWith(element);
-        this.#HTMLElementForItem.set(item, element);
-    }*/
+    removeClass(item, cls) {
+        let elem = this.#HTMLElementForItem.get(item);
+        if (elem != null) {
+            elem.classList.remove(cls);
+        }
+    }
 
     #makeNewHTMLElementForItem(item, title, extraClass = null) {
         let element = document.createElement("details");
@@ -203,9 +186,9 @@ class Browser {
      */
     #renameSummary(element, newTitle) {
         let children = element.children;
-        for(let i = 0; i < children.length; i++) {
+        for (let i = 0; i < children.length; i++) {
             let child = children[i];
-            if(child.tagName == "SUMMARY") {
+            if (child.tagName == "SUMMARY") {
                 child.innerText = newTitle;
                 return;
             }
@@ -214,12 +197,12 @@ class Browser {
 
     updateTitle(item, newTitle) {
         let element = this.#HTMLElementForItem.get(item);
-        if(element == null) throw new Error('У данного объекта нет элемента в браузере!');
+        if (element == null) throw new Error('У данного объекта нет элемента в браузере!');
         this.#renameSummary(element, newTitle);
 
         let links = this.#links.get(item);
-        if(links == null) return;
-        for(let link of links.values()) {
+        if (links == null) return;
+        for (let link of links.values()) {
             this.updateTitle(link, newTitle);
         }
     }
