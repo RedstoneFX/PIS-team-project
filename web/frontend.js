@@ -321,7 +321,7 @@ class Frontend {
 
             // Добавляем все в браузер
             this.browser.addItem(this.lastClickedItem, newComp, name);
-            this.browser.addLink(newComp, targetPattern, "pattern-definition");
+            this.browser.addItem(newComp, targetPattern, "pattern-definition");
 
         } catch (err) {
             alert(err.message);
