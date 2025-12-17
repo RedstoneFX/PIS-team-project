@@ -1280,6 +1280,9 @@ class Component {
         if (!(pattern instanceof Pattern)) {
             throw new Error(`Тип данных компонента должен быть задан вариацией паттерна.`);
         }
+        if (pattern === this.#parentPattern) {
+            throw new Error(`Компонент не может ссылаться на паттерн, в котором находится.`)
+        }
 
         // Вызвать деструктор дочернего паттерна, если он является pattern_definition
         if (this.#pattern instanceof PatternByPatternDefinition) {
