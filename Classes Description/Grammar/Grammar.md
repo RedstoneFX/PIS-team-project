@@ -14,6 +14,7 @@
 - [[Grammar.popPattern(name)]] - находит паттерн и извлекает его из грамматики
 - [[popPatternNotByName(pattern)]] - обёртка метода popPattern() для вызова через ссылку, а не имя
 - [[Grammar.renamePattern(pattern, newName)]] - переименовывает существующий паттерн
+- [[Grammar.getPatternCount()]] - возвращает количество паттернов в грамматике
 - [[getPatternById(id)]] - возвращает паттерн по его идентификатору
 - [[getAllArraysWithPattern(pattern)]] - возвращает все массивы имеющие ссылку на указанный паттерн
 - [[getAllComponentsWithPattern(pattern)]] - возвращает все компоненты имеющие ссылку на указанный паттерн
@@ -47,6 +48,7 @@ class Grammar {
 	popPattern(name) {}
 	popPatternNotByName(pattern) {}
 	renamePattern(pattern, newName) {}
+	getPatternCount() {}
 	getPatternById(id) {}
 	getAllArraysWithPattern(pattern) {}
 	getAllComponentsWithPattern(pattern) {}

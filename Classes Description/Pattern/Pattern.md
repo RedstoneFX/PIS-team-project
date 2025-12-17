@@ -15,6 +15,7 @@
 - [[Pattern.fromRawData(rawData)]] - извлекает необходимые для объекта данные
 - [[Pattern.serialize()]] - сериализирует данные объекта
 - [[Pattern.destroy()]] - обнуляет ссылки объекта
+- [[Pattern.changeKind(kindName, grammar)]] - меняет тип паттерна
 - [[Pattern.setKind(kind)]]
 - [[Pattern.getKind()]]
 - [[Pattern.setDescription(description)]]
@@ -51,6 +52,7 @@ class Pattern {
 	resolveKindFromRawData(rawData, grammar) {}
 	fromRawData(rawData) {}
 	serialize(grammar) {}
+	changeKind(kindName, grammar) {}
 	destroy() {}
 	setKind(kind) {}
 	getKind() {}

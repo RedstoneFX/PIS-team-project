@@ -198,6 +198,10 @@ class Grammar {
         return this;
     }
 
+    getPatternCount() {
+        return this.#patterns.size;
+    }
+
     /**
      * Возвращает паттерн по его идентификатору
      * @param {number} id
@@ -500,6 +504,39 @@ class Pattern {
     }
 
     /**
+     * Меняет тип паттерна
+     * @param {string} kindName 
+     * @param {Grammar} grammar 
+     * @returns возвращает себя для цепного вызова
+     */
+    changeKind(kindName, grammar) {
+        const oldKind = this.#kind;
+        kindName = kindName.toUpperCase();
+        if (oldKind.getKindName().toUpperCase() === kindName) {
+            return this;
+        }
+        if (kindName == "CELL") {
+            this.setKind(new CellPatternExtension().setContentType("none"));
+        } else if (kindName == "AREA") {
+            this.setKind(new AreaPatternExtension(this));
+        } else if (kindName == "ARRAY" || kindName == "ARRAY-IN-CONTEXT") {
+            if (grammar.getPatternCount() <= 1) {
+                throw new Error(`Невозможно создать массив, так как не хватает паттернов для его заполнения`);
+            }
+            let placeholder;
+            for (const [name, pattern] of grammar.getAllPatternEntries()) {
+                if (pattern !== this) {
+                    placeholder = pattern;
+                    break;
+                }
+            }
+            this.setKind(new ArrayPatternExtension().setDirection("COLUMN").setItemPattern(placeholder).setKindName(kindName));
+        } else throw new Error(`Неизвестный тип паттерна: ${kindName}`);
+        oldKind.destroy();
+        return this;
+    }
+
+    /**
      * Обнуляет ссылки объекта
      */
     destroy() {
@@ -700,6 +737,7 @@ class PatternExtension {
             throw new Error(`Неизвестный тип паттерна: ${kindName}. Поддерживаемые: CELL, AREA, ARRAY, ARRAY-IN-CONTEXT`);
         }
         this.#kindName = kindName.toUpperCase();
+        return this;
     }
 }
 

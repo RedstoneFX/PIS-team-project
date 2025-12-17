@@ -218,18 +218,10 @@ class Frontend {
             this.lastClickedItem.getKind().setKindName(newKindName);
         } else {
             try {
-                this.lastClickedItem.getKind().destroy();
-                let newKind;
-                if (newKindName == "cell") newKind = new CellPatternExtension().setContentType("none");
-                else if (newKindName == "area") newKind = new AreaPatternExtension(this.lastClickedItem);
-                else if (newKindName == "array") newKind = new ArrayPatternExtension().setDirection("COLUMN").setItemPattern(null); // инициализировать начальный паттерн
-                else if (newKindName == "array-in-context") newKind = new ArrayPatternExtension().setDirection("COLUMN").setItemPattern(null).setKindName("array-in-context"); // инициализировать начальный паттерн
-                else throw new Error("Неизвестный тип паттерна: " + newKindName);
-
+                this.lastClickedItem.changeKind(newKindName, this.grammar);
                 if (oldKindName == "area") {
                     this.browser.clearChildren(this.lastClickedItem);
                 }
-                this.lastClickedItem.setKind(newKind);
                 this.loadParameters(this.lastClickedItem);
             } catch (err) {
                 this.halt(err);
