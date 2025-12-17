@@ -97,6 +97,8 @@ class Frontend {
     /** @type {HTMLInputElement} */
     static isComponentOptional;
 
+    /** @type {HTMLInputElement} */
+    static cellTypeFilepath;
 
     /** @type {Browser} */
     static browser;
@@ -155,6 +157,7 @@ class Frontend {
 
         this.isPatternRoot = document.getElementById("is-pattern-root");
         this.isComponentOptional = document.getElementById("is-component-optional");
+        this.cellTypeFilepath = document.getElementById("cell-types-filepath");
 
         this.resetUI();
 
@@ -197,6 +200,7 @@ class Frontend {
 
         this.componentType.addEventListener("change", (e) => this.onComponentTypeChange(e));
         this.isComponentOptional.addEventListener("change", (e) => this.onOptionalChange(e));
+        this.cellTypeFilepath.addEventListener("change", (e) => this.onCellTypeFilepathChange(e));
     }
 
     static halt(err) {
@@ -220,6 +224,14 @@ class Frontend {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static onCellTypeFilepathChange(e) {
+        try {
+            this.grammar.setCellTypesFilepath(e.target.value);
+        } catch (err) {
+            this.halt(err);
+        }
+    }
 
     static onOptionalChange(e) {
         try {
