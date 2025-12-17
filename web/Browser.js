@@ -147,7 +147,7 @@ class Browser {
     }
 
     addLink(parentItem, targetChildren, title, extraClass = null) {
-        let links = this.#links.get(parentItem);
+        let links = this.#links.get(targetChildren);
         if (links == null) {
             links = new Set();
             this.#links.set(targetChildren, links);
