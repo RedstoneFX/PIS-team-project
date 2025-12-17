@@ -5,6 +5,12 @@ function isNameValid(name) {
     return name.search(/\s/gm) == -1 && name.replaceAll(/\s/gm, "") != "";
 }
 
+function myParseInt(value) {
+    let v = Number.parseInt(value);
+    if (v == NaN) throw new Error("Введенное значение не является числом!");
+    return v
+}
+
 class Frontend {
 
     /** @type {HTMLElement} */
@@ -88,7 +94,11 @@ class Frontend {
     static componentType;
     /** @type {HTMLInputElement} */
     static isPatternRoot;
+    /** @type {HTMLInputElement} */
+    static isComponentOptional;
 
+    /** @type {HTMLInputElement} */
+    static cellTypeFilepath;
 
     /** @type {Browser} */
     static browser;
@@ -146,6 +156,8 @@ class Frontend {
         this.componentType = document.getElementById("component-type");
 
         this.isPatternRoot = document.getElementById("is-pattern-root");
+        this.isComponentOptional = document.getElementById("is-component-optional");
+        this.cellTypeFilepath = document.getElementById("cell-types-filepath");
 
         this.resetUI();
 
@@ -187,6 +199,8 @@ class Frontend {
         this.componentBottomMax.addEventListener("change", (e) => this.onLocationChange(e, "bottom", "max"));
 
         this.componentType.addEventListener("change", (e) => this.onComponentTypeChange(e));
+        this.isComponentOptional.addEventListener("change", (e) => this.onOptionalChange(e));
+        this.cellTypeFilepath.addEventListener("change", (e) => this.onCellTypeFilepathChange(e));
     }
 
     static halt(err) {
@@ -211,6 +225,22 @@ class Frontend {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    static onCellTypeFilepathChange(e) {
+        try {
+            this.grammar.setCellTypesFilepath(e.target.value);
+        } catch (err) {
+            this.halt(err);
+        }
+    }
+
+    static onOptionalChange(e) {
+        try {
+            this.lastClickedItem.setOptional(e.target.checked);
+        } catch (err) {
+            this.halt(err);
+        }
+    }
+
     static onPatternTypeChange(e) {
         let newKindName = e.target.value;
         let oldKindName = this.lastClickedItem.getKind().getKindName();
@@ -218,18 +248,10 @@ class Frontend {
             this.lastClickedItem.getKind().setKindName(newKindName);
         } else {
             try {
-                this.lastClickedItem.getKind().destroy();
-                let newKind;
-                if (newKindName == "cell") newKind = new CellPatternExtension().setContentType("none");
-                else if (newKindName == "area") newKind = new AreaPatternExtension(this.lastClickedItem);
-                else if (newKindName == "array") newKind = new ArrayPatternExtension().setDirection("COLUMN").setItemPattern(null); // инициализировать начальный паттерн
-                else if (newKindName == "array-in-context") newKind = new ArrayPatternExtension().setDirection("COLUMN").setItemPattern(null).setKindName("array-in-context"); // инициализировать начальный паттерн
-                else throw new Error("Неизвестный тип паттерна: " + newKindName);
-
+                this.lastClickedItem.changeKind(newKindName, this.grammar);
                 if (oldKindName == "area") {
                     this.browser.clearChildren(this.lastClickedItem);
                 }
-                this.lastClickedItem.setKind(newKind);
                 this.loadParameters(this.lastClickedItem);
             } catch (err) {
                 this.halt(err);
@@ -259,10 +281,11 @@ class Frontend {
     static onLocationChange(e, side, limit) {
         try {
             let dim = this.getLocationBySideName(side);
-            if (limit == "min") dim.setBegin(e.target.value - 0);
-            else dim.setEnd(e.target.value - 0);
+            if (limit == "min") dim.setBegin(myParseInt(e.target.value - 0));
+            else dim.setEnd(myParseInt(e.target.value - 0));
         } catch (err) {
-            this.halt(err);
+            alert(err);
+            this.loadParameters(this.lastClickedItem);
         }
     }
 
@@ -275,7 +298,7 @@ class Frontend {
                 this.browser.addClass(this.lastClickedItem, "root-pattern");
             } else {
                 alert("В документе должен быть корень, выберите другой паттерн у становите его как корень.");
-                e.target.value = "on";
+                e.target.checked = true;
             }
         } catch (err) {
             this.halt(err);
@@ -291,14 +314,14 @@ class Frontend {
             // Создаем компонент с пустым pattern-definition
             let newComp = new Component(this.lastClickedItem);
             let targetPattern = new PatternByPatternDefinition(newComp).setKind(new CellPatternExtension().setContentType("None"));
-
+            newComp.setPattern(targetPattern);
 
             // Привязываем компонент к текущему паттерну
             this.lastClickedItem.getKind().addComponent(name, newComp, false);
 
             // Добавляем все в браузер
             this.browser.addItem(this.lastClickedItem, newComp, name);
-            this.browser.addLink(newComp, targetPattern, "pattern-definition");
+            this.browser.addItem(newComp, targetPattern, "pattern-definition");
 
         } catch (err) {
             alert(err.message);
@@ -348,6 +371,7 @@ class Frontend {
             let name = this.grammar.getTemplateName();
             this.grammar.addPattern(name, pattern);
             this.browser.addItem(null, pattern, name);
+            this.regenerateSelections();
         } catch (e) {
             this.halt(e);
         }
@@ -373,7 +397,8 @@ class Frontend {
                 let components = this.grammar.getAllComponentsWithPattern(this.lastClickedItem);
                 let arrays = this.grammar.getAllArraysWithPattern(this.lastClickedItem);
                 if (arrays.size > 0) {
-                    throw Error("Не могу удалить паттерн, так как на него ссылаются массивы")
+                    alert("Не могу удалить паттерн, так как на него ссылаются массивы");
+                    return;
                 }
 
                 // Удаляем компоненты из дерева и из браузера
@@ -429,8 +454,8 @@ class Frontend {
     static onPatternSizeChanged(e, isMin, isWidth) {
         try {
             let dim = isWidth ? this.lastClickedItem.getWidth() : this.lastClickedItem.getHeight();
-            if (isMin) dim.setBegin(e.target.value);
-            else dim.setEnd(e.target.value);
+            if (isMin) dim.setBegin(myParseInt(e.target.value));
+            else dim.setEnd(myParseInt(e.target.value));
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -443,8 +468,8 @@ class Frontend {
     static onCountInDocChange(e, isMin) {
         try {
             let dim = this.lastClickedItem.getCountInDocument();
-            if (isMin) dim.setBegin(e.target.value);
-            else dim.setEnd(e.target.value);
+            if (isMin) dim.setBegin(myParseInt(e.target.value));
+            else dim.setEnd(myParseInt(e.target.value));
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -487,8 +512,8 @@ class Frontend {
             /** @type {ArrayPatternExtension} */
             let kind = this.lastClickedItem.getKind();
             let dim = kind.getGap();
-            if (isMin) dim.setBegin(e.target.value);
-            else dim.setEnd(e.target.value);
+            if (isMin) dim.setBegin(myParseInt(e.target.value));
+            else dim.setEnd(myParseInt(e.target.value));
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -503,8 +528,8 @@ class Frontend {
             /** @type {ArrayPatternExtension} */
             let kind = this.lastClickedItem.getKind();
             let dim = kind.getItemCount();
-            if (isMin) dim.setBegin(e.target.value);
-            else dim.setEnd(e.target.value);
+            if (isMin) dim.setBegin(myParseInt(e.target.value));
+            else dim.setEnd(myParseInt(e.target.value));
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -540,6 +565,7 @@ class Frontend {
     static setGrammar(grammar) {
         this.resetUI();
         this.grammar = grammar;
+        this.cellTypeFilepath.value = this.grammar.getCellTypesFilepath();
         this.drawEverythingInGrammar();
         this.regenerateSelections();
     }
@@ -585,7 +611,9 @@ class Frontend {
      * @param {Pattern | Component | PatternByPatternDefinition} item 
      */
     static onItemSelected(item) {
+        if (this.lastClickedItem != null) this.browser.removeClass(this.lastClickedItem, "selected-item");
         this.lastClickedItem = item;
+        this.browser.addClass(item, "selected-item");
         this.loadParameters(item);
         this.deleteSelectedButton.disabled = false;
         if (item instanceof Pattern)
@@ -685,6 +713,7 @@ class Frontend {
             }
         } else if (item instanceof Component) {
             this.componentType.value = item.getParentPattern().getKind().isComponentInner(item) ? "INNER" : "OUTER";
+            this.isComponentOptional.checked = item.isOptional();
             let loc = item.location();
             let left = loc.getLeft();
             if (left.isDefault()) {

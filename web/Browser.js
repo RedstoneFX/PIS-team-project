@@ -28,6 +28,7 @@ class Browser {
 
     clearChildren(item) {
         let children = this.#childrenOfParent.get(item);
+        if (children == null) return;
         for (let child of children.values()) {
             this.removeItem(child);
         }
@@ -147,7 +148,7 @@ class Browser {
     }
 
     addLink(parentItem, targetChildren, title, extraClass = null) {
-        let links = this.#links.get(parentItem);
+        let links = this.#links.get(targetChildren);
         if (links == null) {
             links = new Set();
             this.#links.set(targetChildren, links);
