@@ -275,7 +275,7 @@ class Frontend {
                 this.browser.addClass(this.lastClickedItem, "root-pattern");
             } else {
                 alert("В документе должен быть корень, выберите другой паттерн у становите его как корень.");
-                e.target.value = "on";
+                e.target.checked = true;
             }
         } catch (err) {
             this.halt(err);
