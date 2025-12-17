@@ -123,11 +123,11 @@ input[type=file] {
     margin: 10px;
 }
 
-.selected-browserItemWithChildren>summary {
+.selected-item>summary {
     font-weight: bold;
 }
 
-.selected-browserItemWithChildren {
+.selected-item {
     background-color: #000000 !important;
     margin-left: 1rem;
     color: white;

@@ -578,7 +578,9 @@ class Frontend {
      * @param {Pattern | Component | PatternByPatternDefinition} item 
      */
     static onItemSelected(item) {
+        if(this.lastClickedItem != null) this.browser.removeClass(this.lastClickedItem, "selected-item");
         this.lastClickedItem = item;
+        this.browser.addClass(item, "selected-item");
         this.loadParameters(item);
         this.deleteSelectedButton.disabled = false;
         if (item instanceof Pattern)
