@@ -30,33 +30,36 @@ class Drawer {
     }
 
     static squareDot() {
-        return new paper.Path.Rectangle({
+        let point = new paper.Path.Rectangle({
             point: [0, 0],
             size: [10, 10],
             strokeColor: 'black',
             strokeWidth: 2,
             fillColor: null
         });
+        return point;
     }
 
     static verticalLine() {
-        return new paper.Path.Rectangle({
+        let line = new paper.Path.Rectangle({
             point: [0, 0],
             size: [0, 100],
             strokeColor: 'black',
             strokeWidth: 2,
             fillColor: 'black'
         });
+        return line;
     }
 
     static horizontalLine() {
-        return new paper.Path.Rectangle({
+        let line = new paper.Path.Rectangle({
             point: [0, 0],
             size: [100, 0],
             strokeColor: 'black',
             strokeWidth: 2,
             fillColor: 'black'
         });
+        return line;
     }
 
     static gapBeginArrow() {
@@ -93,7 +96,7 @@ class Drawer {
         let arrowLeft = this.gapBeginArrow();
         arrowLeft.position = (5, 0);
         group.addChild(arrowLeft);
-
+        
         let arrowRight = this.gapEndArrow();
         arrowRight.position = (95, 0);
         group.addChild(arrowRight);
@@ -188,17 +191,18 @@ class Drawer {
      */
     static drawPattern(pattern) {
         let kind = pattern.getKind();
+        this.clearCanvas();
         if (kind instanceof CellPatternExtension) {
             let cellPattern = this.drawCellPattern(pattern, kind);
-            return cellPattern;
+            this.elements.push(cellPattern);
         }
         else if (kind instanceof ArrayPatternExtension) {
             let arrayPattern = this.drawArrayPattern(pattern, kind);
-            return arrayPattern;
+            this.elements.push(arrayPattern);
         }
         else if (kind instanceof AreaPatternExtension) {
             let areaPattern = this.drawAreaPattern(pattern, kind);
-            return areaPattern;
+            this.elements.push(areaPattern);
         }
         else throw new Error("Нельзя отрисовать данный объект!");
     }
@@ -215,7 +219,20 @@ class Drawer {
             strokeWidth: 2,
             fillColor: null
         });
+        return cell;
+    }
 
+    /**
+     * Отрисовать квадратную ячейку
+     */
+    static squareArea(color) {
+        let cell = new paper.Path.Rectangle({
+            point: [0, 0],
+            size: [300, 300],
+            strokeColor: 'black',
+            strokeWidth: 2,
+            fillColor: null
+        });
         return cell;
     }
 
@@ -245,12 +262,13 @@ class Drawer {
      * @param {Point} to 
      */
     static straightLine(from, to) {
-        return new paper.Path.Line({ from: from, to: to, strokeColor: 'black' });
+        let line = new paper.Path.Line({ from: from, to: to, strokeColor: 'black' });
+        return line;
     }
 
     /**
      * Обозначить размер между двумя точками
-     * @param {boolean} isOuter s
+     * @param {boolean} isOuter
      * @param {boolean} isHorizontal 
      * @param {Number} size 
      */
@@ -280,14 +298,14 @@ class Drawer {
 
             //// отрисовать две линии с параметрами ((0, 0), (100, 0))
             let point1 = new paper.Point(0, 0);
-            let point2 = new paper.Point(100, 0);
-            let line1 = new paper.Path.Line(point1, point2);
-            let line2 = new paper.Path.Line(point1, point2);
+            let point2 = new paper.Point(50, 0);
+            let line1 = this.straightLine(point1, point2);
+            let line2 = this.straightLine(point1, point2);
             //// установить центр одной линии на верхнем конце стрелки
-            line1.position = (0, 0);
+            line1.position = new paper.Point(0, 0);
             group.addChild(line1);
             //// установить центр второй линии на нижнем конце стрелки
-            line2.position = (0, -size);
+            line2.position = new paper.Point(0, -size);
             group.addChild(line2);
 
         }
@@ -315,15 +333,15 @@ class Drawer {
         // отрисовать фигуру "размер" с параметрами "внешний", "по вертикали",  "100"
         let sizeV = this.figureSize(true, false, 100);
         // установить центр фигуры (-50, -50)
-        sizeV.position = new paper.Point (100, 250);
+        sizeV.position = new paper.Point (175, 250);
         group.addChild(sizeV);
         // отрисовать фигуру "размер" с параметрами "внешний", "по горизонтали",  "100"
         let sizeH = this.figureSize(true, true, 100);
         // установить центр фигуры (50, 50)
-        sizeH.position = new paper.Point (250, 100);
+        sizeH.position = new paper.Point (250, 175);
         group.addChild(sizeH);
 
-        return cell;
+        return group;
         
     }
 
@@ -408,20 +426,22 @@ class Drawer {
      * Отрисовать паттерн-массив
      */
     static squareDot(x) {
-        return new paper.Path.Rectangle({
+        let dot = new paper.Path.Rectangle({
             point: [x, 0],
             size: [10, 10],
             strokeColor: 'black',
             strokeWidth: 2,
             fillColor: 'black'
         });
+            return dot;
     }
 
     /**
      * Отрисовать паттерн-массив
      */
     static squareDot() {
-        return squareDot(0);
+        let dot = squareDot(0);
+            return dot;
     }
 
     /**
@@ -556,21 +576,22 @@ class Drawer {
         let group = new paper.Group();
         
         // отрисовать прямоугольник 300 на 300
-        let area = this.squareCell('black');
-        area.size = (300, 300);
+        let area = this.squareArea();
         // установить центр прямоугольника (150, -150)
-        area.position = (150, -150);
+        area.position = new paper.Point (250, 250);
         group.addChild(area);
         // отрисовать фигуру "размер" с параметрами "внешний", "по вертикали",  "300"
-        sizeV = figureSize(true, false, 300);
+        let sizeV = this.figureSize(true, false, 300);
         // установить центр фигуры (-150, -150)
-        sizeV.position = (-150, -150);
+        sizeV.position = new paper.Point (75, 250);
         group.addChild(sizeV);
         // отрисовать фигуру "размер" с параметрами "внешний", "по горизонтали",  "300"
-        sizeH = figureSize(true, true, 300);
+        let sizeH = this.figureSize(true, true, 300);
         // установить центр фигуры (150, 150)
-        sizeH.position = (150, 150);
+        sizeH.position = new paper.Point (250, 75);
         group.addChild(sizeH);
+
+        return group;
         
     }
 
