@@ -565,6 +565,7 @@ class Frontend {
     static setGrammar(grammar) {
         this.resetUI();
         this.grammar = grammar;
+        this.cellTypeFilepath.value = this.grammar.getCellTypesFilepath();
         this.drawEverythingInGrammar();
         this.regenerateSelections();
     }
