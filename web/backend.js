@@ -1097,7 +1097,7 @@ class AreaPatternExtension extends PatternExtension {
             throw new Error(`Компонент не считает, что принадлежит текущей области.`);
         }
         // Если компонент уже имеет требуемый тип расположения
-        if (this.isComponentInner(component)) {
+        if (this.isComponentInner(component) == isInner) {
             // Вернуть себя
             return this;
         } else { // Иначе
