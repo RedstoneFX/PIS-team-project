@@ -28,6 +28,7 @@ class Browser {
 
     clearChildren(item) {
         let children = this.#childrenOfParent.get(item);
+        if (children == null) return;
         for (let child of children.values()) {
             this.removeItem(child);
         }
