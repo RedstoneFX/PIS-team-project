@@ -45,6 +45,19 @@ class Drawer {
     }
 
     /**
+     * Отрисовать квадратную ячейку
+     */
+    static squareCell() {
+        return new paper.Path.Rectangle({
+            point: [0, 0],
+            size: [300, 300],
+            strokeColor: color,
+            strokeWidth: 2,
+            fillColor: null
+        });
+    }
+
+    /**
      * Отрисовать треугольную стрелку
      * @param {Number} angle 
      */
@@ -375,21 +388,35 @@ class Drawer {
      */
     static drawAreaPattern(pattern, kind, group) {
         
-        // отрисовать прямоугольник 100 на 100
-        let area = this.squareCell(new Color(1));
-        // установить центр прямоугольника (50, -50)
-        area.position = (50, -50);
+        // отрисовать прямоугольник 300 на 300
+        let area = this.squareArea();
+        // установить центр прямоугольника (150, -150)
+        area.position = (150, -150);
         group.addChild(area);
         // отрисовать фигуру "размер" с параметрами "внешний", "по вертикали",  "100"
-        sizeV = figureSize(true, false, 100);
-        // установить центр фигуры (-50, -50)
-        sizeV.position = (-50, -50);
+        sizeV = figureSize(true, false, 300);
+        // установить центр фигуры (-150, -150)
+        sizeV.position = (-150, -150);
         group.addChild(sizeV);
         // отрисовать фигуру "размер" с параметрами "внешний", "по горизонтали",  "100"
-        sizeH = figureSize(true, true, 100);
-        // установить центр фигуры (50, 50)
-        sizeH.position = (50, 50);
+        sizeH = figureSize(true, true, 300);
+        // установить центр фигуры (150, 150)
+        sizeH.position = (150, 150);
         group.addChild(sizeH);
+        
+    }
+
+    /**
+     * Отрисовать компонент
+     * @param {Component} component 
+     */
+    static drawComponent(component) {
+        
+        let group;
+
+        group.addChild(this.drawAreaPattern());
+
+        let child = component.getPattern;
         
     }
 
