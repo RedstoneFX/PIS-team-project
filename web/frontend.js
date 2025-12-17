@@ -5,6 +5,12 @@ function isNameValid(name) {
     return name.search(/\s/gm) == -1 && name.replaceAll(/\s/gm, "") != "";
 }
 
+function myParseInt(value) {
+    let v = Number.parseInt(value);
+    if(v == NaN) throw new Error("Введенное значение не является числом!");
+    return v
+}
+
 class Frontend {
 
     /** @type {HTMLElement} */
@@ -251,10 +257,11 @@ class Frontend {
     static onLocationChange(e, side, limit) {
         try {
             let dim = this.getLocationBySideName(side);
-            if (limit == "min") dim.setBegin(e.target.value - 0);
-            else dim.setEnd(e.target.value - 0);
+            if (limit == "min") dim.setBegin(myParseInt(e.target.value - 0));
+            else dim.setEnd(myParseInt(e.target.value - 0));
         } catch (err) {
-            this.halt(err);
+            alert(err);
+            this.loadParameters(this.lastClickedItem);
         }
     }
 
@@ -422,8 +429,8 @@ class Frontend {
     static onPatternSizeChanged(e, isMin, isWidth) {
         try {
             let dim = isWidth ? this.lastClickedItem.getWidth() : this.lastClickedItem.getHeight();
-            if (isMin) dim.setBegin(e.target.value);
-            else dim.setEnd(e.target.value);
+            if (isMin) dim.setBegin(myParseInt(e.target.value));
+            else dim.setEnd(myParseInt(e.target.value));
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -436,8 +443,8 @@ class Frontend {
     static onCountInDocChange(e, isMin) {
         try {
             let dim = this.lastClickedItem.getCountInDocument();
-            if (isMin) dim.setBegin(e.target.value);
-            else dim.setEnd(e.target.value);
+            if (isMin) dim.setBegin(myParseInt(e.target.value));
+            else dim.setEnd(myParseInt(e.target.value));
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -480,8 +487,8 @@ class Frontend {
             /** @type {ArrayPatternExtension} */
             let kind = this.lastClickedItem.getKind();
             let dim = kind.getGap();
-            if (isMin) dim.setBegin(e.target.value);
-            else dim.setEnd(e.target.value);
+            if (isMin) dim.setBegin(myParseInt(e.target.value));
+            else dim.setEnd(myParseInt(e.target.value));
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -496,8 +503,8 @@ class Frontend {
             /** @type {ArrayPatternExtension} */
             let kind = this.lastClickedItem.getKind();
             let dim = kind.getItemCount();
-            if (isMin) dim.setBegin(e.target.value);
-            else dim.setEnd(e.target.value);
+            if (isMin) dim.setBegin(myParseInt(e.target.value));
+            else dim.setEnd(myParseInt(e.target.value));
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -578,7 +585,7 @@ class Frontend {
      * @param {Pattern | Component | PatternByPatternDefinition} item 
      */
     static onItemSelected(item) {
-        if(this.lastClickedItem != null) this.browser.removeClass(this.lastClickedItem, "selected-item");
+        if (this.lastClickedItem != null) this.browser.removeClass(this.lastClickedItem, "selected-item");
         this.lastClickedItem = item;
         this.browser.addClass(item, "selected-item");
         this.loadParameters(item);
