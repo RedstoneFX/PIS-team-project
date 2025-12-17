@@ -154,6 +154,7 @@ class Frontend {
         this.componentType = document.getElementById("component-type");
 
         this.isPatternRoot = document.getElementById("is-pattern-root");
+        this.isComponentOptional = document.getElementById("is-component-optional");
 
         this.resetUI();
 
