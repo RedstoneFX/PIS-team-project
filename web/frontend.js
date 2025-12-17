@@ -314,7 +314,7 @@ class Frontend {
             // Создаем компонент с пустым pattern-definition
             let newComp = new Component(this.lastClickedItem);
             let targetPattern = new PatternByPatternDefinition(newComp).setKind(new CellPatternExtension().setContentType("None"));
-
+            newComp.setPattern(targetPattern);
 
             // Привязываем компонент к текущему паттерну
             this.lastClickedItem.getKind().addComponent(name, newComp, false);

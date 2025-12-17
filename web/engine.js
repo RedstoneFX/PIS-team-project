@@ -76,6 +76,7 @@ function onFileSave() {
     } catch (err) {
         console.log(err.message);
         if (!/[а-яА-Я]/.test(err.message)) Frontend.halt(); // TODO: полностью завершает работу приложения, если ошибка была не через throw. Сломается, если изменить язык.
+        throw err;
     }
 }
 
