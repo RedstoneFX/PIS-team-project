@@ -365,7 +365,8 @@ class Frontend {
                 let components = this.grammar.getAllComponentsWithPattern(this.lastClickedItem);
                 let arrays = this.grammar.getAllArraysWithPattern(this.lastClickedItem);
                 if (arrays.size > 0) {
-                    throw Error("Не могу удалить паттерн, так как на него ссылаются массивы")
+                    alert("Не могу удалить паттерн, так как на него ссылаются массивы");
+                    return;
                 }
 
                 // Удаляем компоненты из дерева и из браузера
