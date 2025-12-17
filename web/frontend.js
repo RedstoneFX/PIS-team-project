@@ -7,7 +7,7 @@ function isNameValid(name) {
 
 function myParseInt(value) {
     let v = Number.parseInt(value);
-    if(v == NaN) throw new Error("Введенное значение не является числом!");
+    if (v == NaN) throw new Error("Введенное значение не является числом!");
     return v
 }
 
@@ -94,6 +94,8 @@ class Frontend {
     static componentType;
     /** @type {HTMLInputElement} */
     static isPatternRoot;
+    /** @type {HTMLInputElement} */
+    static isComponentOptional;
 
 
     /** @type {Browser} */
@@ -193,6 +195,7 @@ class Frontend {
         this.componentBottomMax.addEventListener("change", (e) => this.onLocationChange(e, "bottom", "max"));
 
         this.componentType.addEventListener("change", (e) => this.onComponentTypeChange(e));
+        this.isComponentOptional.addEventListener("change", (e) => this.onOptionalChange(e));
     }
 
     static halt(err) {
@@ -216,6 +219,14 @@ class Frontend {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static onOptionalChange(e) {
+        try {
+            this.lastClickedItem.setOptional(e.target.checked);
+        } catch (err) {
+            this.halt(err);
+        }
+    }
 
     static onPatternTypeChange(e) {
         let newKindName = e.target.value;
@@ -688,6 +699,7 @@ class Frontend {
             }
         } else if (item instanceof Component) {
             this.componentType.value = item.getParentPattern().getKind().isComponentInner(item) ? "INNER" : "OUTER";
+            this.isComponentOptional.checked = item.isOptional();
             let loc = item.location();
             let left = loc.getLeft();
             if (left.isDefault()) {
