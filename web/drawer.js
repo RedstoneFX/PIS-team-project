@@ -248,15 +248,6 @@ class Drawer {
     }
 
     /**
-     * Отрисовать треугольную стрелку
-     */
-    static triangleArrow() {
-        let arrow = new paper.Path.RegularPolygon(new paper.Point(0, 0), 3, 5);
-        arrow.fillColor = 'black';
-        return arrow;
-    }
-
-    /**
      * Отрисовать линию
      * @param {Point} from 
      * @param {Point} to 
@@ -280,7 +271,7 @@ class Drawer {
         let to = new paper.Point(0, 5-size);
 
         // отрисовать треугольник в точке (0, -10) с углом поворота в 0 градусов
-        let up = this.triangleArrow();
+        let up = this.triangleArrow(0);
         up.position = from;
         group.addChild(up);
 
@@ -377,7 +368,7 @@ class Drawer {
 
             //// отрисовать 3 точки с учётом разрыва
             for (let i = 0; i < 2; i++) {
-                let dot = this.squareDot();
+                let dot = this.squareDot(0);
                 dot.position = (x, y);
                 row.addChild(dot);
                 x += 50;
@@ -433,14 +424,6 @@ class Drawer {
             strokeWidth: 2,
             fillColor: 'black'
         });
-            return dot;
-    }
-
-    /**
-     * Отрисовать паттерн-массив
-     */
-    static squareDot() {
-        let dot = squareDot(0);
             return dot;
     }
 
