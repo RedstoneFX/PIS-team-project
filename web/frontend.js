@@ -347,6 +347,7 @@ class Frontend {
             let name = this.grammar.getTemplateName();
             this.grammar.addPattern(name, pattern);
             this.browser.addItem(null, pattern, name);
+            this.regenerateSelections();
         } catch (e) {
             this.halt(e);
         }
