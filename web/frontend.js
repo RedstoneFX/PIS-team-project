@@ -498,6 +498,7 @@ class Frontend {
             /** @type {ArrayPatternExtension} */
             let kind = this.lastClickedItem.getKind();
             kind.setDirection(e.target.value);
+            this.redrawSelected();
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -514,6 +515,7 @@ class Frontend {
             let dim = kind.getGap();
             if (isMin) dim.setBegin(myParseInt(e.target.value));
             else dim.setEnd(myParseInt(e.target.value));
+            this.redrawSelected();
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -530,6 +532,7 @@ class Frontend {
             let dim = kind.getItemCount();
             if (isMin) dim.setBegin(myParseInt(e.target.value));
             else dim.setEnd(myParseInt(e.target.value));
+            this.redrawSelected();
         } catch (err) {
             alert(err.message);
             this.loadParameters(this.lastClickedItem);
@@ -616,10 +619,14 @@ class Frontend {
         this.browser.addClass(item, "selected-item");
         this.loadParameters(item);
         this.deleteSelectedButton.disabled = false;
-        if (item instanceof Pattern)
-            Drawer.drawPattern(item);
+        this.redrawSelected();
+    }
+
+    static redrawSelected() {
+        if (this.lastClickedItem instanceof Pattern)
+            Drawer.drawPattern(this.lastClickedItem);
         else
-            Drawer.drawComponent(item);
+            Drawer.drawComponent(this.lastClickedItem);
     }
 
     static unselectItem() {
