@@ -68,21 +68,21 @@
 
                     <label>Размер</label>
                     <div id="pattern-size">
-                        <input type="number" id="pattern-x-min" class="numeric" min="1" placeholder="1"
+                        <input type="text" id="pattern-x-min" class="numeric" min="1" placeholder="1"
                             title="Минимальная ширина" />
-                        <input type="number" id="pattern-x-max" class="numeric" min="1" placeholder="+inf"
+                        <input type="text" id="pattern-x-max" class="numeric" min="1" placeholder="+inf"
                             title="Максимальная ширина" />
                         <div>x</div>
-                        <input type="number" id="pattern-y-min" class="numeric" min="1" placeholder="1"
+                        <input type="text" id="pattern-y-min" class="numeric" min="1" placeholder="1"
                             title="Минимальная высота" />
-                        <input type="number" id="pattern-y-max" class="numeric" min="1" placeholder="+inf"
+                        <input type="text" id="pattern-y-max" class="numeric" min="1" placeholder="+inf"
                             title="Максимальная высота" />
                     </div>
 
                     <label>Количество</label>
                     <div id="pattern-count">
-                        <input type="number" class="numeric" id="pattern-count-min" min="0" placeholder="0" />..<input
-                            type="number" class="numeric" id="pattern-count-max" min="1" placeholder="+Infinity" />
+                        <input type="text" class="numeric" id="pattern-count-min" min="0" placeholder="0" />..<input
+                            type="text" class="numeric" id="pattern-count-max" min="1" placeholder="+Infinity" />
                     </div>
                 </div>
             </details>
@@ -120,10 +120,10 @@
                     </div>
                     <label>Количество</label>
                     <div id="pattern-array-count">
-                        <input type="number" class="numeric" id="pattern-array-count-min" min="0" max="100"
+                        <input type="text" class="numeric" id="pattern-array-count-min" min="0" max="100"
                             placeholder="1" />
                         <div>..</div>
-                        <input type="number" class="numeric" id="pattern-array-count-max" min="0" max="100"
+                        <input type="text" class="numeric" id="pattern-array-count-max" min="0" max="100"
                             placeholder="+Infinity" />
                     </div>
                 </div>
@@ -162,16 +162,16 @@
                         <div></div>
 
                         <span>left</span>
-                        <input type="number" class="numeric" id="left-min" min="0" max="100" placeholder="-inf" />
-                        <input type="number" class="numeric" id="left-max" min="0" max="100" placeholder="+inf" />
+                        <input type="text" class="numeric" id="left-min" min="0" max="100" placeholder="-inf" />
+                        <input type="text" class="numeric" id="left-max" min="0" max="100" placeholder="+inf" />
                         <select id="left-mode">
                             <option value="PADDING">Padding</option>
                             <option value="MARGIN">Margin</option>
                         </select>
 
                         <span>top</span>
-                        <input type="number" class="numeric" id="top-min" min="0" max="100" placeholder="-inf" />
-                        <input type="number" class="numeric" id="top-max" min="0" max="100" placeholder="+inf" />
+                        <input type="text" class="numeric" id="top-min" min="0" max="100" placeholder="-inf" />
+                        <input type="text" class="numeric" id="top-max" min="0" max="100" placeholder="+inf" />
                         <select id="top-mode">
                             <option value="PADDING">Padding</option>
                             <option value="MARGIN">Margin</option>
@@ -179,8 +179,8 @@
 
 
                         <span>right</span>
-                        <input type="number" class="numeric" id="right-min" min="0" max="100" placeholder="-inf" />
-                        <input type="number" class="numeric" id="right-max" min="0" max="100" placeholder="+inf" />
+                        <input type="text" class="numeric" id="right-min" min="0" max="100" placeholder="-inf" />
+                        <input type="text" class="numeric" id="right-max" min="0" max="100" placeholder="+inf" />
                         <select id="right-mode">
                             <option value="PADDING">Padding</option>
                             <option value="MARGIN">Margin</option>
@@ -188,8 +188,8 @@
 
 
                         <span>bottom</span>
-                        <input type="number" class="numeric" id="bottom-min" min="0" max="100" placeholder="-inf" />
-                        <input type="number" class="numeric" id="bottom-max" min="0" max="100" placeholder="+inf" />
+                        <input type="text" class="numeric" id="bottom-min" min="0" max="100" placeholder="-inf" />
+                        <input type="text" class="numeric" id="bottom-max" min="0" max="100" placeholder="+inf" />
                         <select id="bottom-mode">
                             <option value="PADDING">Padding</option>
                             <option value="MARGIN">Margin</option>

@@ -6,7 +6,7 @@ function isNameValid(name) {
 }
 
 function myParseInt(value) {
-    let v = value.toLowerCase();
+    let v = value.replaceAll(/\w+/g, "").toLowerCase();
     if(v.includes("-inf")) return -Infinity;
     else if (v.includes("inf")) return Infinity;
 
