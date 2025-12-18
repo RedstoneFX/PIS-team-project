@@ -12,11 +12,14 @@ class Drawer {
 
     static elements = [];
 
+    static maxX; static maxY;
+
     static init() {
         this.exampleVariable1 = 1;
         this.exampleVariable2 = 2;
         this.canvas = document.getElementById("illustration");
         paper.setup(this.canvas);
+        this.maxX = 50; this.maxY = 50;
     }
 
     /**
@@ -35,7 +38,7 @@ class Drawer {
             size: [10, 10],
             strokeColor: 'black',
             strokeWidth: 2,
-            fillColor: null
+            fillColor: 'black'
         });
         return point;
     }
@@ -94,15 +97,15 @@ class Drawer {
         let group = new paper.Group();
 
         let arrowLeft = this.gapBeginArrow();
-        arrowLeft.position = (5, 0);
+        arrowLeft.position = new paper.Point(5, 0);
         group.addChild(arrowLeft);
         
         let arrowRight = this.gapEndArrow();
-        arrowRight.position = (95, 0);
+        arrowRight.position = new paper.Point(95, 0);
         group.addChild(arrowRight);
 
         let line3 = this.horizontalLine();
-        line3.position = (50, 0);
+        line3.position = new paper.Point(50, 0);
         group.addChild(line3);
 
         return group;
@@ -114,23 +117,23 @@ class Drawer {
         let group = new paper.Group();
 
         let line1 = this.verticalLine();
-        line1.position = (0, 100);
+        line1.position = new paper.Point(0, 100);
         group.addChild(line1);
 
         let line2 = this.verticalLine();
-        line2.position = (x, 100);
+        line2.position = new paper.Point(x, 100);
         group.addChild(line2);
 
         let arrowLeft = this.gapBeginArrow();
-        arrowLeft.position = (5, 100);
+        arrowLeft.position = new paper.Point(5, 100);
         group.addChild(arrowLeft);
 
         let arrowRight = this.gapEndArrow();
-        arrowRight.position = (x-5, 100);
+        arrowRight.position = new paper.Point(x-5, 100);
         group.addChild(arrowRight);
 
         let line3 = this.horizontalLine();
-        line3.position = (x/2, 100);
+        line3.position = new paper.Point(x/2, 100);
         group.addChild(line3);
 
         return group;
@@ -142,15 +145,15 @@ class Drawer {
         let group = new paper.Group();
 
         let arrowDown = this.gapArrowDown();
-        arrowDown.position = (0, -95);
+        arrowDown.position = new paper.Point(0, -95);
         group.addChild(arrowDown);
 
         let arrowUp = this.gapArrowUp();
-        arrowUp.position = (0, -5);
+        arrowUp.position = new paper.Point(0, -5);
         group.addChild(arrowUp);
 
         let line3 = this.verticalLine();
-        line3.position = (0, -50);
+        line3.position = new paper.Point(0, -50);
         group.addChild(line3);
 
         return group;
@@ -162,23 +165,23 @@ class Drawer {
         let group = new paper.Group();
 
         let line1 = this.horizontalLine();
-        line1.position = (-100, 0);
+        line1.position = new paper.Point(-100, 0);
         group.addChild(line1);
 
         let line2 = this.horizontalLine();
-        line2.position = (-100, y);
+        line2.position = new paper.Point(-100, y);
         group.addChild(line2);
 
         let arrowDown = this.gapArrowDown();
-        arrowDown.position = (-100, y+5);
+        arrowDown.position = new paper.Point(-100, y+5);
         group.addChild(arrowDown);
 
         let arrowUp = this.gapArrowUp();
-        arrowUp.position = (-100, -5);
+        arrowUp.position = new paper.Point(-100, -5);
         group.addChild(arrowUp);
 
         let line3 = this.verticalLine();
-        line3.position = (-100, y/2);
+        line3.position = new paper.Point(-100, y/2);
         group.addChild(line3);
 
         return group;
@@ -338,38 +341,39 @@ class Drawer {
 
     /**
      * Отрисовать ряд ячеек
-     * @param {Number} cellsLeft 
+     * @param {Number} rowLength 
      * @param {Number} blackCellsLeft 
      * @param {Number} x 
      * @param {Number} y 
      * @param {Number} gap 
      */
-    static rowOfCells(cellsLeft, blackCellsLeft, x, y, gap) {
+    static rowOfCells(rowLength, blackCellsLeft, itemCountEnd, x, y, gap, isFirst) {
 
         let row = new paper.Group();
         
         // если длина ряда больше 5
-        if (cellsLeft > 5)
+        if (rowLength > 5)
         {
 
             //// отрисовать 2 ячейки с учётом разрыва и цвета
             for (let i = 0; i < 2; i++) {
-                let cell;
-                if (blackCellsLeft > 0)
+                let cell; 
+                if (!isFirst && itemCountEnd == Infinity)
+                    cell = this.squareCell('red');
+                else if (blackCellsLeft > i)
                 {
                     cell = this.squareCell('black');
-                    blackCellsLeft -= 1;
                 }
                 else cell = this.squareCell('red');
-                cell.position = (x, y);
+                cell.position = new paper.Point(x, y);
                 row.addChild(cell);
                 x += 100 + gap;
             }
 
             //// отрисовать 3 точки с учётом разрыва
-            for (let i = 0; i < 2; i++) {
-                let dot = this.squareDot(0);
-                dot.position = (x, y);
+            for (let i = 0; i < 3; i++) {
+                let dot = this.squareDot();
+                dot.position = new paper.Point(x, y);
                 row.addChild(dot);
                 x += 50;
             }
@@ -382,15 +386,14 @@ class Drawer {
         else {
 
             //// отрисовать все ячейки, кроме последней, с учётом разрыва и цвета
-            for (let i = 0; i < cellsLeft - 1; i++) {
+            for (let i = 0; i < rowLength - 1; i++) {
                 let cell;
-                if (blackCellsLeft > 0)
+                if (blackCellsLeft > i)
                 {
                     cell = this.squareCell('black');
-                    blackCellsLeft -= 1;
                 }
                 else cell = this.squareCell('red');
-                cell.position = (x, y);
+                cell.position = new paper.Point(x, y);
                 row.addChild(cell);
                 x += 100 + gap;
             }
@@ -399,47 +402,38 @@ class Drawer {
 
         // отрисовать последнюю ячейку с учётом цвета
         let lastCell;
-        if (blackCellsLeft > 0)
+        if (rowLength > 5 && itemCountEnd == Infinity)
+            lastCell = this.squareCell('red');
+        else if (blackCellsLeft > rowLength-1)
         {
             lastCell = this.squareCell('black');
-            blackCellsLeft -= 1;
         }
         else lastCell = this.squareCell('red');
-        lastCell.position = (x, y);
+        lastCell.position = new paper.Point(x, y);
         row.addChild(lastCell);
         x += 50;
 
-        return row, x;
+        this.maxX = x;
+
+        return row;
         
     }
 
     /**
-     * Отрисовать паттерн-массив
-     */
-    static squareDot(x) {
-        let dot = new paper.Path.Rectangle({
-            point: [x, 0],
-            size: [10, 10],
-            strokeColor: 'black',
-            strokeWidth: 2,
-            fillColor: 'black'
-        });
-            return dot;
-    }
-
-    /**
-     * Отрисовать паттерн-массив
+     * Отрисовать многоточие
      * @param {Number} x 
      */
     static rowOfDots(x) {
 
         let row = new paper.Group();
+        let xx = x;
 
-        while (x > 0) {
+        while (xx > 0) {
 
-            let dot = squareDot(x);
+            let dot = this.squareDot();
+            dot.position = new paper.Point(xx, 0);
             row.addChild(dot);
-            x -= 50;
+            xx -= 50;
 
         }
 
@@ -454,48 +448,46 @@ class Drawer {
 
         let array = new paper.Group();
 
-        let maxCells = kind.itemCount().getEnd();
+        let itemCountEnd = kind.getItemCount().getEnd();
+        let maxCells = itemCountEnd == Infinity ? 36: itemCountEnd;
         // определить количество гарантированных ячеек
-        let blackCells = kind.itemCount().getBegin();
+        let blackCells = kind.getItemCount().getBegin();
         // определить, есть разрыв или нет
-        let gap = kind.gap().getEnd() > 0 ? 100 : 0;
+        let gap = kind.getGap().getEnd() > 0 ? 100 : 0;
         // определить начальную позицию отрисовки
-        let x = 50; let y = -50;
-        let maxX; let maxY;
+        let x = 50; let y = 50;
         // определить длину ряда (в ячейках)
         let direction = kind.getDirection();
         let rowNumber; let rowLength;
         //// определить длину ряда как максимальное кол-во ячеек, если направление = 'ROW'
-        if (direction = "ROW") rowLength = maxCells;
+        if (direction == "row") rowLength = maxCells;
         //// определить длину ряда как 1, если направление = 'COLUMN'
-        else if (direction = "ROW") rowLength = 1;
+        else if (direction == "column") rowLength = 1;
         //// определить длину ряда как ближайший целый корень максимального кол-ва ячеек
-        else if (direction = "FILL") rowLength = Math.ceil(Math.sqrt(maxCells));
+        else if (direction == "fill") rowLength = Math.ceil(Math.sqrt(maxCells));
         // определить количество рядов как округлённое частное макс. кол-ва ячеек и длины ряда 
         rowNumber = Math.ceil(maxCells / rowLength);
         // если рядов больше 5
         if (rowNumber > 5) {
             
             //// отрисовать 2 ряда ячеек с учётом разрыва 
-            for (let i = 0; i < 2; i++) {
-                
-                x = 50; 
-                let row;
-                row, x = this.rowOfCells(maxCells, blackCells, x, y, gap); 
-                row.position = (x/2, y);
-                array.addChild(row);
-                maxCells -= rowLength;
-                y -= 100 + gap;
+                let row1;
+                row1 = this.rowOfCells(rowLength, blackCells, itemCountEnd, x, y, gap, true); 
+                row1.position = new paper.Point(this.maxX/2, y);
+                array.addChild(row1);
+                y += 100 + gap;
 
-            }
-
-            maxX = x;
+                let row2;
+                row2 = this.rowOfCells(rowLength, blackCells-rowLength, itemCountEnd, x, y, gap, false); 
+                row2.position = new paper.Point(this.maxX/2, y);
+                array.addChild(row2);
+                y += 100 + gap;
 
             //// отрисовать ряд точек с учётом разрыва
-            let dots = this.rowOfDots(x);
-            dots.position = (x/2, y); //[изменить позицию, добавить расчёт позиции]
+            let dots = this.rowOfDots(this.maxX);
+            dots.position = new paper.Point(this.maxX/2, y); //[изменить позицию, добавить расчёт позиции]
             array.addChild(dots);
-            y -= 100;
+            y += 100;
             
         }
 
@@ -505,46 +497,47 @@ class Drawer {
             //// отрисовать все ряды, кроме последнего, с учётом разрыва
             for (let i = 0; i < rowNumber - 1; i++) {
                 
-                x = 50; 
                 let row;
-                row, x = this.rowOfCells(maxCells, blackCells, x, y, gap); 
-                row.position = (x/2, y); //[изменить позицию, добавить расчёт позиции]
+                row = this.rowOfCells(rowLength, blackCells-i*rowLength, itemCountEnd, x, y, gap, i==0); 
+                row.position = new paper.Point(this.maxX/2, y); //[изменить позицию, добавить расчёт позиции]
                 array.addChild(row);
-                maxCells -= rowLength;
-                y -= 100 + gap;
+                y += 100 + gap;
 
             }
 
         }
 
         // отрисовать последний ряд ячеек с учётом кол-ва оставшихся для отрисовки ячеек
-        x = 50; 
         let row;
-        row, x = this.rowOfCells(maxCells, blackCells, x, y, gap); 
-        row.position = (x/2, y);
+        let remainder = maxCells % rowNumber
+        let rLen = remainder == 0 ? rowLength : remainder;
+        row = this.rowOfCells(rLen, blackCells-(rowNumber-1)*rowLength, itemCountEnd, x, y, gap, rowNumber==1); 
+        row.position = new paper.Point(this.maxX/2, y);
         array.addChild(row);
-        y -= 50;
+        y += 50;
 
-        maxY = y;
+        this.maxY = y;
 
-        if (rowLength > 5) {
+        /*if (rowLength > 5) {
             let sizeOutH = this.figureSize(true, true, x);
-            sizeOutH.position = (x/2, 50);
+            sizeOutH.position = new paper.Point(x/2, 50);
             array.addChild(sizeOutH);
         }
         
         if (rowNumber > 5) {
-            let sizeOutV = this.figureSize(true, false, -y);
-            sizeOutV.position = (-50, y/2);
+            let sizeOutV = this.figureSize(true, false, y);
+            sizeOutV.position = new paper.Point(50, y/2);
             array.addChild(sizeOutV);
         }
 
         if (gap) {
             let sizeInH = this.figureSize(false, true, x);
-            sizeInH.position = (x/2, -50);
-            let sizeInV = this.figureSize(false, false, -y);
-            sizeInV.position = (50, y/2);
-        }
+            sizeInH.position = new paper.Point(x/2, 50);
+            let sizeInV = this.figureSize(false, false, y);
+            sizeInV.position = new paper.Point(50, y/2);
+        }*/
+
+        array.position = new paper.Point(250, 250);
 
         return array;
         
