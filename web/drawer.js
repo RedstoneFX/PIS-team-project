@@ -71,27 +71,27 @@ class Drawer {
     }
 
     static gapBeginArrow() {
-        let gapBegin = new paper.Path.RegularPolygon(new paper.Point(0, 0), 3, 5);
+        let gapBegin = new paper.Path.RegularPolygon(new paper.Point(0, 0), 3, 3);
         gapBegin.fillColor = 'black';
-        gapBegin.rotate(-90);
+        gapBegin.rotate(90);
         return gapBegin;
     }
 
     static gapEndArrow() {
-        let gapEnd = new paper.Path.RegularPolygon(new paper.Point(0, 0), 3, 5);
+        let gapEnd = new paper.Path.RegularPolygon(new paper.Point(0, 0), 3, 3);
         gapEnd.fillColor = 'black';
-        gapEnd.rotate(90);
+        gapEnd.rotate(-90);
         return gapEnd;
     }
 
     static gapArrowUp() {
-        let gapBegin = new paper.Path.RegularPolygon(new paper.Point(0, 0), 3, 5);
+        let gapBegin = new paper.Path.RegularPolygon(new paper.Point(0, 0), 3, 3);
         gapBegin.fillColor = 'black';
         return gapBegin;
     }
 
     static gapArrowDown() {
-        let gapEnd = new paper.Path.RegularPolygon(new paper.Point(0, 0), 3, 5);
+        let gapEnd = new paper.Path.RegularPolygon(new paper.Point(0, 0), 3, 3);
         gapEnd.fillColor = 'black';
         gapEnd.rotate(180);
         return gapEnd;
@@ -150,11 +150,11 @@ class Drawer {
         let group = new paper.Group();
 
         let arrowDown = this.gapArrowDown();
-        arrowDown.position = new paper.Point(0, this.cell_size-5);
+        arrowDown.position = new paper.Point(0, this.cell_size+5);
         group.addChild(arrowDown);
 
         let arrowUp = this.gapArrowUp();
-        arrowUp.position = new paper.Point(0, this.cell_size+5);
+        arrowUp.position = new paper.Point(0, this.cell_size-5);
         group.addChild(arrowUp);
 
         let line3 = this.verticalLine();
@@ -249,17 +249,6 @@ class Drawer {
     }
 
     /**
-     * Отрисовать треугольную стрелку
-     * @param {Number} angle 
-     */
-    static triangleArrow(angle) {
-        let arrow = new paper.Path.RegularPolygon(new paper.Point(0, 0), 3, 5);
-        arrow.fillColor = 'black';
-        arrow.rotate(angle);
-        return arrow;
-    }
-
-    /**
      * Отрисовать линию
      * @param {Point} from 
      * @param {Point} to 
@@ -279,17 +268,17 @@ class Drawer {
 
         let group = new paper.Group();
 
-        let from = new paper.Point(0, -5);
-        let to = new paper.Point(0, 5-size);
+        let from = new paper.Point(0, -3);
+        let to = new paper.Point(0, 3-size);
 
         // отрисовать треугольник в точке (0, -10) с углом поворота в 0 градусов
-        let up = this.triangleArrow(0);
-        up.position = from;
+        let up = this.gapArrowUp();
+        up.position = to;
         group.addChild(up);
 
         // отрисовать второй треугольник в точке (0, 10-(длина стрелки)) с углом поворота в 180 градусов
-        let down = this.triangleArrow(180);
-        down.position = to;
+        let down = this.gapArrowDown();
+        down.position = from;
         group.addChild(down);
 
         // отрисовать между треугольниками прямую линию
@@ -530,24 +519,30 @@ class Drawer {
 
         this.maxY = y;
 
-        /*if (rowLength > 5) {
-            let sizeOutH = this.figureSize(true, true, x);
-            sizeOutH.position = new paper.Point(x/2, 50);
+        if (rowLength > 5) {
+            let sizeOutH = this.figureSize(true, true, this.maxX);
+            sizeOutH.position = new paper.Point(this.maxX/2, -this.cell_size/2);
             array.addChild(sizeOutH);
         }
         
         if (rowNumber > 5) {
-            let sizeOutV = this.figureSize(true, false, y);
-            sizeOutV.position = new paper.Point(50, y/2);
+            let sizeOutV = this.figureSize(true, false, this.maxY);
+            sizeOutV.position = new paper.Point(-this.cell_size/2, this.maxY/2);
             array.addChild(sizeOutV);
         }
 
         if (gap) {
-            let sizeInH = this.figureSize(false, true, x);
-            sizeInH.position = new paper.Point(x/2, 50);
-            let sizeInV = this.figureSize(false, false, y);
-            sizeInV.position = new paper.Point(50, y/2);
-        }*/
+            if (direction != "column"){
+                let sizeInH = this.figureSize(false, true, gap);
+                sizeInH.position = new paper.Point(this.cell_size+gap/2, this.cell_size/2);
+                array.addChild(sizeInH);
+            }
+            if (direction != "row") {
+                let sizeInV = this.figureSize(false, false, gap);
+                sizeInV.position = new paper.Point(this.cell_size/2, this.cell_size+gap/2);
+                array.addChild(sizeInV);
+            }
+        }
 
         array.position = new paper.Point(250, 250);
 
