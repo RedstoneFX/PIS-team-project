@@ -37,9 +37,10 @@ class Drawer {
     }
 
     static squareDot() {
+        let dot_size = this.cell_size/10;
         let point = new paper.Path.Rectangle({
             point: [0, 0],
-            size: [10, 10],
+            size: [dot_size, dot_size],
             strokeColor: 'black',
             strokeWidth: 2,
             fillColor: 'black'
@@ -326,6 +327,8 @@ class Drawer {
     static drawCellPattern(pattern, kind) {
 
         let group = new paper.Group();
+
+        let deductable = this.cell_size/4*3
         
         // отрисовать прямоугольник 100 на 100
         let cell = this.squareCell('black');
@@ -333,14 +336,14 @@ class Drawer {
         cell.position = new paper.Point (250, 250);
         group.addChild(cell);
         // отрисовать фигуру "размер" с параметрами "внешний", "по вертикали",  "100"
-        let sizeV = this.figureSize(true, false, 100);
+        let sizeV = this.figureSize(true, false, this.cell_size);
         // установить центр фигуры (-50, -50)
-        sizeV.position = new paper.Point (175, 250);
+        sizeV.position = new paper.Point (250-deductable, 250);
         group.addChild(sizeV);
         // отрисовать фигуру "размер" с параметрами "внешний", "по горизонтали",  "100"
-        let sizeH = this.figureSize(true, true, 100);
+        let sizeH = this.figureSize(true, true, this.cell_size);
         // установить центр фигуры (50, 50)
-        sizeH.position = new paper.Point (250, 175);
+        sizeH.position = new paper.Point (250, 250-deductable);
         group.addChild(sizeH);
 
         return group;
@@ -559,6 +562,9 @@ class Drawer {
     static drawAreaPattern(pattern, kind) {
 
         let group = new paper.Group();
+
+        let area_size = this.cell_size*3;
+        let deductable = area_size/8*5;
         
         // отрисовать прямоугольник 300 на 300
         let area = this.squareArea();
@@ -566,14 +572,14 @@ class Drawer {
         area.position = new paper.Point (250, 250);
         group.addChild(area);
         // отрисовать фигуру "размер" с параметрами "внешний", "по вертикали",  "300"
-        let sizeV = this.figureSize(true, false, 300);
+        let sizeV = this.figureSize(true, false, area_size);
         // установить центр фигуры (-150, -150)
-        sizeV.position = new paper.Point (75, 250);
+        sizeV.position = new paper.Point (250-deductable, 250);
         group.addChild(sizeV);
         // отрисовать фигуру "размер" с параметрами "внешний", "по горизонтали",  "300"
-        let sizeH = this.figureSize(true, true, 300);
+        let sizeH = this.figureSize(true, true, area_size);
         // установить центр фигуры (150, 150)
-        sizeH.position = new paper.Point (250, 75);
+        sizeH.position = new paper.Point (250, 250-deductable);
         group.addChild(sizeH);
 
         return group;
