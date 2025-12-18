@@ -11,7 +11,7 @@ function myParseInt(value) {
     else if (v.includes("inf")) return Infinity;
 
     v = Number.parseInt(value);
-    if (isNaN(NaN)) throw new Error("Введенное значение не является числом!");
+    if (isNaN(v)) throw new Error("Введенное значение не является числом!");
     return v
 }
 
