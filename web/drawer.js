@@ -447,13 +447,14 @@ class Drawer {
     static drawArrayPattern(pattern, kind) {
 
         let array = new paper.Group();
+        let cell_size = 100;
 
         let itemCountEnd = kind.getItemCount().getEnd();
         let maxCells = itemCountEnd == Infinity ? 36: itemCountEnd;
         // определить количество гарантированных ячеек
         let blackCells = kind.getItemCount().getBegin();
         // определить, есть разрыв или нет
-        let gap = kind.getGap().getEnd() > 0 ? 100 : 0;
+        let gap = kind.getGap().getEnd() > 0 ? 30 : 0;
         // определить начальную позицию отрисовки
         let x = 50; let y = 50;
         // определить длину ряда (в ячейках)
@@ -475,19 +476,19 @@ class Drawer {
                 row1 = this.rowOfCells(rowLength, blackCells, itemCountEnd, x, y, gap, true); 
                 row1.position = new paper.Point(this.maxX/2, y);
                 array.addChild(row1);
-                y += 100 + gap;
+                y += cell_size + gap;
 
                 let row2;
                 row2 = this.rowOfCells(rowLength, blackCells-rowLength, itemCountEnd, x, y, gap, false); 
                 row2.position = new paper.Point(this.maxX/2, y);
                 array.addChild(row2);
-                y += 100 + gap;
+                y += cell_size + gap;
 
             //// отрисовать ряд точек с учётом разрыва
             let dots = this.rowOfDots(this.maxX);
             dots.position = new paper.Point(this.maxX/2, y); //[изменить позицию, добавить расчёт позиции]
             array.addChild(dots);
-            y += 100;
+            y += cell_size;
             
         }
 
@@ -501,7 +502,7 @@ class Drawer {
                 row = this.rowOfCells(rowLength, blackCells-i*rowLength, itemCountEnd, x, y, gap, i==0); 
                 row.position = new paper.Point(this.maxX/2, y); //[изменить позицию, добавить расчёт позиции]
                 array.addChild(row);
-                y += 100 + gap;
+                y += cell_size + gap;
 
             }
 
@@ -514,7 +515,7 @@ class Drawer {
         row = this.rowOfCells(rLen, blackCells-(rowNumber-1)*rowLength, itemCountEnd, x, y, gap, rowNumber==1); 
         row.position = new paper.Point(this.maxX/2, y);
         array.addChild(row);
-        y += 50;
+        y += cell_size/2;
 
         this.maxY = y;
 
