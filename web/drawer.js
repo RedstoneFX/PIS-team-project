@@ -13,6 +13,8 @@ class Drawer {
     static elements = [];
 
     static maxX; static maxY;
+    static cell_size;
+    static gap_size;
 
     static init() {
         this.exampleVariable1 = 1;
@@ -20,6 +22,8 @@ class Drawer {
         this.canvas = document.getElementById("illustration");
         paper.setup(this.canvas);
         this.maxX = 50; this.maxY = 50;
+        this.cell_size = 70;
+        this.gap_size = 20;
     }
 
     /**
@@ -46,7 +50,7 @@ class Drawer {
     static verticalLine() {
         let line = new paper.Path.Rectangle({
             point: [0, 0],
-            size: [0, 100],
+            size: [0, this.cell_size],
             strokeColor: 'black',
             strokeWidth: 2,
             fillColor: 'black'
@@ -57,7 +61,7 @@ class Drawer {
     static horizontalLine() {
         let line = new paper.Path.Rectangle({
             point: [0, 0],
-            size: [100, 0],
+            size: [this.cell_size, 0],
             strokeColor: 'black',
             strokeWidth: 2,
             fillColor: 'black'
@@ -101,11 +105,11 @@ class Drawer {
         group.addChild(arrowLeft);
         
         let arrowRight = this.gapEndArrow();
-        arrowRight.position = new paper.Point(95, 0);
+        arrowRight.position = new paper.Point(this.cell_size-5, 0);
         group.addChild(arrowRight);
 
         let line3 = this.horizontalLine();
-        line3.position = new paper.Point(50, 0);
+        line3.position = new paper.Point(this.cell_size/2, 0);
         group.addChild(line3);
 
         return group;
@@ -117,23 +121,23 @@ class Drawer {
         let group = new paper.Group();
 
         let line1 = this.verticalLine();
-        line1.position = new paper.Point(0, 100);
+        line1.position = new paper.Point(0, this.cell_size);
         group.addChild(line1);
 
         let line2 = this.verticalLine();
-        line2.position = new paper.Point(x, 100);
+        line2.position = new paper.Point(x, this.cell_size);
         group.addChild(line2);
 
         let arrowLeft = this.gapBeginArrow();
-        arrowLeft.position = new paper.Point(5, 100);
+        arrowLeft.position = new paper.Point(5, this.cell_size);
         group.addChild(arrowLeft);
 
         let arrowRight = this.gapEndArrow();
-        arrowRight.position = new paper.Point(x-5, 100);
+        arrowRight.position = new paper.Point(x-5, this.cell_size);
         group.addChild(arrowRight);
 
         let line3 = this.horizontalLine();
-        line3.position = new paper.Point(x/2, 100);
+        line3.position = new paper.Point(x/2, this.cell_size);
         group.addChild(line3);
 
         return group;
@@ -145,15 +149,15 @@ class Drawer {
         let group = new paper.Group();
 
         let arrowDown = this.gapArrowDown();
-        arrowDown.position = new paper.Point(0, -95);
+        arrowDown.position = new paper.Point(0, this.cell_size-5);
         group.addChild(arrowDown);
 
         let arrowUp = this.gapArrowUp();
-        arrowUp.position = new paper.Point(0, -5);
+        arrowUp.position = new paper.Point(0, this.cell_size+5);
         group.addChild(arrowUp);
 
         let line3 = this.verticalLine();
-        line3.position = new paper.Point(0, -50);
+        line3.position = new paper.Point(0, this.cell_size/2);
         group.addChild(line3);
 
         return group;
@@ -165,23 +169,23 @@ class Drawer {
         let group = new paper.Group();
 
         let line1 = this.horizontalLine();
-        line1.position = new paper.Point(-100, 0);
+        line1.position = new paper.Point(this.cell_size, 0);
         group.addChild(line1);
 
         let line2 = this.horizontalLine();
-        line2.position = new paper.Point(-100, y);
+        line2.position = new paper.Point(this.cell_size, y);
         group.addChild(line2);
 
         let arrowDown = this.gapArrowDown();
-        arrowDown.position = new paper.Point(-100, y+5);
+        arrowDown.position = new paper.Point(this.cell_size, y-5);
         group.addChild(arrowDown);
 
         let arrowUp = this.gapArrowUp();
-        arrowUp.position = new paper.Point(-100, -5);
+        arrowUp.position = new paper.Point(this.cell_size, 5);
         group.addChild(arrowUp);
 
         let line3 = this.verticalLine();
-        line3.position = new paper.Point(-100, y/2);
+        line3.position = new paper.Point(this.cell_size, y/2);
         group.addChild(line3);
 
         return group;
@@ -195,17 +199,21 @@ class Drawer {
     static drawPattern(pattern) {
         let kind = pattern.getKind();
         this.clearCanvas();
+        let group = new paper.Group();
         if (kind instanceof CellPatternExtension) {
             let cellPattern = this.drawCellPattern(pattern, kind);
             this.elements.push(cellPattern);
+            group.addChild(cellPattern);
         }
         else if (kind instanceof ArrayPatternExtension) {
             let arrayPattern = this.drawArrayPattern(pattern, kind);
             this.elements.push(arrayPattern);
+            group.addChild(arrayPattern);
         }
         else if (kind instanceof AreaPatternExtension) {
             let areaPattern = this.drawAreaPattern(pattern, kind);
             this.elements.push(areaPattern);
+            group.addChild(areaPattern);
         }
         else throw new Error("Нельзя отрисовать данный объект!");
     }
@@ -217,7 +225,7 @@ class Drawer {
     static squareCell(color) {
         let cell = new paper.Path.Rectangle({
             point: [0, 0],
-            size: [100, 100],
+            size: [this.cell_size, this.cell_size],
             strokeColor: color,
             strokeWidth: 2,
             fillColor: null
@@ -231,7 +239,7 @@ class Drawer {
     static squareArea(color) {
         let cell = new paper.Path.Rectangle({
             point: [0, 0],
-            size: [300, 300],
+            size: [this.cell_size*3, this.cell_size*3],
             strokeColor: 'black',
             strokeWidth: 2,
             fillColor: null
@@ -292,7 +300,7 @@ class Drawer {
 
             //// отрисовать две линии с параметрами ((0, 0), (100, 0))
             let point1 = new paper.Point(0, 0);
-            let point2 = new paper.Point(50, 0);
+            let point2 = new paper.Point(this.cell_size/2, 0);
             let line1 = this.straightLine(point1, point2);
             let line2 = this.straightLine(point1, point2);
             //// установить центр одной линии на верхнем конце стрелки
@@ -367,7 +375,8 @@ class Drawer {
                 else cell = this.squareCell('red');
                 cell.position = new paper.Point(x, y);
                 row.addChild(cell);
-                x += 100 + gap;
+                x += this.cell_size;
+                if (i == 0) x += gap;
             }
 
             //// отрисовать 3 точки с учётом разрыва
@@ -375,10 +384,10 @@ class Drawer {
                 let dot = this.squareDot();
                 dot.position = new paper.Point(x, y);
                 row.addChild(dot);
-                x += 50;
+                x += this.cell_size/2;
             }
             
-                x += 50;
+                x += this.cell_size/2;
 
         }
 
@@ -395,7 +404,7 @@ class Drawer {
                 else cell = this.squareCell('red');
                 cell.position = new paper.Point(x, y);
                 row.addChild(cell);
-                x += 100 + gap;
+                x += this.cell_size + gap;
             }
 
         }
@@ -411,7 +420,7 @@ class Drawer {
         else lastCell = this.squareCell('red');
         lastCell.position = new paper.Point(x, y);
         row.addChild(lastCell);
-        x += 50;
+        x += this.cell_size/2;
 
         this.maxX = x;
 
@@ -433,7 +442,7 @@ class Drawer {
             let dot = this.squareDot();
             dot.position = new paper.Point(xx, 0);
             row.addChild(dot);
-            xx -= 50;
+            xx -= this.cell_size/2;
 
         }
 
@@ -447,16 +456,15 @@ class Drawer {
     static drawArrayPattern(pattern, kind) {
 
         let array = new paper.Group();
-        let cell_size = 100;
 
         let itemCountEnd = kind.getItemCount().getEnd();
         let maxCells = itemCountEnd == Infinity ? 36: itemCountEnd;
         // определить количество гарантированных ячеек
         let blackCells = kind.getItemCount().getBegin();
         // определить, есть разрыв или нет
-        let gap = kind.getGap().getEnd() > 0 ? 30 : 0;
+        let gap = kind.getGap().getEnd() > 0 ? this.gap_size : 0;
         // определить начальную позицию отрисовки
-        let x = 50; let y = 50;
+        let x = this.cell_size/2; let y = this.cell_size/2;
         // определить длину ряда (в ячейках)
         let direction = kind.getDirection();
         let rowNumber; let rowLength;
@@ -476,19 +484,19 @@ class Drawer {
                 row1 = this.rowOfCells(rowLength, blackCells, itemCountEnd, x, y, gap, true); 
                 row1.position = new paper.Point(this.maxX/2, y);
                 array.addChild(row1);
-                y += cell_size + gap;
+                y += this.cell_size + gap;
 
                 let row2;
                 row2 = this.rowOfCells(rowLength, blackCells-rowLength, itemCountEnd, x, y, gap, false); 
                 row2.position = new paper.Point(this.maxX/2, y);
                 array.addChild(row2);
-                y += cell_size + gap;
+                y += this.cell_size + gap;
 
             //// отрисовать ряд точек с учётом разрыва
             let dots = this.rowOfDots(this.maxX);
             dots.position = new paper.Point(this.maxX/2, y); //[изменить позицию, добавить расчёт позиции]
             array.addChild(dots);
-            y += cell_size;
+            y += this.cell_size;
             
         }
 
@@ -502,7 +510,7 @@ class Drawer {
                 row = this.rowOfCells(rowLength, blackCells-i*rowLength, itemCountEnd, x, y, gap, i==0); 
                 row.position = new paper.Point(this.maxX/2, y); //[изменить позицию, добавить расчёт позиции]
                 array.addChild(row);
-                y += cell_size + gap;
+                y += this.cell_size + gap;
 
             }
 
@@ -515,7 +523,7 @@ class Drawer {
         row = this.rowOfCells(rLen, blackCells-(rowNumber-1)*rowLength, itemCountEnd, x, y, gap, rowNumber==1); 
         row.position = new paper.Point(this.maxX/2, y);
         array.addChild(row);
-        y += cell_size/2;
+        y += this.cell_size/2;
 
         this.maxY = y;
 
