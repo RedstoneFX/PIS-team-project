@@ -36,7 +36,7 @@ input.numeric {
 
 #parameters,
 #browser-panel {
-    background-color: #E8E8E8;
+    background-color: #00000017;
     height: auto;
     overflow-x: hidden;
 }
@@ -173,10 +173,6 @@ button:hover,
     display: grid;
     justify-items: center;
     align-items: center;
-}
-
-canvas {
-    width: 100% !important;
 }
 
 #tree-browser .root-pattern>summary::before {
