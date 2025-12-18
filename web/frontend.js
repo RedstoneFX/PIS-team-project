@@ -6,10 +6,15 @@ function isNameValid(name) {
 }
 
 function myParseInt(value) {
-    let v = Number.parseInt(value);
-    if (v == NaN) throw new Error("Введенное значение не является числом!");
+    let v = value.toLowerCase();
+    if(v.includes("-inf")) return -Infinity;
+    else if (v.includes("inf")) return Infinity;
+
+    v = Number.parseInt(value);
+    if (isNaN(NaN)) throw new Error("Введенное значение не является числом!");
     return v
 }
+
 
 class Frontend {
 
