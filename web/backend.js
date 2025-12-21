@@ -671,6 +671,18 @@ class PatternByPatternDefinition extends Pattern {
     }
 
     /**
+     * Создаёт глобальный паттерн на основе своих данных
+     * @returns идентичный глобальный паттерн
+     */
+    copyAsGlobalPattern() {
+        return new Pattern()
+            .setDescription(this.getDescription()).setKind(this.getKind())
+            .setWidth(this.getWidth().getBegin(), this.getWidth().getEnd())
+            .setHeight(this.getHeight().getBegin(), this.getHeight().getEnd())
+            .setCountInDocument(this.getCountInDocument()).setStyle(this.getStyle());
+    }
+
+    /**
      * Обнуляет ссылки объекта
      */
     destroy() {
