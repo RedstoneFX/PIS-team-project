@@ -393,6 +393,16 @@ class Pattern {
         this.#id = Pattern.#idCouner++;
     }
 
+
+    setStyle(style) {
+        this.#style = style;
+        return this;
+    }
+
+    getStyle() {
+        return this.#style;
+    }
+
     getId() {
         return this.#id;
     }
