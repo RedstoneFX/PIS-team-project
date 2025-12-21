@@ -1,6 +1,8 @@
 
 class Grammar {
     /** @type {string} */
+    #filename = "";
+    /** @type {string} */
     #cellTypesFilepath = "";
     /** @type {Map<string, Pattern>} */
     #patterns = new Map();
@@ -31,7 +33,9 @@ class Grammar {
         return true;
     }
 
-    constructor() { }
+    constructor() {
+        this.#filename = "grammar";
+    }
 
     /**
      * Создает новую грамматику на основе исходных данных
@@ -297,6 +301,10 @@ class Grammar {
      * Обнуляет ссылки объекта
      */
     destroy() {
+        // Стереть имя файла
+        this.#filename = "";
+        // Стереть путь к файлу с типами данных
+        this.#cellTypesFilepath = "";
         // Удалить ссылку на корневой паттерн
         this.#rootPattern = null;
         // Вызвать деструкторы всех известных паттернов
@@ -342,6 +350,21 @@ class Grammar {
 
     getRoot() {
         return this.#rootPattern;
+    }
+
+    /**
+     * @param {string} filename 
+     * @returns возвращает себя для цепного вызова
+     */
+    setFilename(filename) {
+        if (this.isNameValid(filename)) {
+            this.#filename = filename;
+        }
+        return this;
+    }
+
+    getFilename() {
+        return this.#filename;
     }
 
     /**
