@@ -397,7 +397,7 @@ class Pattern {
 
     /**
      * Создаёт паттерн-объявление на основе своих данных
-     * @param {string} parentComponent 
+     * @param {Component} parentComponent 
      * @returns идентичный паттерн-объявление
      */
     copyAsPatternDefinition(parentComponent) {
@@ -670,6 +670,23 @@ class PatternByPatternDefinition extends Pattern {
             throw new Error(`Вписанный паттерн должен быть определён в компоненте.`);
         }
         this.#parentComponent = parentComponent;
+    }
+
+    /**
+     * Конвертирует паттерн-объявление в глобальный паттерн
+     * @param {string} name 
+     * @param {Grammar} grammar 
+     * @returns созданный глобальный паттерн
+     */
+    convertIntoGlobalPattern(name, grammar) {
+        // Создать копию как глобальный паттерн
+        const pattern = this.copyAsGlobalPattern();
+        // Добавить копию в грамматику
+        grammar.addPattern(name, pattern);
+        // Обновить ссылку в компоненте
+        this.#parentComponent.setPattern(pattern);
+    
+        return pattern;
     }
 
     /**
