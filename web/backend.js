@@ -396,6 +396,23 @@ class Pattern {
     }
 
     /**
+     * Конвертирует глобальный паттерн в паттерн-объявление
+     * @param {Grammar} grammar 
+     */
+    convertIntoPatternDefinition(grammar) {
+        // Проверить наличие ссылок в массивах
+        if (grammar.getAllArraysWithPattern(this).size > 0) {
+            throw new Error(`Невозможно преобразовать глобальный паттерн, так как на него ссылаются массивы`);
+        }
+        // Заменить все ссылки в компонентах на паттерн-объявление
+        for (const component of grammar.getAllComponentsWithPattern(this)) {
+            component.setPattern(this.copyAsPatternDefinition(component));
+        }
+        // Удалить глобальный паттерн
+        grammar.popPatternNotByName(this).destroy();
+    }
+
+    /**
      * Создаёт паттерн-объявление на основе своих данных
      * @param {Component} parentComponent 
      * @returns идентичный паттерн-объявление
@@ -685,7 +702,7 @@ class PatternByPatternDefinition extends Pattern {
         grammar.addPattern(name, pattern);
         // Обновить ссылку в компоненте
         this.#parentComponent.setPattern(pattern);
-    
+
         return pattern;
     }
 
