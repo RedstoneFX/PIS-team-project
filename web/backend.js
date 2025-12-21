@@ -393,6 +393,17 @@ class Pattern {
         this.#id = Pattern.#idCouner++;
     }
 
+    /**
+     * Создаёт паттерн-объявление на основе своих данных
+     * @param {string} parentComponent 
+     * @returns идентичный паттерн-объявление
+     */
+    copyAsPatternDefinition(parentComponent) {
+        return new PatternByPatternDefinition(parentComponent)
+            .setDescription(this.#description).setKind(this.#kind).setWidth(this.#width.getBegin(), this.#width.getEnd())
+            .setHeight(this.#height.getBegin(), this.#height.getEnd()).setCountInDocument(this.#countInDocument).setStyle(this.#style);
+
+    }
 
     setStyle(style) {
         this.#style = style;
