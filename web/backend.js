@@ -146,8 +146,10 @@ class Grammar {
         if (this.#patterns.get(name)) {
             throw new Error(`Паттерн с таким имененм уже есть`);
         }
-        // Сохранить паттерн в грамматику
-        this.#patterns.set(name, pattern);
+        if (Grammar.isNameValid(name)) {
+            // Сохранить паттерн в грамматику
+            this.#patterns.set(name, pattern);
+        }
         return this;
     }
 
