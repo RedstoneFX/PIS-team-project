@@ -7,7 +7,7 @@ function isNameValid(name) {
 
 function myParseInt(value) {
     let v = value.replaceAll(/\w+/g, "").toLowerCase();
-    if(v.includes("-inf")) return -Infinity;
+    if (v.includes("-inf")) return -Infinity;
     else if (v.includes("inf")) return Infinity;
 
     v = Number.parseInt(value);
@@ -104,6 +104,8 @@ class Frontend {
 
     /** @type {HTMLInputElement} */
     static cellTypeFilepath;
+    /** @type {HTMLInputElement} */
+    static grammarFilename;
 
     /** @type {Browser} */
     static browser;
@@ -163,6 +165,7 @@ class Frontend {
         this.isPatternRoot = document.getElementById("is-pattern-root");
         this.isComponentOptional = document.getElementById("is-component-optional");
         this.cellTypeFilepath = document.getElementById("cell-types-filepath");
+        this.grammarFilename = document.getElementById("grammar-file-name");
 
         this.resetUI();
 
@@ -206,6 +209,7 @@ class Frontend {
         this.componentType.addEventListener("change", (e) => this.onComponentTypeChange(e));
         this.isComponentOptional.addEventListener("change", (e) => this.onOptionalChange(e));
         this.cellTypeFilepath.addEventListener("change", (e) => this.onCellTypeFilepathChange(e));
+        this.grammarFilename.addEventListener("change", (e) => this.onFilenameChange(e));
     }
 
     static halt(err) {
@@ -230,11 +234,24 @@ class Frontend {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    static onFilenameChange(e) {
+        try {
+            this.grammar.setFilename(e.target.value);
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            this.grammarFilename.value = this.grammar.getFilename();
+        }
+    }
+
     static onCellTypeFilepathChange(e) {
+
         try {
             this.grammar.setCellTypesFilepath(e.target.value);
         } catch (err) {
-            this.halt(err);
+            alert(err.message);
+        } finally {
+            this.cellTypeFilepath.value = this.grammar.getCellTypesFilepath();
         }
     }
 
@@ -576,6 +593,7 @@ class Frontend {
         this.cellTypeFilepath.value = this.grammar.getCellTypesFilepath();
         this.drawEverythingInGrammar();
         this.regenerateSelections();
+        this.grammarFilename.value = this.grammar.getFilename();
     }
 
     static drawEverythingInGrammar() {
