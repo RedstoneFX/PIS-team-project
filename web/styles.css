@@ -179,3 +179,11 @@ button:hover,
 #tree-browser .root-pattern>summary::before {
     content: "⭐";
 }
+
+.param-warning-text {
+    margin: 5px;
+    padding: 5px;
+    text-align: justify;
+    border-radius: 0.4rem;
+    background-color: #a7a0b76a;
+}

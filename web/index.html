@@ -87,6 +87,29 @@
                 </div>
             </details>
 
+            <details id="copy-to-components-tab">
+                <summary>Копирование в компоненты</summary>
+                <p class="param-warning-text">Данное действие создаст копию данного паттерна во всех компонентах,
+                    которые сейчас ссылаются на него.</p>
+                <div class="parameters-table">
+                    <label></label>
+                    <button id="global-to-def-btn">Преобразовать</button>
+            </details>
+
+            <details id="deffinition-to-global-tab">
+                <summary>Перемещение в корень грамматики</summary>
+                <p class="param-warning-text">Данное действие переместит данный паттерн в корень грамматики и установит
+                    ему указанное название (если оно не занято).</p>
+                <div class="parameters-table">
+                    <label>Название</label>
+                    <input type="text" id="def-to-global-name" />
+                </div>
+                <div class="parameters-table">
+                    <label></label>
+                    <button id="def-to-global-btn">Преобразовать</button>
+                </div>
+            </details>
+
             <details id="cell-parameters">
                 <summary>Параметры вида CELL</summary>
                 <div class="parameters-table">

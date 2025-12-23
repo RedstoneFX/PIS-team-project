@@ -7,7 +7,7 @@ function isNameValid(name) {
 
 function myParseInt(value) {
     let v = value.replaceAll(/\w+/g, "").toLowerCase();
-    if(v.includes("-inf")) return -Infinity;
+    if (v.includes("-inf")) return -Infinity;
     else if (v.includes("inf")) return Infinity;
 
     v = Number.parseInt(value);
@@ -163,6 +163,13 @@ class Frontend {
         this.isPatternRoot = document.getElementById("is-pattern-root");
         this.isComponentOptional = document.getElementById("is-component-optional");
         this.cellTypeFilepath = document.getElementById("cell-types-filepath");
+
+        this.defToGlobalTab = document.getElementById("deffinition-to-global-tab");
+        this.defToGlobalName = document.getElementById("def-to-global-name");
+        this.defToGlobalButton = document.getElementById("def-to-global-btn");
+
+        this.globalToDefTab = document.getElementById("copy-to-components-tab");
+        this.globalToDefButton = document.getElementById("global-to-def-btn");
 
         this.resetUI();
 
@@ -646,6 +653,8 @@ class Frontend {
         this.cellParams.hidden = true;
         this.arrayParams.hidden = true;
         this.componentParams.hidden = true;
+        this.globalToDefTab.hidden = true;
+        this.defToGlobalTab.hidden = true;
     }
 
     /**
@@ -655,7 +664,13 @@ class Frontend {
         this.disableAllParameters();
         if (item instanceof Pattern) {
             this.patternParams.hidden = false;
-            this.patternName.disabled = (item instanceof PatternByPatternDefinition);
+            if (item instanceof PatternByPatternDefinition) {
+                this.patternName.disabled = true;
+                this.defToGlobalTab.hidden = false;
+            } else {
+                this.patternName.disabled = false;
+                this.globalToDefTab.hidden = false;
+            }
             let kind = item.getKind();
             if (kind instanceof CellPatternExtension) {
                 this.cellParams.hidden = false;
