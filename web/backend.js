@@ -420,8 +420,7 @@ class Pattern {
     copyAsPatternDefinition(parentComponent) {
         return new PatternByPatternDefinition(parentComponent)
             .setDescription(this.#description).setKind(this.#kind).setWidth(this.#width.getBegin(), this.#width.getEnd())
-            .setHeight(this.#height.getBegin(), this.#height.getEnd()).setCountInDocument(this.#countInDocument).setStyle(this.#style);
-
+            .setHeight(this.#height.getBegin(), this.#height.getEnd()).setCountInDocument(this.#countInDocument.getBegin(), this.#countInDocument.getEnd()).setStyle(this.#style);
     }
 
     setStyle(style) {
@@ -723,7 +722,7 @@ class PatternByPatternDefinition extends Pattern {
             .setDescription(this.getDescription()).setKind(this.getKind())
             .setWidth(this.getWidth().getBegin(), this.getWidth().getEnd())
             .setHeight(this.getHeight().getBegin(), this.getHeight().getEnd())
-            .setCountInDocument(this.getCountInDocument()).setStyle(this.getStyle());
+            .setCountInDocument(this.getCountInDocument().getBegin(), this.getCountInDocument().getEnd()).setStyle(this.getStyle());
     }
 
     /**
