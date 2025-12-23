@@ -55,8 +55,9 @@ class Grammar {
         // Заполнить #cell_types_filepath в грамматике...
         tmp = rawData.cell_types_filepath;
         // Выкинуть ошибку, если сell_types_filepath отсутствует
-        if (!tmp) {
-            throw new Error(`Поле сell_types_filepath отсутствует в исходных данных`)
+        if (tmp === undefined) {
+            tmp = "None";
+            console.warn(`Поле сell_types_filepath отсутствует в исходных данных!`);
         }
         // Выкинуть ошибку, если cell_types_filepath не является строкой
         if (typeof tmp !== "string") {
