@@ -357,7 +357,7 @@ class Grammar {
      * @returns возвращает себя для цепного вызова
      */
     setFilename(filename) {
-        if (this.isNameValid(filename)) {
+        if (Grammar.isNameValid(filename)) {
             this.#filename = filename;
         }
 
