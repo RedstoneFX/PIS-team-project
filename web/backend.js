@@ -579,7 +579,7 @@ class Pattern {
     /**
      * Обнуляет ссылки объекта
      */
-    destroy(shouldDestroyKind=true) {
+    destroy(shouldDestroyKind = true) {
         if (shouldDestroyKind && this.#kind) {
             this.#kind.destroy();
         }
@@ -699,7 +699,13 @@ class PatternByPatternDefinition extends Pattern {
         // Создать копию как глобальный паттерн
         const pattern = this.copyAsGlobalPattern();
         // Добавить копию в грамматику
-        grammar.addPattern(name, pattern);
+        try {
+            grammar.addPattern(name, pattern);
+        } catch (err) {
+            // Уничтожение копии, если её не удалось вставить в грамматику
+            pattern.destroy(false);
+            throw err;
+        }
         // Обновить ссылку в компоненте
         this.#parentComponent.setPattern(pattern);
 
@@ -723,7 +729,7 @@ class PatternByPatternDefinition extends Pattern {
     /**
      * Обнуляет ссылки объекта
      */
-    destroy(shouldDestroyKind=true) {
+    destroy(shouldDestroyKind = true) {
         super.destroy(shouldDestroyKind);
         this.#parentComponent = null;
     }
