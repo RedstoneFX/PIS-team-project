@@ -213,6 +213,9 @@ class Frontend {
         this.componentType.addEventListener("change", (e) => this.onComponentTypeChange(e));
         this.isComponentOptional.addEventListener("change", (e) => this.onOptionalChange(e));
         this.cellTypeFilepath.addEventListener("change", (e) => this.onCellTypeFilepathChange(e));
+
+        this.defToGlobalButton.addEventListener("click", (e) => this.onMoveToGrammarRoot(e));
+        this.globalToDefButton.addEventListener("click", (e) => this.onCopyToComponents(e));
     }
 
     static halt(err) {
@@ -236,6 +239,22 @@ class Frontend {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    static onCopyToComponents(e) {
+        try {
+            this.lastClickedItem.convertIntoPatternDefinition(this.grammar);
+            this.browser.clear();
+            this.drawEverythingInGrammar();
+            this.regenerateSelections();
+        } catch (err) {
+            alert(err.message);
+            throw err;
+        }
+    }
+
+    static onMoveToGrammarRoot(e) {
+
+    }
 
     static onCellTypeFilepathChange(e) {
         try {
