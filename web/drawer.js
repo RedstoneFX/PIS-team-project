@@ -509,10 +509,10 @@ class Drawer {
         }
 
         // отрисовать последний ряд ячеек с учётом кол-ва оставшихся для отрисовки ячеек
-        let row;
-        let remainder = maxCells % rowNumber
+        let remainder = maxCells % rowLength
         let rLen = remainder == 0 ? rowLength : remainder;
-        row = this.rowOfCells(rLen, blackCells-(rowNumber-1)*rowLength, itemCountEnd, x, y, gap, rowNumber==1); 
+        let drawnCells = (rowNumber-1)*rowLength;
+        let row = this.rowOfCells(rLen, blackCells-drawnCells, itemCountEnd, x, y, gap, rowNumber==1); 
         row.position = new paper.Point(this.maxX/2, y);
         array.addChild(row);
         y += this.cell_size/2;
