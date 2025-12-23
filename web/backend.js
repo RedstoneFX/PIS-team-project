@@ -579,8 +579,8 @@ class Pattern {
     /**
      * Обнуляет ссылки объекта
      */
-    destroy() {
-        if (this.#kind) {
+    destroy(shouldDestroyKind=true) {
+        if (shouldDestroyKind && this.#kind) {
             this.#kind.destroy();
         }
         this.#kind = null;
@@ -703,6 +703,8 @@ class PatternByPatternDefinition extends Pattern {
         // Обновить ссылку в компоненте
         this.#parentComponent.setPattern(pattern);
 
+        this.destroy(false);
+
         return pattern;
     }
 
@@ -721,8 +723,8 @@ class PatternByPatternDefinition extends Pattern {
     /**
      * Обнуляет ссылки объекта
      */
-    destroy() {
-        super.destroy();
+    destroy(shouldDestroyKind=true) {
+        super.destroy(shouldDestroyKind);
         this.#parentComponent = null;
     }
 
