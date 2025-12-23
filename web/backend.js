@@ -360,10 +360,16 @@ class Grammar {
         if (this.isNameValid(filename)) {
             this.#filename = filename;
         }
+
+        if(!filename.endsWith(".yml")) {
+            this.#filename += ".yml";
+            console.warn("Название файла " + filename + " заменено на " + this.#filename + ", так как название должно иметь расширение .yml");
+        }
         return this;
     }
 
     getFilename() {
+        if(this.#filename == null || this.grammar) return "grammar.yml";
         return this.#filename;
     }
 
