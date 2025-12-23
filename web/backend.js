@@ -184,7 +184,7 @@ class Grammar {
      * @returns извлеченный паттерн
      */
     popPatternNotByName(pattern) {
-        this.popPattern(this.getPatternName(pattern));
+        return this.popPattern(this.getPatternName(pattern));
     }
 
     /**
