@@ -405,7 +405,9 @@ class Pattern {
             throw new Error(`Невозможно преобразовать глобальный паттерн, так как на него ссылаются массивы`);
         }
         // Заменить все ссылки в компонентах на паттерн-объявление
-        for (const component of grammar.getAllComponentsWithPattern(this)) {
+        let comps = grammar.getAllComponentsWithPattern(this);
+        if (comps.size == 0) throw new Error("Данный паттерн не учавствует в компонентах!");
+        for (const component of comps) {
             component.setPattern(this.copyAsPatternDefinition(component));
         }
         // Удалить глобальный паттерн
