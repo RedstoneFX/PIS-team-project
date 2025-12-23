@@ -243,7 +243,7 @@ class Frontend {
     static onCopyToComponents(e) {
         try {
             this.lastClickedItem.convertIntoPatternDefinition(this.grammar);
-            this.browser.clear();
+            this.unselectItem();
             this.drawEverythingInGrammar();
             this.regenerateSelections();
         } catch (err) {
@@ -253,7 +253,15 @@ class Frontend {
     }
 
     static onMoveToGrammarRoot(e) {
-
+        try {
+            this.lastClickedItem.convertIntoGlobalPattern(this.defToGlobalName.value, this.grammar);
+            this.unselectItem();
+            this.drawEverythingInGrammar();
+            this.regenerateSelections();
+        } catch (err) {
+            alert(err);
+            throw err();
+        }
     }
 
     static onCellTypeFilepathChange(e) {
@@ -605,6 +613,7 @@ class Frontend {
     }
 
     static drawEverythingInGrammar() {
+        this.browser.clear();
         for (let [name, pattern] of this.grammar.getAllPatternEntries()) {
             this.browser.addItem(null, pattern, name);
             this.addComponentsOf(pattern);
