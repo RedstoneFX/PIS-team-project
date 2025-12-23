@@ -63,7 +63,7 @@ function onFileUpload(e) {
             Frontend.setGrammar(grammar);
         } catch (e) {
             //UI.resetUI();
-            alert(e.message);
+            Frontend.halt(e);
             throw e;
         }
     };
