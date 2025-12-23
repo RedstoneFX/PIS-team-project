@@ -34,7 +34,7 @@ class Grammar {
     }
 
     constructor() {
-        this.#filename = "grammar";
+        this.setFilename("grammar.yml");
     }
 
     /**
