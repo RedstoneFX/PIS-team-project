@@ -354,18 +354,31 @@ class Grammar {
     }
 
     /**
+     * Выбрасывает ошибку, если это не название файла, или исправляет его, если это возможно
+     * @param {*} filename 
+     * @param {*} ext 
+     */
+    static validifyFilename(filename, ext = ".yml") {
+        if (typeof filename !== "string")
+            throw new Error("Имя файла должно быть строкой!");
+        if (/^\s+$/gm.test(filename))
+            throw new Error("Имя файла не должно быть пустым!");
+        if (filename.includes("\n"))
+            throw new Error("Имя файла не может иметь переносы строк!");
+        filename = filename.trim();
+        if (! filename.trim().endsWith(ext)) {
+            console.warn("Название файла " + filename + " заменено на " + filename + + ext +  ", так как оно должно иметь расширение " + ext);
+            return filename + ext;
+        }
+        return filename;
+    }
+
+    /**
      * @param {string} filename 
      * @returns возвращает себя для цепного вызова
      */
     setFilename(filename) {
-        if (Grammar.isNameValid(filename)) {
-            this.#filename = filename;
-        }
-
-        if(!filename.endsWith(".yml")) {
-            this.#filename += ".yml";
-            console.warn("Название файла " + filename + " заменено на " + this.#filename + ", так как название должно иметь расширение .yml");
-        }
+        this.#filename = Grammar.validifyFilename(filename);
         return this;
     }
 
@@ -379,10 +392,7 @@ class Grammar {
      * @returns возвращает себя для цепного вызова
      */
     setCellTypesFilepath(filepath) {
-        if (typeof filepath !== "string") {
-            throw new Error(`Путь к файлу с описанием типов клеток должен быть строкой`);
-        }
-        this.#cellTypesFilepath = filepath;
+        this.#cellTypesFilepath = Grammar.validifyFilename(filepath);
         return this;
     }
 
