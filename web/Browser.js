@@ -156,7 +156,9 @@ class Browser {
 
         let link = new BrowserLink(targetChildren);
         links.add(link);
-        this.addItem(parentItem, link, title, extraClass);
+        this.addItem(parentItem, link, title, "browser-link");
+        if (extraClass)
+            this.addClass(link, extraClass);
     }
 
     onClickListeners() {

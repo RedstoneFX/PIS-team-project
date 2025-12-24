@@ -640,7 +640,7 @@ class Frontend {
      * @param {String} name
      */
     static addComponent(pattern, component, name) {
-        this.browser.addItem(pattern, component, name);
+        this.browser.addItem(pattern, component, name, "component-in-browser");
         let componentPattern = component.getPattern();
         if (componentPattern instanceof PatternByPatternDefinition) {
             this.browser.addItem(component, componentPattern, "pattern-definition");
