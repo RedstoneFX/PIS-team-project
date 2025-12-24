@@ -337,8 +337,8 @@ class Frontend {
     static onLocationChange(e, side, limit) {
         try {
             let dim = this.getLocationBySideName(side);
-            if (limit == "min") dim.setBegin(myParseInt(e.target.value - 0));
-            else dim.setEnd(myParseInt(e.target.value - 0));
+            if (limit == "min") dim.setBegin(myParseInt(e.target.value));
+            else dim.setEnd(myParseInt(e.target.value));
         } catch (err) {
             alert(err);
             this.loadParameters(this.lastClickedItem);

@@ -12,18 +12,20 @@ class Drawer {
 
     static elements = [];
 
-    static maxX; static maxY;
+    static maxX; static X; static maxY;
     static cell_size;
     static gap_size;
+    static max_row_length;
 
     static init() {
         this.exampleVariable1 = 1;
         this.exampleVariable2 = 2;
         this.canvas = document.getElementById("illustration");
         paper.setup(this.canvas);
-        this.maxX = 50; this.maxY = 50;
+        this.maxX = 50; this.X = 0; this.maxY = 50;
         this.cell_size = 70;
-        this.gap_size = 20;
+        this.gap_size = 30;
+        this.max_row_length = 0;
     }
 
     /**
@@ -237,7 +239,7 @@ class Drawer {
     /**
      * Отрисовать квадратную ячейку
      */
-    static squareArea(color) {
+    static squareArea() {
         let cell = new paper.Path.Rectangle({
             point: [0, 0],
             size: [this.cell_size*3, this.cell_size*3],
@@ -288,9 +290,9 @@ class Drawer {
         // если размер внешний
         if (isOuter) {
 
-            //// отрисовать две линии с параметрами ((0, 0), (100, 0))
+            //// отрисовать две линии с параметрами ((0, 0), (30, 0))
             let point1 = new paper.Point(0, 0);
-            let point2 = new paper.Point(this.cell_size/2, 0);
+            let point2 = new paper.Point(30, 0);
             let line1 = this.straightLine(point1, point2);
             let line2 = this.straightLine(point1, point2);
             //// установить центр одной линии на верхнем конце стрелки
@@ -316,8 +318,6 @@ class Drawer {
     static drawCellPattern(pattern, kind) {
 
         let group = new paper.Group();
-
-        let deductable = this.cell_size/4*3
         
         // отрисовать прямоугольник 100 на 100
         let cell = this.squareCell('black');
@@ -327,13 +327,26 @@ class Drawer {
         // отрисовать фигуру "размер" с параметрами "внешний", "по вертикали",  "100"
         let sizeV = this.figureSize(true, false, this.cell_size);
         // установить центр фигуры (-50, -50)
-        sizeV.position = new paper.Point (250-deductable, 250);
+        sizeV.position = new paper.Point (200, 250);
         group.addChild(sizeV);
         // отрисовать фигуру "размер" с параметрами "внешний", "по горизонтали",  "100"
         let sizeH = this.figureSize(true, true, this.cell_size);
         // установить центр фигуры (50, 50)
-        sizeH.position = new paper.Point (250, 250-deductable);
+        sizeH.position = new paper.Point (250, 200);
         group.addChild(sizeH);
+
+        let sizeWidth = new paper.PointText(new paper.Point(0, 0));
+        let stringWidth = pattern.getWidth();
+        sizeWidth.content = this.toString(stringWidth);
+        sizeWidth.position = new paper.Point(250, 193);
+        group.addChild(sizeWidth);
+
+        let sizeHeight = new paper.PointText(new paper.Point(0, 0));
+        let stringHeight = pattern.getHeight();
+        sizeHeight.content = this.toString(stringHeight);
+        sizeHeight.position = new paper.Point(193, 250);
+        sizeHeight.rotate(-90);
+        group.addChild(sizeHeight);
 
         return group;
         
@@ -350,11 +363,8 @@ class Drawer {
     static rowOfCells(rowLength, blackCellsLeft, itemCountEnd, x, y, gap, isFirst) {
 
         let row = new paper.Group();
-        
-        // если длина ряда больше 5
-        if (rowLength > 5)
-        {
 
+        if (rowLength > 5) {
             //// отрисовать 2 ячейки с учётом разрыва и цвета
             for (let i = 0; i < 2; i++) {
                 let cell; 
@@ -378,9 +388,18 @@ class Drawer {
                 row.addChild(dot);
                 x += this.cell_size/2;
             }
-            
-                x += this.cell_size/2;
 
+            if (rowLength == this.max_row_length) {
+                //// отрисовать 3 точки с учётом разрыва
+                for (let i = 0; i < 2; i++) {
+                    let dot = this.squareDot();
+                    dot.position = new paper.Point(x, y);
+                    row.addChild(dot);
+                    x += this.cell_size/2;
+                }
+            }
+            
+            x += this.cell_size/2;
         }
 
         // иначе
@@ -415,6 +434,7 @@ class Drawer {
         x += this.cell_size/2;
 
         this.maxX = x;
+        if (this.maxX > this.X) this.X = this.maxX;
 
         return row;
         
@@ -447,6 +467,8 @@ class Drawer {
      */
     static drawArrayPattern(pattern, kind) {
 
+        this.X = 0;
+
         let array = new paper.Group();
 
         let itemCountEnd = kind.getItemCount().getEnd();
@@ -468,6 +490,7 @@ class Drawer {
         else if (direction == "fill") rowLength = Math.ceil(Math.sqrt(maxCells));
         // определить количество рядов как округлённое частное макс. кол-ва ячеек и длины ряда 
         rowNumber = Math.ceil(maxCells / rowLength);
+        this.max_row_length = rowLength;
         // если рядов больше 5
         if (rowNumber > 5) {
             
@@ -482,7 +505,7 @@ class Drawer {
                 row2 = this.rowOfCells(rowLength, blackCells-rowLength, itemCountEnd, x, y, gap, false); 
                 row2.position = new paper.Point(this.maxX/2, y);
                 array.addChild(row2);
-                y += this.cell_size + gap;
+                y += this.cell_size;
 
             //// отрисовать ряд точек с учётом разрыва
             let dots = this.rowOfDots(this.maxX);
@@ -509,38 +532,82 @@ class Drawer {
         }
 
         // отрисовать последний ряд ячеек с учётом кол-ва оставшихся для отрисовки ячеек
-        let row;
-        let remainder = maxCells % rowNumber
+        let remainder = maxCells % rowLength
         let rLen = remainder == 0 ? rowLength : remainder;
-        row = this.rowOfCells(rLen, blackCells-(rowNumber-1)*rowLength, itemCountEnd, x, y, gap, rowNumber==1); 
+        let drawnCells = (rowNumber-1)*rowLength;
+        let row = this.rowOfCells(rLen, blackCells-drawnCells, itemCountEnd, x, y, gap, rowNumber==1); 
         row.position = new paper.Point(this.maxX/2, y);
         array.addChild(row);
         y += this.cell_size/2;
 
         this.maxY = y;
 
-        if (rowLength > 5) {
+        if (rLen < this.max_row_length) {
             let sizeOutH = this.figureSize(true, true, this.maxX);
-            sizeOutH.position = new paper.Point(this.maxX/2, -this.cell_size/2);
+            sizeOutH.position = new paper.Point(this.maxX/2, this.maxY+15);
             array.addChild(sizeOutH);
+            let length = new paper.PointText(new paper.Point(0, 0));
+            let string = "";
+            string += kind.getItemCount().getEnd() == Infinity ? 0 : kind.getItemCount().getEnd() - rowLength * (rowNumber - 1);
+            string += "..";
+            string += remainder;
+            length.content = string;
+            length.position = new paper.Point(this.maxX/2, this.maxY+25);
+            array.addChild(length);
+        }
+
+        if (rowLength > 5) {
+            let sizeOutH = this.figureSize(true, true, this.X);
+            sizeOutH.position = new paper.Point(this.X/2, -this.cell_size/2);
+            array.addChild(sizeOutH);
+            let length = new paper.PointText(new paper.Point(0, 0));
+            let string = "";
+            string += Math.min(kind.getItemCount().getBegin(), rowLength);
+            string += "..";
+            if (itemCountEnd != Infinity)
+                string += rowLength;
+            length.content = string;
+            length.position = new paper.Point(this.X/2, -this.cell_size/2-7);
+            array.addChild(length);
         }
         
         if (rowNumber > 5) {
             let sizeOutV = this.figureSize(true, false, this.maxY);
             sizeOutV.position = new paper.Point(-this.cell_size/2, this.maxY/2);
             array.addChild(sizeOutV);
+            let number = new paper.PointText(new paper.Point(0, 0));
+            let string = "";
+            string += Math.min(Math.ceil(kind.getItemCount().getBegin() / rowLength), rowNumber);
+            string += "..";
+            if (itemCountEnd != Infinity)
+                string += rowNumber;
+            number.content = string;
+            number.rotate(-90);
+            number.position = new paper.Point(-this.cell_size/2-7, this.maxY/2);
+            array.addChild(number);
         }
 
         if (gap) {
             if (direction != "column"){
                 let sizeInH = this.figureSize(false, true, gap);
-                sizeInH.position = new paper.Point(this.cell_size+gap/2, this.cell_size/2);
+                sizeInH.position = new paper.Point(this.cell_size+gap/2, 0);
                 array.addChild(sizeInH);
+                let size = new paper.PointText(new paper.Point(0, 0));
+                let string = kind.getGap();
+                size.content = this.toString(string);
+                size.position = new paper.Point(this.cell_size+gap/2, -7);
+                array.addChild(size);
             }
             if (direction != "row") {
                 let sizeInV = this.figureSize(false, false, gap);
-                sizeInV.position = new paper.Point(this.cell_size/2, this.cell_size+gap/2);
+                sizeInV.position = new paper.Point(0, this.cell_size+gap/2);
                 array.addChild(sizeInV);
+                let size = new paper.PointText(new paper.Point(0, 0));
+                let string = kind.getGap();
+                size.content = this.toString(string);
+                size.rotate(-90);
+                size.position = new paper.Point(-7, this.cell_size+gap/2);
+                array.addChild(size);
             }
         }
 
@@ -548,6 +615,36 @@ class Drawer {
 
         return array;
         
+    }
+
+    static toString(newInterval) {
+
+        let gap = "";
+        let begin = newInterval.getBegin();
+        let end = newInterval.getEnd();
+
+        if (begin == -Infinity)
+        {
+            if (end == Infinity) 
+            {
+                gap += "*";
+                return gap;
+            }
+        }
+        else
+        {
+            gap += begin;
+        }
+
+        gap += "..";
+
+        if (end != Infinity)
+        {
+            gap += end;
+        }
+
+        return gap;
+
     }
 
     /**
@@ -559,7 +656,6 @@ class Drawer {
         let group = new paper.Group();
 
         let area_size = this.cell_size*3;
-        let deductable = area_size/8*5;
         
         // отрисовать прямоугольник 300 на 300
         let area = this.squareArea();
@@ -569,16 +665,213 @@ class Drawer {
         // отрисовать фигуру "размер" с параметрами "внешний", "по вертикали",  "300"
         let sizeV = this.figureSize(true, false, area_size);
         // установить центр фигуры (-150, -150)
-        sizeV.position = new paper.Point (250-deductable, 250);
+        sizeV.position = new paper.Point (130, 250);
         group.addChild(sizeV);
         // отрисовать фигуру "размер" с параметрами "внешний", "по горизонтали",  "300"
         let sizeH = this.figureSize(true, true, area_size);
         // установить центр фигуры (150, 150)
-        sizeH.position = new paper.Point (250, 250-deductable);
+        sizeH.position = new paper.Point (250, 130);
         group.addChild(sizeH);
+
+        let sizeWidth = new paper.PointText(new paper.Point(0, 0));
+        let stringWidth = pattern.getWidth();
+        sizeWidth.content = this.toString(stringWidth);
+        sizeWidth.position = new paper.Point(250, 123);
+        group.addChild(sizeWidth);
+
+        let sizeHeight = new paper.PointText(new paper.Point(0, 0));
+        let stringHeight = pattern.getHeight();
+        sizeHeight.content = this.toString(stringHeight);
+        sizeHeight.rotate(-90);
+        sizeHeight.position = new paper.Point(123, 250);
+        group.addChild(sizeHeight);
 
         return group;
         
+    }
+
+    /**
+     * Отрисовать компонент
+     * @param {Component} component 
+     */
+    static drawComponent(component) {
+
+        let group = new paper.Group();
+
+        this.clearCanvas();
+
+        let location = component.location();
+
+        let left = location.getLeft();
+        let right = location.getRight();
+        let top = location.getTop();
+        let bottom = location.getBottom();
+
+        let array1 = [left, right, top, bottom];
+
+        let leftPadding = location.isLeftPadding();
+        let rightPadding = location.isRightPadding();
+        let topPadding = location.isTopPadding();
+        let bottomPadding = location.isBottomPadding();
+
+        let array2 = [leftPadding, rightPadding, topPadding, bottomPadding];
+
+        let leftIsZero = left.getBegin() == 0 & left.getEnd() == 0;
+        let rightIsZero = right.getBegin() == 0 & right.getEnd() == 0;
+        let topIsZero = top.getBegin() == 0 & top.getEnd() == 0;
+        let bottomIsZero = bottom.getBegin() == 0 & bottom.getEnd() == 0;
+
+        let array3 = [leftIsZero, rightIsZero, topIsZero, bottomIsZero];
+
+        //рисуем отцовский паттерн
+        let parent = this.squareArea();
+        parent.position = new paper.Point(250, 250);
+
+        group.addChild(parent);
+
+        let childWidth = this.cell_size;
+        let childHeight = this.cell_size;
+        
+        let childX = 250;
+        let childY = 250;
+
+        for (let i = 0; i < 4; i++) {
+            if(array3[i]) {
+                if(array2[i]) {
+                    if (i < 2)
+                    {
+                        childWidth += this.cell_size;
+
+                        if (i == 0)
+                            childX -= this.cell_size/2;
+                        else
+                            childX += this.cell_size/2;
+                    }
+                    else
+                    {
+                        childHeight += this.cell_size;
+                        
+                        if (i == 2)
+                            childY -= this.cell_size/2;
+                        else
+                            childY += this.cell_size/2;
+                    }
+                }
+                else {
+                    if (i == 0)
+                        childX -= this.cell_size*3;
+                    else if (i == 1)
+                        childX += this.cell_size*3;
+                    else if (i == 2)
+                        childY -= this.cell_size*3;
+                    else
+                        childY += this.cell_size*3;
+                }
+            }
+            else {
+                if(array2[i]) {
+                    if(i < 2) {
+                        let innerSizeH = this.figureSize(false, true, this.cell_size);
+                        innerSizeH.position = new paper.Point(180+i*140, 250);
+                        group.addChild(innerSizeH);
+
+                        let string = new paper.PointText(new paper.Point(0, 0));
+                        string.content = this.toString(array1[i]);
+                        string.position = new paper.Point(180+i*140, 243);
+                        group.addChild(string);
+                    }
+                    else {
+                        let innerSizeV = this.figureSize(false, false, this.cell_size);
+                        innerSizeV.position = new paper.Point(250, i*140-100);
+                        group.addChild(innerSizeV);
+                        
+                        let string = new paper.PointText(new paper.Point(0, 0));
+                        string.content = this.toString(array1[i]);
+                        string.rotate(-90);
+                        string.position = new paper.Point(243, i*140-100);
+                        group.addChild(string);
+                    }
+                }
+                else {
+                        if (i == 0) {
+                            childX -= this.cell_size*4;
+
+                            let innerSizeH = this.figureSize(false, true, this.cell_size);
+                            innerSizeH.position = new paper.Point(110, 250);
+                            group.addChild(innerSizeH);
+                        
+                            let string = new paper.PointText(new paper.Point(0, 0));
+                            string.content = this.toString(array1[i]);
+                            string.position = new paper.Point(110, 243);
+                            group.addChild(string);
+                            
+                            childWidth -= this.cell_size;
+                        }
+                        else if (i == 1) {
+                            childX += this.cell_size*4;
+
+                            let innerSizeH = this.figureSize(false, true, this.cell_size);
+                            innerSizeH.position = new paper.Point(390, 250);
+                            group.addChild(innerSizeH);
+                        
+                            let string = new paper.PointText(new paper.Point(0, 0));
+                            string.content = this.toString(array1[i]);
+                            string.position = new paper.Point(390, 243);
+                            group.addChild(string);
+                            
+                            childWidth += this.cell_size;
+                        }
+                        if (i == 2) {
+                            childY += this.cell_size*4;
+
+                            let innerSizeV = this.figureSize(false, false, this.cell_size);
+                            innerSizeV.position = new paper.Point(250, 110);
+                            group.addChild(innerSizeV);
+                        
+                            let string = new paper.PointText(new paper.Point(0, 0));
+                            string.content = this.toString(array1[i]);
+                            string.rotate(-90);
+                            string.position = new paper.Point(243, 110);
+                            group.addChild(string);
+                        
+                            childHeight += this.cell_size;
+
+                        }
+                        else {
+                            childY -= this.cell_size*4;
+
+                            let innerSizeV = this.figureSize(false, false, this.cell_size);
+                            innerSizeV.position = new paper.Point(250, 390);
+                            group.addChild(innerSizeV);
+                        
+                            let string = new paper.PointText(new paper.Point(0, 0));
+                            string.content = this.toString(array1[i]);
+                            string.rotate(-90);
+                            string.position = new paper.Point(243, 390);
+                            group.addChild(string);
+                        
+                            childHeight -= this.cell_size;
+
+                        }
+                }
+            }
+        }
+
+        let child = new paper.Path.Rectangle({
+            point: [0, 0],
+            size: [childWidth, childHeight],
+            strokeColor: "black",
+            strokeWidth: 2,
+            fillColor: null
+        });
+
+        child.position = new paper.Point(childX, childY);
+
+        group.addChild(child);
+
+        this.elements.push(group);
+        return group;
+
     }
 
 }
