@@ -40,14 +40,14 @@ function onPageLoaded() {
     try {
         grammar = loadFromLocalStorage();
         Frontend.setGrammar(grammar);
+        setInterval(saveToLocalStorage, 5000);
     } catch (err) {
         grammar = new Grammar();
         Frontend.setGrammar(grammar);
         alert("Не удалось загрузить автосохранение! Загружен пустой проект.");
+        setInterval(saveToLocalStorage, 5000);
         throw err;
     }
-
-    setInterval(saveToLocalStorage, 5000);
 }
 
 function onFileUpload(e) {
@@ -59,11 +59,10 @@ function onFileUpload(e) {
             let yaml = YAML.load(text);
             grammar.destroy();
             grammar = Grammar.fromRawData(yaml);
-            grammar.setFilename(file.name);
             Frontend.setGrammar(grammar);
         } catch (e) {
             //UI.resetUI();
-            Frontend.halt(e);
+            alert(e.message);
             throw e;
         }
     };
@@ -72,7 +71,7 @@ function onFileUpload(e) {
 
 function onFileSave() {
     try {
-        writeFile(Frontend.grammarFilename.value, YAML.dump(grammar.serialize()))
+        writeFile("grammar.yml", YAML.dump(grammar.serialize()))
     } catch (err) {
         console.log(err.message);
         if (!/[а-яА-Я]/.test(err.message)) Frontend.halt(); // TODO: полностью завершает работу приложения, если ошибка была не через throw. Сломается, если изменить язык.
@@ -80,13 +79,6 @@ function onFileSave() {
     }
 }
 
-function onCreateNewFile() {
-    grammar = new Grammar();
-    Frontend.setGrammar(grammar);
-    Drawer.clearCanvas();
-}
-
 document.getElementById("load-from-file").addEventListener("change", (e) => onFileUpload(e));
 document.getElementById("save-to-file").onclick = onFileSave;
-document.addEventListener('DOMContentLoaded', () => onPageLoaded());
-document.getElementById("create-new-file").onclick = onCreateNewFile;
+document.addEventListener('DOMContentLoaded', onPageLoaded());
