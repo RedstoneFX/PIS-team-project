@@ -15,6 +15,7 @@ class Drawer {
     static maxX; static maxY;
     static cell_size;
     static gap_size;
+    static max_row_length;
 
     static init() {
         this.exampleVariable1 = 1;
@@ -23,7 +24,8 @@ class Drawer {
         paper.setup(this.canvas);
         this.maxX = 50; this.maxY = 50;
         this.cell_size = 70;
-        this.gap_size = 20;
+        this.gap_size = 30;
+        this.max_row_length = 0;
     }
 
     /**
@@ -288,9 +290,9 @@ class Drawer {
         // если размер внешний
         if (isOuter) {
 
-            //// отрисовать две линии с параметрами ((0, 0), (100, 0))
+            //// отрисовать две линии с параметрами ((0, 0), (30, 0))
             let point1 = new paper.Point(0, 0);
-            let point2 = new paper.Point(this.cell_size/2, 0);
+            let point2 = new paper.Point(30, 0);
             let line1 = this.straightLine(point1, point2);
             let line2 = this.straightLine(point1, point2);
             //// установить центр одной линии на верхнем конце стрелки
@@ -316,8 +318,6 @@ class Drawer {
     static drawCellPattern(pattern, kind) {
 
         let group = new paper.Group();
-
-        let deductable = this.cell_size/4*3
         
         // отрисовать прямоугольник 100 на 100
         let cell = this.squareCell('black');
@@ -327,13 +327,26 @@ class Drawer {
         // отрисовать фигуру "размер" с параметрами "внешний", "по вертикали",  "100"
         let sizeV = this.figureSize(true, false, this.cell_size);
         // установить центр фигуры (-50, -50)
-        sizeV.position = new paper.Point (250-deductable, 250);
+        sizeV.position = new paper.Point (200, 250);
         group.addChild(sizeV);
         // отрисовать фигуру "размер" с параметрами "внешний", "по горизонтали",  "100"
         let sizeH = this.figureSize(true, true, this.cell_size);
         // установить центр фигуры (50, 50)
-        sizeH.position = new paper.Point (250, 250-deductable);
+        sizeH.position = new paper.Point (250, 200);
         group.addChild(sizeH);
+
+        let sizeWidth = new paper.PointText(new paper.Point(0, 0));
+        let stringWidth = pattern.getWidth();
+        sizeWidth.content = this.toString(stringWidth);
+        sizeWidth.position = new paper.Point(250, 193);
+        group.addChild(sizeWidth);
+
+        let sizeHeight = new paper.PointText(new paper.Point(0, 0));
+        let stringHeight = pattern.getHeight();
+        sizeHeight.content = this.toString(stringHeight);
+        sizeHeight.position = new paper.Point(193, 250);
+        sizeHeight.rotate(-90);
+        group.addChild(sizeHeight);
 
         return group;
         
@@ -350,10 +363,6 @@ class Drawer {
     static rowOfCells(rowLength, blackCellsLeft, itemCountEnd, x, y, gap, isFirst) {
 
         let row = new paper.Group();
-        
-        // если длина ряда больше 5
-        if (rowLength > 5)
-        {
 
             //// отрисовать 2 ячейки с учётом разрыва и цвета
             for (let i = 0; i < 2; i++) {
@@ -371,8 +380,24 @@ class Drawer {
                 if (i == 0) x += gap;
             }
 
+        if (rowLength < this.max_row_length) {
             //// отрисовать 3 точки с учётом разрыва
             for (let i = 0; i < 3; i++) {
+                let dot = this.squareDot();
+                dot.position = new paper.Point(x, y);
+                row.addChild(dot);
+                x += this.cell_size/2;
+            }
+            
+                x += this.cell_size/2;
+        }
+        
+        // если длина ряда больше 5
+        else if (rowLength > 5)
+        {
+
+            //// отрисовать 3 точки с учётом разрыва
+            for (let i = 0; i < 5; i++) {
                 let dot = this.squareDot();
                 dot.position = new paper.Point(x, y);
                 row.addChild(dot);
@@ -387,7 +412,7 @@ class Drawer {
         else {
 
             //// отрисовать все ячейки, кроме последней, с учётом разрыва и цвета
-            for (let i = 0; i < rowLength - 1; i++) {
+            for (let i = 2; i < rowLength - 1; i++) {
                 let cell;
                 if (blackCellsLeft > i)
                 {
@@ -468,6 +493,7 @@ class Drawer {
         else if (direction == "fill") rowLength = Math.ceil(Math.sqrt(maxCells));
         // определить количество рядов как округлённое частное макс. кол-ва ячеек и длины ряда 
         rowNumber = Math.ceil(maxCells / rowLength);
+        this.max_row_length = rowLength
         // если рядов больше 5
         if (rowNumber > 5) {
             
@@ -482,7 +508,7 @@ class Drawer {
                 row2 = this.rowOfCells(rowLength, blackCells-rowLength, itemCountEnd, x, y, gap, false); 
                 row2.position = new paper.Point(this.maxX/2, y);
                 array.addChild(row2);
-                y += this.cell_size + gap;
+                y += this.cell_size;
 
             //// отрисовать ряд точек с учётом разрыва
             let dots = this.rowOfDots(this.maxX);
@@ -523,24 +549,54 @@ class Drawer {
             let sizeOutH = this.figureSize(true, true, this.maxX);
             sizeOutH.position = new paper.Point(this.maxX/2, -this.cell_size/2);
             array.addChild(sizeOutH);
+            let length = new paper.PointText(new paper.Point(0, 0));
+            let string = "";
+            string += Math.min(kind.getItemCount().getBegin(), rowLength);
+            string += "..";
+            if (itemCountEnd != Infinity)
+                string += rowLength;
+            length.content = string;
+            length.position = new paper.Point(this.maxX/2, -this.cell_size/2-7);
+            array.addChild(length);
         }
         
         if (rowNumber > 5) {
             let sizeOutV = this.figureSize(true, false, this.maxY);
             sizeOutV.position = new paper.Point(-this.cell_size/2, this.maxY/2);
             array.addChild(sizeOutV);
+            let number = new paper.PointText(new paper.Point(0, 0));
+            let string = "";
+            string += Math.min(Math.ceil(kind.getItemCount().getBegin() / rowLength), rowNumber);
+            string += "..";
+            if (itemCountEnd != Infinity)
+                string += rowNumber;
+            number.content = string;
+            number.rotate(-90);
+            number.position = new paper.Point(-this.cell_size/2-7, this.maxY/2);
+            array.addChild(number);
         }
 
         if (gap) {
             if (direction != "column"){
                 let sizeInH = this.figureSize(false, true, gap);
-                sizeInH.position = new paper.Point(this.cell_size+gap/2, this.cell_size/2);
+                sizeInH.position = new paper.Point(this.cell_size+gap/2, 0);
                 array.addChild(sizeInH);
+                let size = new paper.PointText(new paper.Point(0, 0));
+                let string = kind.getGap();
+                size.content = this.toString(string);
+                size.position = new paper.Point(this.cell_size+gap/2, -7);
+                array.addChild(size);
             }
             if (direction != "row") {
                 let sizeInV = this.figureSize(false, false, gap);
-                sizeInV.position = new paper.Point(this.cell_size/2, this.cell_size+gap/2);
+                sizeInV.position = new paper.Point(0, this.cell_size+gap/2);
                 array.addChild(sizeInV);
+                let size = new paper.PointText(new paper.Point(0, 0));
+                let string = kind.getGap();
+                size.content = this.toString(string);
+                size.rotate(-90);
+                size.position = new paper.Point(-7, this.cell_size+gap/2);
+                array.addChild(size);
             }
         }
 
@@ -548,6 +604,36 @@ class Drawer {
 
         return array;
         
+    }
+
+    static toString(newInterval) {
+
+        let gap = "";
+        let begin = newInterval.getBegin();
+        let end = newInterval.getEnd();
+
+        if (begin == -Infinity)
+        {
+            if (end == Infinity) 
+            {
+                gap += "*";
+                return gap;
+            }
+        }
+        else
+        {
+            gap += begin;
+        }
+
+        gap += "..";
+
+        if (end != Infinity)
+        {
+            gap += end;
+        }
+
+        return gap;
+
     }
 
     /**
@@ -559,7 +645,6 @@ class Drawer {
         let group = new paper.Group();
 
         let area_size = this.cell_size*3;
-        let deductable = area_size/8*5;
         
         // отрисовать прямоугольник 300 на 300
         let area = this.squareArea();
@@ -569,13 +654,26 @@ class Drawer {
         // отрисовать фигуру "размер" с параметрами "внешний", "по вертикали",  "300"
         let sizeV = this.figureSize(true, false, area_size);
         // установить центр фигуры (-150, -150)
-        sizeV.position = new paper.Point (250-deductable, 250);
+        sizeV.position = new paper.Point (130, 250);
         group.addChild(sizeV);
         // отрисовать фигуру "размер" с параметрами "внешний", "по горизонтали",  "300"
         let sizeH = this.figureSize(true, true, area_size);
         // установить центр фигуры (150, 150)
-        sizeH.position = new paper.Point (250, 250-deductable);
+        sizeH.position = new paper.Point (250, 130);
         group.addChild(sizeH);
+
+        let sizeWidth = new paper.PointText(new paper.Point(0, 0));
+        let stringWidth = pattern.getWidth();
+        sizeWidth.content = this.toString(stringWidth);
+        sizeWidth.position = new paper.Point(250, 123);
+        group.addChild(sizeWidth);
+
+        let sizeHeight = new paper.PointText(new paper.Point(0, 0));
+        let stringHeight = pattern.getHeight();
+        sizeHeight.content = this.toString(stringHeight);
+        sizeHeight.rotate(-90);
+        sizeHeight.position = new paper.Point(123, 250);
+        group.addChild(sizeHeight);
 
         return group;
         
