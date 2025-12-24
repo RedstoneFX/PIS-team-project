@@ -15,40 +15,39 @@ function writeFile(name, value) {
     console.log(blobdtMIME)
 }
 
+let grammar = new Grammar();
+
 /**
  * @param {Grammar} grammar 
  */
-function saveToLocalStorage(grammar) {
+function saveToLocalStorage() {
     localStorage.setItem("GrammarData", JSON.stringify(grammar.serialize()));
 }
 
 function loadFromLocalStorage() {
     const savedData = localStorage.getItem("GrammarData");
     if (savedData) {
-        return Grammar.fromRawData(savedData);
+        return Grammar.fromRawData(JSON.parse(savedData));
     }
+    else return new Grammar();
 }
 
 
-let grammar = new Grammar();
-
 function onPageLoaded() {
-    //let testData = YAML.load(request("cnf/grammar_root.yml"));
-    //grammar = Grammar.fromRawData(testData);
     Frontend.init();
-    Frontend.setGrammar(grammar);
     Drawer.init();
 
-    /*try {
-        loadFromLocalStorage();
-        UI.loadFromGrammar();
-    } catch (e) {
-        UI.resetUI();
-        console.log("Загрузка автосохранения не удалась.");
-        throw e;
+    try {
+        grammar = loadFromLocalStorage();
+        Frontend.setGrammar(grammar);
+    } catch (err) {
+        grammar = new Grammar();
+        Frontend.setGrammar(grammar);
+        alert("Не удалось загрузить автосохранение! Загружен пустой проект.");
+        throw err;
     }
 
-    setInterval(saveToLocalStorage, 1000);*/
+    setInterval(saveToLocalStorage, 5000);
 }
 
 function onFileUpload(e) {

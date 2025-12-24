@@ -67,8 +67,21 @@ input.numeric {
     text-align: right;
 }
 
-.pattern-pointer::before {
+.browser-link > summary::before {
     content: "🌌 ";
+}
+
+.browser-link > summary {
+    list-style: none;
+}
+
+.component-in-browser > summary::before {
+    content: "⚙️ ";
+}
+
+
+.component-in-browser > summary {
+    list-style: none;
 }
 
 #the-editor {
