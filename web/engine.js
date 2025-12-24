@@ -62,7 +62,7 @@ function onFileUpload(e) {
             Frontend.setGrammar(grammar);
         } catch (e) {
             //UI.resetUI();
-            alert(e.message);
+            Frontend.halt(e);
             throw e;
         }
     };
@@ -79,6 +79,14 @@ function onFileSave() {
     }
 }
 
+
+function onCreateNewFile() {
+    grammar = new Grammar();
+    Frontend.setGrammar(grammar);
+    Drawer.clearCanvas();
+}
+
 document.getElementById("load-from-file").addEventListener("change", (e) => onFileUpload(e));
 document.getElementById("save-to-file").onclick = onFileSave;
-document.addEventListener('DOMContentLoaded', onPageLoaded());
+document.addEventListener('DOMContentLoaded', () => onPageLoaded());
+document.getElementById("create-new-file").onclick = onCreateNewFile;

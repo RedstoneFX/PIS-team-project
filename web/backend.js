@@ -370,7 +370,7 @@ class Grammar {
             throw new Error("Имя файла не может иметь переносы строк!");
         filename = filename.trim();
         if (! filename.trim().endsWith(ext)) {
-            console.warn("Название файла " + filename + " заменено на " + filename + + ext +  ", так как оно должно иметь расширение " + ext);
+            console.warn("Название файла " + filename + " заменено на " + filename + ext +  ", так как оно должно иметь расширение " + ext);
             return filename + ext;
         }
         return filename;
