@@ -12,7 +12,7 @@ class Drawer {
 
     static elements = [];
 
-    static maxX; static maxY;
+    static maxX; static X; static maxY;
     static cell_size;
     static gap_size;
     static max_row_length;
@@ -22,7 +22,7 @@ class Drawer {
         this.exampleVariable2 = 2;
         this.canvas = document.getElementById("illustration");
         paper.setup(this.canvas);
-        this.maxX = 50; this.maxY = 50;
+        this.maxX = 50; this.X = 0; this.maxY = 50;
         this.cell_size = 70;
         this.gap_size = 30;
         this.max_row_length = 0;
@@ -239,7 +239,7 @@ class Drawer {
     /**
      * Отрисовать квадратную ячейку
      */
-    static squareArea(color) {
+    static squareArea() {
         let cell = new paper.Path.Rectangle({
             point: [0, 0],
             size: [this.cell_size*3, this.cell_size*3],
@@ -364,6 +364,7 @@ class Drawer {
 
         let row = new paper.Group();
 
+        if (rowLength > 5) {
             //// отрисовать 2 ячейки с учётом разрыва и цвета
             for (let i = 0; i < 2; i++) {
                 let cell; 
@@ -380,7 +381,6 @@ class Drawer {
                 if (i == 0) x += gap;
             }
 
-        if (rowLength < this.max_row_length) {
             //// отрисовать 3 точки с учётом разрыва
             for (let i = 0; i < 3; i++) {
                 let dot = this.squareDot();
@@ -388,31 +388,25 @@ class Drawer {
                 row.addChild(dot);
                 x += this.cell_size/2;
             }
-            
-                x += this.cell_size/2;
-        }
-        
-        // если длина ряда больше 5
-        else if (rowLength > 5)
-        {
 
-            //// отрисовать 3 точки с учётом разрыва
-            for (let i = 0; i < 5; i++) {
-                let dot = this.squareDot();
-                dot.position = new paper.Point(x, y);
-                row.addChild(dot);
-                x += this.cell_size/2;
+            if (rowLength == this.max_row_length) {
+                //// отрисовать 3 точки с учётом разрыва
+                for (let i = 0; i < 2; i++) {
+                    let dot = this.squareDot();
+                    dot.position = new paper.Point(x, y);
+                    row.addChild(dot);
+                    x += this.cell_size/2;
+                }
             }
             
-                x += this.cell_size/2;
-
+            x += this.cell_size/2;
         }
 
         // иначе
         else {
 
             //// отрисовать все ячейки, кроме последней, с учётом разрыва и цвета
-            for (let i = 2; i < rowLength - 1; i++) {
+            for (let i = 0; i < rowLength - 1; i++) {
                 let cell;
                 if (blackCellsLeft > i)
                 {
@@ -440,6 +434,7 @@ class Drawer {
         x += this.cell_size/2;
 
         this.maxX = x;
+        if (this.maxX > this.X) this.X = this.maxX;
 
         return row;
         
@@ -472,6 +467,8 @@ class Drawer {
      */
     static drawArrayPattern(pattern, kind) {
 
+        this.X = 0;
+
         let array = new paper.Group();
 
         let itemCountEnd = kind.getItemCount().getEnd();
@@ -493,7 +490,7 @@ class Drawer {
         else if (direction == "fill") rowLength = Math.ceil(Math.sqrt(maxCells));
         // определить количество рядов как округлённое частное макс. кол-ва ячеек и длины ряда 
         rowNumber = Math.ceil(maxCells / rowLength);
-        this.max_row_length = rowLength
+        this.max_row_length = rowLength;
         // если рядов больше 5
         if (rowNumber > 5) {
             
@@ -545,9 +542,23 @@ class Drawer {
 
         this.maxY = y;
 
-        if (rowLength > 5) {
+        if (rLen < this.max_row_length) {
             let sizeOutH = this.figureSize(true, true, this.maxX);
-            sizeOutH.position = new paper.Point(this.maxX/2, -this.cell_size/2);
+            sizeOutH.position = new paper.Point(this.maxX/2, this.maxY+15);
+            array.addChild(sizeOutH);
+            let length = new paper.PointText(new paper.Point(0, 0));
+            let string = "";
+            string += kind.getItemCount().getEnd() == Infinity ? 0 : kind.getItemCount().getEnd() - rowLength * (rowNumber - 1);
+            string += "..";
+            string += remainder;
+            length.content = string;
+            length.position = new paper.Point(this.maxX/2, this.maxY+25);
+            array.addChild(length);
+        }
+
+        if (rowLength > 5) {
+            let sizeOutH = this.figureSize(true, true, this.X);
+            sizeOutH.position = new paper.Point(this.X/2, -this.cell_size/2);
             array.addChild(sizeOutH);
             let length = new paper.PointText(new paper.Point(0, 0));
             let string = "";
@@ -556,7 +567,7 @@ class Drawer {
             if (itemCountEnd != Infinity)
                 string += rowLength;
             length.content = string;
-            length.position = new paper.Point(this.maxX/2, -this.cell_size/2-7);
+            length.position = new paper.Point(this.X/2, -this.cell_size/2-7);
             array.addChild(length);
         }
         
