@@ -729,26 +729,43 @@ class Drawer {
 
         group.addChild(parent);
 
-        let child = this.squareCell();
-        let child_center = new paper.Point(250, 250);
+        let childWidth = this.cell_size;
+        let childHeight = this.cell_size;
+        
+        let childX = 250;
+        let childY = 250;
 
         for (let i = 0; i < 4; i++) {
             if(array3[i]) {
                 if(array2[i]) {
                     if (i < 2)
-                        child.size[0] += this.cell_size;
+                    {
+                        childWidth += this.cell_size;
+
+                        if (i == 0)
+                            childX -= this.cell_size/2;
+                        else
+                            childX += this.cell_size/2;
+                    }
                     else
-                        child.size[1] += this.cell_size;
-                    if (i % 2 == 0)
-                        child_center.x -= this.cell_size/2;
-                    else
-                        child_center.x += this.cell_size/2;
+                    {
+                        childHeight += this.cell_size;
+                        
+                        if (i == 2)
+                            childY -= this.cell_size/2;
+                        else
+                            childY += this.cell_size/2;
+                    }
                 }
                 else {
-                    if (i % 2 == 0)
-                        child_center.x -= this.cell_size*3;
+                    if (i == 0)
+                        childX -= this.cell_size*3;
+                    else if (i == 1)
+                        childX += this.cell_size*3;
+                    else if (i == 2)
+                        childY -= this.cell_size*3;
                     else
-                        child_center.x += this.cell_size*3;
+                        childY += this.cell_size*3;
                 }
             }
             else {
@@ -765,20 +782,19 @@ class Drawer {
                     }
                     else {
                         let innerSizeV = this.figureSize(false, false, this.cell_size);
-                        innerSizeV.position = new paper.Point(250, 600-i*140);
+                        innerSizeV.position = new paper.Point(250, i*140-100);
                         group.addChild(innerSizeV);
                         
                         let string = new paper.PointText(new paper.Point(0, 0));
                         string.content = this.toString(array1[i]);
                         string.rotate(-90);
-                        string.position = new paper.Point(243, 600-i*140);
+                        string.position = new paper.Point(243, i*140-100);
                         group.addChild(string);
                     }
                 }
                 else {
-                    if(i < 2) {
                         if (i == 0) {
-                            child_center.x -= this.cell_size*4;
+                            childX -= this.cell_size*4;
 
                             let innerSizeH = this.figureSize(false, true, this.cell_size);
                             innerSizeH.position = new paper.Point(110, 250);
@@ -788,9 +804,11 @@ class Drawer {
                             string.content = this.toString(array1[i]);
                             string.position = new paper.Point(110, 243);
                             group.addChild(string);
+                            
+                            childWidth -= this.cell_size;
                         }
-                        else {
-                            child_center.x += this.cell_size*4;
+                        else if (i == 1) {
+                            childX += this.cell_size*4;
 
                             let innerSizeH = this.figureSize(false, true, this.cell_size);
                             innerSizeH.position = new paper.Point(390, 250);
@@ -800,11 +818,11 @@ class Drawer {
                             string.content = this.toString(array1[i]);
                             string.position = new paper.Point(390, 243);
                             group.addChild(string);
+                            
+                            childWidth += this.cell_size;
                         }
-                    }
-                    else {
                         if (i == 2) {
-                            child_center.x -= this.cell_size*4;
+                            childY += this.cell_size*4;
 
                             let innerSizeV = this.figureSize(false, false, this.cell_size);
                             innerSizeV.position = new paper.Point(250, 110);
@@ -815,9 +833,12 @@ class Drawer {
                             string.rotate(-90);
                             string.position = new paper.Point(243, 110);
                             group.addChild(string);
+                        
+                            childHeight += this.cell_size;
+
                         }
                         else {
-                            child_center.x += this.cell_size*4;
+                            childY -= this.cell_size*4;
 
                             let innerSizeV = this.figureSize(false, false, this.cell_size);
                             innerSizeV.position = new paper.Point(250, 390);
@@ -828,13 +849,23 @@ class Drawer {
                             string.rotate(-90);
                             string.position = new paper.Point(243, 390);
                             group.addChild(string);
+                        
+                            childHeight -= this.cell_size;
+
                         }
-                    }
                 }
             }
         }
 
-        child.position = child_center;
+        let child = new paper.Path.Rectangle({
+            point: [0, 0],
+            size: [childWidth, childHeight],
+            strokeColor: "black",
+            strokeWidth: 2,
+            fillColor: null
+        });
+
+        child.position = new paper.Point(childX, childY);
 
         group.addChild(child);
 
