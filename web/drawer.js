@@ -690,4 +690,157 @@ class Drawer {
         
     }
 
+    /**
+     * Отрисовать компонент
+     * @param {Component} component 
+     */
+    static drawComponent(component) {
+
+        let group = new paper.Group();
+
+        this.clearCanvas();
+
+        let location = component.location();
+
+        let left = location.getLeft();
+        let right = location.getRight();
+        let top = location.getTop();
+        let bottom = location.getBottom();
+
+        let array1 = [left, right, top, bottom];
+
+        let leftPadding = location.isLeftPadding();
+        let rightPadding = location.isRightPadding();
+        let topPadding = location.isTopPadding();
+        let bottomPadding = location.isBottomPadding();
+
+        let array2 = [leftPadding, rightPadding, topPadding, bottomPadding];
+
+        let leftIsZero = left.getBegin() == 0 & left.getEnd() == 0;
+        let rightIsZero = right.getBegin() == 0 & right.getEnd() == 0;
+        let topIsZero = top.getBegin() == 0 & top.getEnd() == 0;
+        let bottomIsZero = bottom.getBegin() == 0 & bottom.getEnd() == 0;
+
+        let array3 = [leftIsZero, rightIsZero, topIsZero, bottomIsZero];
+
+        //рисуем отцовский паттерн
+        let parent = this.squareArea();
+        parent.position = new paper.Point(250, 250);
+
+        group.addChild(parent);
+
+        let child = this.squareCell();
+        let child_center = new paper.Point(250, 250);
+
+        for (let i = 0; i < 4; i++) {
+            if(array3[i]) {
+                if(array2[i]) {
+                    if (i < 2)
+                        child.size[0] += this.cell_size;
+                    else
+                        child.size[1] += this.cell_size;
+                    if (i % 2 == 0)
+                        child_center.x -= this.cell_size/2;
+                    else
+                        child_center.x += this.cell_size/2;
+                }
+                else {
+                    if (i % 2 == 0)
+                        child_center.x -= this.cell_size*3;
+                    else
+                        child_center.x += this.cell_size*3;
+                }
+            }
+            else {
+                if(array2[i]) {
+                    if(i < 2) {
+                        let innerSizeH = this.figureSize(false, true, this.cell_size);
+                        innerSizeH.position = new paper.Point(180+i*140, 250);
+                        group.addChild(innerSizeH);
+
+                        let string = new paper.PointText(new paper.Point(0, 0));
+                        string.content = this.toString(array1[i]);
+                        string.position = new paper.Point(180+i*140, 243);
+                        group.addChild(string);
+                    }
+                    else {
+                        let innerSizeV = this.figureSize(false, false, this.cell_size);
+                        innerSizeV.position = new paper.Point(250, 600-i*140);
+                        group.addChild(innerSizeV);
+                        
+                        let string = new paper.PointText(new paper.Point(0, 0));
+                        string.content = this.toString(array1[i]);
+                        string.rotate(-90);
+                        string.position = new paper.Point(243, 600-i*140);
+                        group.addChild(string);
+                    }
+                }
+                else {
+                    if(i < 2) {
+                        if (i == 0) {
+                            child_center.x -= this.cell_size*4;
+
+                            let innerSizeH = this.figureSize(false, true, this.cell_size);
+                            innerSizeH.position = new paper.Point(110, 250);
+                            group.addChild(innerSizeH);
+                        
+                            let string = new paper.PointText(new paper.Point(0, 0));
+                            string.content = this.toString(array1[i]);
+                            string.position = new paper.Point(110, 243);
+                            group.addChild(string);
+                        }
+                        else {
+                            child_center.x += this.cell_size*4;
+
+                            let innerSizeH = this.figureSize(false, true, this.cell_size);
+                            innerSizeH.position = new paper.Point(390, 250);
+                            group.addChild(innerSizeH);
+                        
+                            let string = new paper.PointText(new paper.Point(0, 0));
+                            string.content = this.toString(array1[i]);
+                            string.position = new paper.Point(390, 243);
+                            group.addChild(string);
+                        }
+                    }
+                    else {
+                        if (i == 2) {
+                            child_center.x -= this.cell_size*4;
+
+                            let innerSizeV = this.figureSize(false, false, this.cell_size);
+                            innerSizeV.position = new paper.Point(250, 110);
+                            group.addChild(innerSizeV);
+                        
+                            let string = new paper.PointText(new paper.Point(0, 0));
+                            string.content = this.toString(array1[i]);
+                            string.rotate(-90);
+                            string.position = new paper.Point(243, 110);
+                            group.addChild(string);
+                        }
+                        else {
+                            child_center.x += this.cell_size*4;
+
+                            let innerSizeV = this.figureSize(false, false, this.cell_size);
+                            innerSizeV.position = new paper.Point(250, 390);
+                            group.addChild(innerSizeV);
+                        
+                            let string = new paper.PointText(new paper.Point(0, 0));
+                            string.content = this.toString(array1[i]);
+                            string.rotate(-90);
+                            string.position = new paper.Point(243, 390);
+                            group.addChild(string);
+                        }
+                    }
+                }
+            }
+        }
+
+        child.position = child_center;
+
+        group.addChild(child);
+
+        this.elements.push(group);
+        return group;
+
+    }
+
 }
