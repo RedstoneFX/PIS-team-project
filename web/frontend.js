@@ -104,6 +104,8 @@ class Frontend {
 
     /** @type {HTMLInputElement} */
     static cellTypeFilepath;
+    /** @type {HTMLInputElement} */
+    static grammarFilename;
 
     /** @type {Browser} */
     static browser;
@@ -163,6 +165,7 @@ class Frontend {
         this.isPatternRoot = document.getElementById("is-pattern-root");
         this.isComponentOptional = document.getElementById("is-component-optional");
         this.cellTypeFilepath = document.getElementById("cell-types-filepath");
+        this.grammarFilename = document.getElementById("grammar-file-name");
 
         this.defToGlobalTab = document.getElementById("deffinition-to-global-tab");
         this.defToGlobalName = document.getElementById("def-to-global-name");
@@ -216,6 +219,7 @@ class Frontend {
 
         this.defToGlobalButton.addEventListener("click", (e) => this.onMoveToGrammarRoot(e));
         this.globalToDefButton.addEventListener("click", (e) => this.onCopyToComponents(e));
+        this.grammarFilename.addEventListener("change", (e) => this.onFilenameChange(e));
     }
 
     static halt(err) {
@@ -263,12 +267,25 @@ class Frontend {
             throw err();
         }
     }
+    
+    static onFilenameChange(e) {
+        try {
+            this.grammar.setFilename(e.target.value);
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            this.grammarFilename.value = this.grammar.getFilename();
+        }
+    }
 
     static onCellTypeFilepathChange(e) {
+
         try {
             this.grammar.setCellTypesFilepath(e.target.value);
         } catch (err) {
-            this.halt(err);
+            alert(err.message);
+        } finally {
+            this.cellTypeFilepath.value = this.grammar.getCellTypesFilepath();
         }
     }
 
@@ -610,6 +627,7 @@ class Frontend {
         this.cellTypeFilepath.value = this.grammar.getCellTypesFilepath();
         this.drawEverythingInGrammar();
         this.regenerateSelections();
+        this.grammarFilename.value = this.grammar.getFilename();
     }
 
     static drawEverythingInGrammar() {

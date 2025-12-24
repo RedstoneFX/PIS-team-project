@@ -1,6 +1,8 @@
 
 class Grammar {
     /** @type {string} */
+    #filename = "";
+    /** @type {string} */
     #cellTypesFilepath = "";
     /** @type {Map<string, Pattern>} */
     #patterns = new Map();
@@ -31,7 +33,9 @@ class Grammar {
         return true;
     }
 
-    constructor() { }
+    constructor() {
+        this.setFilename("grammar.yml");
+    }
 
     /**
      * Создает новую грамматику на основе исходных данных
@@ -51,8 +55,9 @@ class Grammar {
         // Заполнить #cell_types_filepath в грамматике...
         tmp = rawData.cell_types_filepath;
         // Выкинуть ошибку, если сell_types_filepath отсутствует
-        if (!tmp) {
-            throw new Error(`Поле сell_types_filepath отсутствует в исходных данных`)
+        if (tmp === undefined) {
+            tmp = "None";
+            console.warn(`Поле сell_types_filepath отсутствует в исходных данных!`);
         }
         // Выкинуть ошибку, если cell_types_filepath не является строкой
         if (typeof tmp !== "string") {
@@ -299,6 +304,10 @@ class Grammar {
      * Обнуляет ссылки объекта
      */
     destroy() {
+        // Стереть имя файла
+        this.#filename = "";
+        // Стереть путь к файлу с типами данных
+        this.#cellTypesFilepath = "";
         // Удалить ссылку на корневой паттерн
         this.#rootPattern = null;
         // Вызвать деструкторы всех известных паттернов
@@ -347,14 +356,45 @@ class Grammar {
     }
 
     /**
+     * Выбрасывает ошибку, если это не название файла, или исправляет его, если это возможно
+     * @param {*} filename 
+     * @param {*} ext 
+     */
+    static validifyFilename(filename, ext = ".yml") {
+        if (typeof filename !== "string")
+            throw new Error("Имя файла должно быть строкой!");
+        if (/^\s+$/gm.test(filename))
+            throw new Error("Имя файла не должно быть пустым!");
+        if (filename.includes("\n"))
+            throw new Error("Имя файла не может иметь переносы строк!");
+        filename = filename.trim();
+        if (! filename.trim().endsWith(ext)) {
+            console.warn("Название файла " + filename + " заменено на " + filename + + ext +  ", так как оно должно иметь расширение " + ext);
+            return filename + ext;
+        }
+        return filename;
+    }
+
+    /**
+     * @param {string} filename 
+     * @returns возвращает себя для цепного вызова
+     */
+    setFilename(filename) {
+        this.#filename = Grammar.validifyFilename(filename);
+        return this;
+    }
+
+    getFilename() {
+        if(this.#filename == null || this.grammar) return "grammar.yml";
+        return this.#filename;
+    }
+
+    /**
      * @param {string} filepath 
      * @returns возвращает себя для цепного вызова
      */
     setCellTypesFilepath(filepath) {
-        if (typeof filepath !== "string") {
-            throw new Error(`Путь к файлу с описанием типов клеток должен быть строкой`);
-        }
-        this.#cellTypesFilepath = filepath;
+        this.#cellTypesFilepath = Grammar.validifyFilename(filepath);
         return this;
     }
 
