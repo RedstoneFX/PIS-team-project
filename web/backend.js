@@ -369,8 +369,8 @@ class Grammar {
         if (filename.includes("\n"))
             throw new Error("Имя файла не может иметь переносы строк!");
         filename = filename.trim();
-        if (! filename.trim().endsWith(ext)) {
-            console.warn("Название файла " + filename + " заменено на " + filename + ext +  ", так как оно должно иметь расширение " + ext);
+        if (!filename.trim().endsWith(ext)) {
+            console.warn("Название файла " + filename + " заменено на " + filename + ext + ", так как оно должно иметь расширение " + ext);
             return filename + ext;
         }
         return filename;
@@ -386,7 +386,7 @@ class Grammar {
     }
 
     getFilename() {
-        if(this.#filename == null || this.grammar) return "grammar.yml";
+        if (this.#filename == null || this.grammar) return "grammar.yml";
         return this.#filename;
     }
 
@@ -462,7 +462,7 @@ class Pattern {
      */
     copyAsPatternDefinition(parentComponent) {
         return new PatternByPatternDefinition(parentComponent)
-            .setDescription(this.#description).setKind(this.#kind).setWidth(this.#width.getBegin(), this.#width.getEnd())
+            .setDescription(this.#description).setKind(this.#kind.copy()).setWidth(this.#width.getBegin(), this.#width.getEnd())
             .setHeight(this.#height.getBegin(), this.#height.getEnd()).setCountInDocument(this.#countInDocument.getBegin(), this.#countInDocument.getEnd()).setStyle(this.#style);
     }
 
@@ -840,6 +840,14 @@ class PatternExtension {
     }
 
     /**
+     * Создает копию этого расширения паттерна
+     * @returns Копия вида паттерна
+     */
+    copy() {
+        return null;
+    }
+
+    /**
      * Обнуляет ссылки объекта
      */
     destroy() { }
@@ -867,6 +875,10 @@ class CellPatternExtension extends PatternExtension {
     constructor() {
         super();
         this.setKindName("CELL");
+    }
+
+    copy() {
+        return new CellPatternExtension().setContentType(this.#contentType);
     }
 
     /**
@@ -927,6 +939,15 @@ class ArrayPatternExtension extends PatternExtension {
     constructor() {
         super();
         this.setKindName("ARRAY");
+    }
+
+    copy() {
+        return new ArrayPatternExtension()
+            .setGap(this.#gap.getBegin(), this.#gap.getEnd())
+            .setItemCount(this.#itemCount.getBegin(), this.#itemCount.getEnd())
+            .setItemPattern(this.#itemPattern)
+            .setDirection(this.#direction)
+            .setKindName(this.getKindName());
     }
 
     /**
@@ -1080,6 +1101,19 @@ class AreaPatternExtension extends PatternExtension {
         if (pattern == null) throw new Error("Для создания AreaPatternExtension необходимо указать целевой паттерн.");
         this.#pattern = pattern;
         this.setKindName("AREA");
+    }
+
+    copy() {
+        let kind = new AreaPatternExtension(this.#pattern);
+        for (let [name, comp] in this.#innerComponents.entries()) {
+            kind.addComponent(name, comp.copy(), true);
+        }
+
+        for (let [name, comp] in this.#outerComponents.entries()) {
+            kind.addComponent(name, comp.copy(), false);
+        }
+
+        return kind;
     }
 
     /**
@@ -1286,6 +1320,41 @@ class Component {
             }
             this.#parentPattern = parentPattern;
         }
+    }
+
+    copy(newParentPattern) {
+        let comp = new Component(newParentPattern).setOptional(this.isOptional());
+        if (this.#pattern instanceof PatternByPatternDefinition) {
+            comp.setPattern(this.#pattern.copyAsPatternDefinition());
+        } else {
+            comp.setPattern(this.#pattern);
+        }
+
+        let mySide = this.#location.getLeft();
+        let copySide = comp.location().getLeft();
+        copySide.default(mySide.getDefaultBegin(), mySide.getDefaultEnd());
+        copySide.limit(mySide.getMinBegin(), mySide.getMaxEnd());
+        copySide.setBegin(mySide.getBegin()).setEnd(mySide.getEnd());
+
+        mySide = this.#location.getTop();
+        copySide = comp.location().getTop();
+        copySide.default(mySide.getDefaultBegin(), mySide.getDefaultEnd());
+        copySide.limit(mySide.getMinBegin(), mySide.getMaxEnd());
+        copySide.setBegin(mySide.getBegin()).setEnd(mySide.getEnd());
+
+        mySide = this.#location.getRight();
+        copySide = comp.location().getRight();
+        copySide.default(mySide.getDefaultBegin(), mySide.getDefaultEnd());
+        copySide.limit(mySide.getMinBegin(), mySide.getMaxEnd());
+        copySide.setBegin(mySide.getBegin()).setEnd(mySide.getEnd());
+
+        mySide = this.#location.getBottom();
+        copySide = comp.location().getBottom();
+        copySide.default(mySide.getDefaultBegin(), mySide.getDefaultEnd());
+        copySide.limit(mySide.getMinBegin(), mySide.getMaxEnd());
+        copySide.setBegin(mySide.getBegin()).setEnd(mySide.getEnd());
+
+        return comp;
     }
 
     /**
