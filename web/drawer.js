@@ -261,6 +261,18 @@ class Drawer {
     }
 
     /**
+     * Отрисовать пунктирную линию
+     * @param {Point} from 
+     * @param {Point} to 
+     */
+    static dottedLine(from, to) {
+        let line = new paper.Path.Line({ from: from, to: to, strokeColor: 'black' });
+        line.strokeCap = 'round';
+        line.dashArray = [10, 12];
+        return line;
+    }
+
+    /**
      * Обозначить размер между двумя точками
      * @param {boolean} isOuter
      * @param {boolean} isHorizontal 
@@ -713,15 +725,20 @@ class Drawer {
         let rightPadding = location.isRightPadding();
         let topPadding = location.isTopPadding();
         let bottomPadding = location.isBottomPadding();
+        
+        let arrayPadding = [leftPadding, rightPadding, topPadding, bottomPadding];
 
-        let array2 = [leftPadding, rightPadding, topPadding, bottomPadding];
+        let leftMargin = !leftPadding;
+        let rightMargin = !rightPadding;
+        let topMargin = !topPadding;
+        let bottomMargin = !bottomPadding;
 
         let leftIsZero = left.getBegin() == 0 & left.getEnd() == 0;
         let rightIsZero = right.getBegin() == 0 & right.getEnd() == 0;
         let topIsZero = top.getBegin() == 0 & top.getEnd() == 0;
         let bottomIsZero = bottom.getBegin() == 0 & bottom.getEnd() == 0;
-
-        let array3 = [leftIsZero, rightIsZero, topIsZero, bottomIsZero];
+        
+        let arrayIsZero = [leftIsZero, rightIsZero, topIsZero, bottomIsZero];
 
         //рисуем отцовский паттерн
         let parent = this.squareArea();
@@ -735,127 +752,425 @@ class Drawer {
         let childX = 250;
         let childY = 250;
 
-        for (let i = 0; i < 4; i++) {
-            if(array3[i]) {
-                if(array2[i]) {
-                    if (i < 2)
-                    {
-                        childWidth += this.cell_size;
+        let cases = 0;
 
-                        if (i == 0)
-                            childX -= this.cell_size/2;
+        if (leftPadding & rightPadding & topPadding & bottomPadding)
+            cases = 1;
+        else if ((leftMargin || rightMargin) & topPadding & bottomPadding)
+            cases = 2;
+        else if (leftPadding & rightPadding & (topMargin || bottomMargin))
+            cases = 3;
+
+        
+            if(cases == 1) {
+                for (let i = 0; i < 4; i++) {
+                    if(arrayIsZero[i]) {
+                        if (i < 2)
+                        {
+                            childWidth += this.cell_size;
+
+                            if (i == 0)
+                                childX -= this.cell_size/2;
+                            else
+                                childX += this.cell_size/2;
+
+                            let x = 250 + (i == 1 ? this.cell_size*3/2 : -this.cell_size*3/2); 
+                            
+                            let innerSizeH = this.figureSize(false, true, 0);
+                            innerSizeH.position = new paper.Point(x, 250);
+                            group.addChild(innerSizeH);
+
+                            let string = new paper.PointText(new paper.Point(0, 0));
+                            string.content = this.toString(array1[i]);
+                            string.rotate(-90);
+                            string.position = new paper.Point(i == 0 ? x-13 : x+13, 250);
+                            group.addChild(string);
+                        }
                         else
-                            childX += this.cell_size/2;
-                    }
-                    else
-                    {
-                        childHeight += this.cell_size;
+                        {
+                            childHeight += this.cell_size;
                         
-                        if (i == 2)
-                            childY -= this.cell_size/2;
-                        else
-                            childY += this.cell_size/2;
-                    }
-                }
-                else {
-                    if (i == 0)
-                        childX -= this.cell_size*3;
-                    else if (i == 1)
-                        childX += this.cell_size*3;
-                    else if (i == 2)
-                        childY -= this.cell_size*3;
-                    else
-                        childY += this.cell_size*3;
-                }
-            }
-            else {
-                if(array2[i]) {
-                    if(i < 2) {
-                        let innerSizeH = this.figureSize(false, true, this.cell_size);
-                        innerSizeH.position = new paper.Point(180+i*140, 250);
-                        group.addChild(innerSizeH);
+                            if (i == 2)
+                                childY -= this.cell_size/2;
+                            else
+                                childY += this.cell_size/2;
 
-                        let string = new paper.PointText(new paper.Point(0, 0));
-                        string.content = this.toString(array1[i]);
-                        string.position = new paper.Point(180+i*140, 243);
-                        group.addChild(string);
+                            let y = 250 + (i == 3 ? this.cell_size*3/2 : -this.cell_size*3/2); 
+                            
+                            let innerSizeV = this.figureSize(false, false, 0);
+                            innerSizeV.position = new paper.Point(250, y);
+                            group.addChild(innerSizeV);
+                        
+                            let string = new paper.PointText(new paper.Point(0, 0));
+                            string.content = this.toString(array1[i]);
+                            string.position = new paper.Point(250, i == 2 ? y-13 : y+13);
+                            group.addChild(string);
+                        }
                     }
                     else {
-                        let innerSizeV = this.figureSize(false, false, this.cell_size);
-                        innerSizeV.position = new paper.Point(250, i*140-100);
-                        group.addChild(innerSizeV);
                         
-                        let string = new paper.PointText(new paper.Point(0, 0));
-                        string.content = this.toString(array1[i]);
-                        string.rotate(-90);
-                        string.position = new paper.Point(243, i*140-100);
-                        group.addChild(string);
-                    }
-                }
-                else {
-                        if (i == 0) {
-                            childX -= this.cell_size*4;
-
+                        if(i < 2) {
                             let innerSizeH = this.figureSize(false, true, this.cell_size);
-                            innerSizeH.position = new paper.Point(110, 250);
+                            innerSizeH.position = new paper.Point(180+i*140, 250);
                             group.addChild(innerSizeH);
-                        
+
                             let string = new paper.PointText(new paper.Point(0, 0));
                             string.content = this.toString(array1[i]);
-                            string.position = new paper.Point(110, 243);
+                            string.position = new paper.Point(180+i*140, 243);
                             group.addChild(string);
-                            
-                            childWidth -= this.cell_size;
-                        }
-                        else if (i == 1) {
-                            childX += this.cell_size*4;
-
-                            let innerSizeH = this.figureSize(false, true, this.cell_size);
-                            innerSizeH.position = new paper.Point(390, 250);
-                            group.addChild(innerSizeH);
-                        
-                            let string = new paper.PointText(new paper.Point(0, 0));
-                            string.content = this.toString(array1[i]);
-                            string.position = new paper.Point(390, 243);
-                            group.addChild(string);
-                            
-                            childWidth += this.cell_size;
-                        }
-                        if (i == 2) {
-                            childY += this.cell_size*4;
-
-                            let innerSizeV = this.figureSize(false, false, this.cell_size);
-                            innerSizeV.position = new paper.Point(250, 110);
-                            group.addChild(innerSizeV);
-                        
-                            let string = new paper.PointText(new paper.Point(0, 0));
-                            string.content = this.toString(array1[i]);
-                            string.rotate(-90);
-                            string.position = new paper.Point(243, 110);
-                            group.addChild(string);
-                        
-                            childHeight += this.cell_size;
-
                         }
                         else {
-                            childY -= this.cell_size*4;
-
                             let innerSizeV = this.figureSize(false, false, this.cell_size);
-                            innerSizeV.position = new paper.Point(250, 390);
+                            innerSizeV.position = new paper.Point(250, i*140-100);
                             group.addChild(innerSizeV);
                         
                             let string = new paper.PointText(new paper.Point(0, 0));
                             string.content = this.toString(array1[i]);
                             string.rotate(-90);
-                            string.position = new paper.Point(243, 390);
+                            string.position = new paper.Point(243, i*140-100);
                             group.addChild(string);
-                        
-                            childHeight -= this.cell_size;
-
                         }
+
+                    }
                 }
             }
-        }
+            else if(cases == 2) {
+                let gapSize;
+                let gapSizeX;
+
+                let topArrowLength = topIsZero ? 0 : this.cell_size;
+                let bottomArrowLength = bottomIsZero ? 0 : this.cell_size;
+
+                if (leftMargin) {
+                    if (leftIsZero)
+                    {
+                        gapSize = this.cell_size*2;
+                        gapSizeX = 250 - this.cell_size*3/2;
+                    }
+                    else
+                    {
+                        gapSize = this.cell_size*3;
+                        gapSizeX = 250 - this.cell_size*2;
+                    }
+
+                    childX -= gapSize;
+                    
+                    let line1point1 = new paper.Point(250 - gapSize, 250 - this.cell_size*3/2);
+                    let line1point2 = new paper.Point(250 - this.cell_size*3/2, 250 - this.cell_size*3/2);
+                    let line1 = this.dottedLine(line1point1, line1point2);
+                    group.addChild(line1);
+
+                    let line2point1 = new paper.Point(250 - gapSize, 250 + this.cell_size*3/2);
+                    let line2point2 = new paper.Point(250 - this.cell_size*3/2, 250 + this.cell_size*3/2);
+                    let line2 = this.dottedLine(line2point1, line2point2);
+                    group.addChild(line2);
+
+                }
+                else {
+                    if (rightIsZero)
+                    {
+                        gapSize = this.cell_size*2;
+                        gapSizeX = 250 + this.cell_size*3/2;
+                    }
+                    else
+                    {
+                        gapSize = this.cell_size*3;
+                        gapSizeX = 250 + this.cell_size*2;
+
+                    }
+
+                    childX += gapSize;
+                    
+                    let line1point1 = new paper.Point(250 + gapSize, 250 - this.cell_size*3/2);
+                    let line1point2 = new paper.Point(250 + this.cell_size*3/2, 250 - this.cell_size*3/2);
+                    let line1 = this.dottedLine(line1point1, line1point2);
+                    group.addChild(line1);
+
+                    let line2point1 = new paper.Point(250 + gapSize, 250 + this.cell_size*3/2);
+                    let line2point2 = new paper.Point(250 + this.cell_size*3/2, 250 + this.cell_size*3/2);
+                    let line2 = this.dottedLine(line2point1, line2point2);
+                    group.addChild(line2);
+
+                }
+
+                if(topIsZero) {
+                    childHeight += this.cell_size;
+                    childY -= this.cell_size / 2;
+                }
+
+                if(bottomIsZero) {
+                    childHeight += this.cell_size;
+                    childY += this.cell_size / 2;
+                }
+
+                    let topArrow = this.figureSize(false, false, topArrowLength);
+                    topArrow.position = new paper.Point(childX, 250 - this.cell_size*3/2 + topArrowLength/2);
+                    group.addChild(topArrow);
+
+                    let topText = new paper.PointText(new paper.Point(0, 0));
+                    topText.content = this.toString(top);
+                    if (topIsZero) {
+                        topText.position = new paper.Point(childX, 250 - this.cell_size*3/2 - 13);
+                    }
+                    else {
+                        topText.rotate(-90);
+                        topText.position = new paper.Point(childX - 7, 250 - this.cell_size);
+                    }
+                    group.addChild(topText);
+
+                    let bottomArrow = this.figureSize(false, false, bottomArrowLength);
+                    bottomArrow.position = new paper.Point(childX, 250 + this.cell_size*3/2 - bottomArrowLength/2);
+                    group.addChild(bottomArrow);
+
+                    let bottomText = new paper.PointText(new paper.Point(0, 0));
+                    bottomText.content = this.toString(bottom);
+                    if (bottomIsZero) {
+                        bottomText.position = new paper.Point(childX, 250 + this.cell_size*3/2 + 13);
+                    }
+                    else {
+                        bottomText.rotate(-90);
+                        bottomText.position = new paper.Point(childX - 7, 250 + this.cell_size);
+                    }
+                    group.addChild(bottomText);
+
+                let gapSizeArrowSize = gapSize - this.cell_size*2;
+                let gapSizeArrows = this.figureSize(false, true, gapSizeArrowSize);
+                gapSizeArrows.position = new paper.Point(gapSizeX, 250);
+                group.addChild(gapSizeArrows);
+
+                let string = new paper.PointText(new paper.Point(0, 0));
+                string.content = this.toString(leftPadding ? right : left);
+
+                if(gapSizeArrowSize > 0)
+                {
+                    string.position = new paper.Point(gapSizeX, 243);
+                }
+                else {
+                    string.rotate(-90);
+                    string.position = new paper.Point(gapSizeX-13, 250);
+                }
+
+                group.addChild(string);
+            }
+            else if(cases == 3) {
+                let gapSize;
+                let gapSizeY;
+
+                let leftArrowLength = leftIsZero ? 0 : this.cell_size;
+                let rightArrowLength = rightIsZero ? 0 : this.cell_size;
+
+                if (topMargin) {
+                    if (topIsZero)
+                    {
+                        gapSize = this.cell_size*2;
+                        gapSizeY = 250 - this.cell_size*3/2;
+                    }
+                    else
+                    {
+                        gapSize = this.cell_size*3;
+                        gapSizeY = 250 - this.cell_size*2;
+                    }
+
+                    childY -= gapSize;
+
+                    let line1point1 = new paper.Point(250 - this.cell_size*3/2, 250 - gapSize);
+                    let line1point2 = new paper.Point(250 - this.cell_size*3/2, 250 - this.cell_size*3/2);
+                    let line1 = this.dottedLine(line1point1, line1point2);
+                    group.addChild(line1);
+
+                    let line2point1 = new paper.Point(250 + this.cell_size*3/2, 250 - gapSize);
+                    let line2point2 = new paper.Point(250 + this.cell_size*3/2, 250 - this.cell_size*3/2);
+                    let line2 = this.dottedLine(line2point1, line2point2);
+                    group.addChild(line2);
+
+                }
+                else {
+                    if (bottomIsZero)
+                    {
+                        gapSize = this.cell_size*2;
+                        gapSizeY = 250 + this.cell_size*3/2;
+                    }
+                    else
+                    {
+                        gapSize = this.cell_size*3;
+                        gapSizeY = 250 + this.cell_size*2;
+
+                    }
+
+                    childY += gapSize;
+
+                    let line1point1 = new paper.Point(250 - this.cell_size*3/2, 250 + gapSize);
+                    let line1point2 = new paper.Point(250 - this.cell_size*3/2, 250 + this.cell_size*3/2);
+                    let line1 = this.dottedLine(line1point1, line1point2);
+                    group.addChild(line1);
+
+                    let line2point1 = new paper.Point(250 + this.cell_size*3/2, 250 + gapSize);
+                    let line2point2 = new paper.Point(250 + this.cell_size*3/2, 250 + this.cell_size*3/2);
+                    let line2 = this.dottedLine(line2point1, line2point2);
+                    group.addChild(line2);
+
+                }
+
+                if(leftIsZero) {
+                    childWidth += this.cell_size;
+                    childX -= this.cell_size / 2;
+                }
+
+                if(rightIsZero) {
+                    childWidth += this.cell_size;
+                    childX += this.cell_size / 2;
+                }
+                    
+                    let leftArrow = this.figureSize(false, true, leftArrowLength);
+                    leftArrow.position = new paper.Point(250 - this.cell_size*3/2 + leftArrowLength/2, childY);
+                    group.addChild(leftArrow);
+
+                    let leftText = new paper.PointText(new paper.Point(0, 0));
+                    leftText.content = this.toString(left);
+                    if (leftIsZero) {
+                        leftText.rotate(-90);
+                        leftText.position = new paper.Point(250 - this.cell_size*3/2 - 13, childY);
+                    }
+                    else {
+                        leftText.position = new paper.Point(250 - this.cell_size, childY - 7);
+                    }
+                    group.addChild(leftText);
+
+                    let rightArrow = this.figureSize(false, true, rightArrowLength);
+                    rightArrow.position = new paper.Point(250 + this.cell_size*3/2 - rightArrowLength/2, childY);
+                    group.addChild(rightArrow);
+
+                    let rightText = new paper.PointText(new paper.Point(0, 0));
+                    rightText.content = this.toString(right);
+                    if (rightIsZero) {
+                        rightText.rotate(-90);
+                        rightText.position = new paper.Point(250 + this.cell_size*3/2 + 13, childY);
+                    }
+                    else {
+                        rightText.position = new paper.Point(250 + this.cell_size, childY - 7);
+                    }
+                    group.addChild(rightText);
+
+                let gapSizeArrowSize = gapSize - this.cell_size*2;
+                let gapSizeArrows = this.figureSize(false, false, gapSizeArrowSize);
+                gapSizeArrows.position = new paper.Point(250, gapSizeY);
+                group.addChild(gapSizeArrows);
+
+                let string = new paper.PointText(new paper.Point(0, 0));
+                string.content = this.toString(topPadding ? bottom : top);
+
+                if(gapSizeArrowSize > 0)
+                {
+                    string.rotate(-90);
+                    string.position = new paper.Point(243, gapSizeY);
+                }
+                else {
+                    string.position = new paper.Point(250, gapSizeY-13);
+                }
+
+                group.addChild(string);
+            }
+            else {
+
+                let gapSizeX;
+                let gapSizeY;
+
+                if(leftMargin) {
+                    if (leftIsZero)
+                        gapSizeX = this.cell_size*2;
+                    else
+                        gapSizeX = this.cell_size*3;
+                    childX -= gapSizeX;
+                }
+                else if (rightMargin) {
+                    if (rightIsZero)
+                        gapSizeX = this.cell_size*2;
+                    else
+                        gapSizeX = this.cell_size*3;
+                    childX += gapSizeX;
+                }
+
+                if(topMargin) {
+                    if (topIsZero)
+                        gapSizeY = this.cell_size*2;
+                    else
+                        gapSizeY = this.cell_size*3;
+                    childY -= gapSizeY;
+                }
+                else if (bottomMargin) {
+                    if (bottomIsZero)
+                        gapSizeY = this.cell_size*2;
+                    else
+                        gapSizeY = this.cell_size*3;
+                    childY += gapSizeY;
+                }
+
+                let lineHorizontalPoint1; let lineHorizontalPoint2;
+                let lineVerticalPoint1; let lineVerticalPoint2;
+
+                if(leftMargin) {
+                    lineVerticalPoint1 = new paper.Point(250-this.cell_size*3/2, 250);
+                    if(topMargin)
+                        lineVerticalPoint2 = new paper.Point(250-this.cell_size*3/2, 250 - gapSizeX);
+                    else
+                        lineVerticalPoint2 = new paper.Point(250-this.cell_size*3/2, 250 + gapSizeX);
+                }
+                else {
+                    lineVerticalPoint1 = new paper.Point(250+this.cell_size*3/2, 250);
+                    if(topMargin)
+                        lineVerticalPoint2 = new paper.Point(250+this.cell_size*3/2, 250 - gapSizeX);
+                    else
+                        lineVerticalPoint2 = new paper.Point(250+this.cell_size*3/2, 250 + gapSizeX);
+                }
+
+                if(topMargin) {
+                    lineHorizontalPoint1 = new paper.Point(250, 250-this.cell_size*3/2);
+                    if(leftMargin)
+                        lineHorizontalPoint2 = new paper.Point(250 - gapSizeY, 250-this.cell_size*3/2);
+                    else
+                        lineHorizontalPoint2 = new paper.Point(250 + gapSizeY, 250-this.cell_size*3/2);
+                }
+                else {
+                    lineHorizontalPoint1 = new paper.Point(250, 250+this.cell_size*3/2);
+                    if(leftMargin)
+                        lineHorizontalPoint2 = new paper.Point(250 - gapSizeY, 250+this.cell_size*3/2);
+                    else
+                        lineHorizontalPoint2 = new paper.Point(250 + gapSizeY, 250+this.cell_size*3/2);
+                }
+
+                let lineHorizontal = this.dottedLine(lineHorizontalPoint1, lineHorizontalPoint2);
+                group.addChild(lineHorizontal);
+
+                let lineVertical = this.dottedLine(lineVerticalPoint1, lineVerticalPoint2);
+                group.addChild(lineVertical);
+
+                let arrowHorizontal = this.figureSize(false, true, this.cell_size);
+                let arrowHorizontalX = lineVerticalPoint2.x - (leftMargin ? this.cell_size/2 : -(this.cell_size/2));
+                arrowHorizontal.position = new paper.Point(arrowHorizontalX, lineVerticalPoint2.y);
+                group.addChild(arrowHorizontal);
+
+                let textArrowHorizontal = new paper.PointText(new paper.Point(0, 0));
+                if (leftMargin)
+                    textArrowHorizontal.content = this.toString(left);
+                else
+                    textArrowHorizontal.content = this.toString(right);
+                textArrowHorizontal.position = new paper.Point(arrowHorizontalX, lineVerticalPoint2.y+13);
+                group.addChild(textArrowHorizontal);
+
+                let arrowVertical = this.figureSize(false, false, this.cell_size);
+                let arrowVerticalY = lineHorizontalPoint2.y - (topMargin ? this.cell_size/2 : -(this.cell_size/2));
+                arrowVertical.position = new paper.Point(lineHorizontalPoint2.x, arrowVerticalY);
+                group.addChild(arrowVertical);
+
+                let textArrowVertical = new paper.PointText(new paper.Point(0, 0));
+                if (topMargin)
+                    textArrowVertical.content = this.toString(top);
+                else
+                    textArrowVertical.content = this.toString(bottom);
+                textArrowVertical.position = new paper.Point(lineHorizontalPoint2.x+13, arrowVerticalY);
+                group.addChild(textArrowVertical);
+
+            }
 
         let child = new paper.Path.Rectangle({
             point: [0, 0],
@@ -868,6 +1183,8 @@ class Drawer {
         child.position = new paper.Point(childX, childY);
 
         group.addChild(child);
+
+        group.position = new paper.Point(250, 250);
 
         this.elements.push(group);
         return group;
