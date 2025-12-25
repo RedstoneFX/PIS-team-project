@@ -59,6 +59,7 @@ function onFileUpload(e) {
             let yaml = YAML.load(text);
             grammar.destroy();
             grammar = Grammar.fromRawData(yaml);
+            grammar.setFilename(file.name);
             Frontend.setGrammar(grammar);
         } catch (e) {
             //UI.resetUI();
