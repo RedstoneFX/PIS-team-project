@@ -261,6 +261,18 @@ class Drawer {
     }
 
     /**
+     * Отрисовать пунктирную линию
+     * @param {Point} from 
+     * @param {Point} to 
+     */
+    static dottedLine(from, to) {
+        let line = new paper.Path.Line({ from: from, to: to, strokeColor: 'black' });
+        line.strokeCap = 'round';
+        line.dashArray = [10, 12];
+        return line;
+    }
+
+    /**
      * Обозначить размер между двумя точками
      * @param {boolean} isOuter
      * @param {boolean} isHorizontal 
@@ -845,12 +857,12 @@ class Drawer {
                     
                     let line1point1 = new paper.Point(250 - gapSize, 250 - this.cell_size*3/2);
                     let line1point2 = new paper.Point(250 - this.cell_size*3/2, 250 - this.cell_size*3/2);
-                    let line1 = this.straightLine(line1point1, line1point2);
+                    let line1 = this.dottedLine(line1point1, line1point2);
                     group.addChild(line1);
 
                     let line2point1 = new paper.Point(250 - gapSize, 250 + this.cell_size*3/2);
                     let line2point2 = new paper.Point(250 - this.cell_size*3/2, 250 + this.cell_size*3/2);
-                    let line2 = this.straightLine(line2point1, line2point2);
+                    let line2 = this.dottedLine(line2point1, line2point2);
                     group.addChild(line2);
 
                 }
@@ -871,12 +883,12 @@ class Drawer {
                     
                     let line1point1 = new paper.Point(250 + gapSize, 250 - this.cell_size*3/2);
                     let line1point2 = new paper.Point(250 + this.cell_size*3/2, 250 - this.cell_size*3/2);
-                    let line1 = this.straightLine(line1point1, line1point2);
+                    let line1 = this.dottedLine(line1point1, line1point2);
                     group.addChild(line1);
 
                     let line2point1 = new paper.Point(250 + gapSize, 250 + this.cell_size*3/2);
                     let line2point2 = new paper.Point(250 + this.cell_size*3/2, 250 + this.cell_size*3/2);
-                    let line2 = this.straightLine(line2point1, line2point2);
+                    let line2 = this.dottedLine(line2point1, line2point2);
                     group.addChild(line2);
 
                 }
@@ -963,12 +975,12 @@ class Drawer {
 
                     let line1point1 = new paper.Point(250 - this.cell_size*3/2, 250 - gapSize);
                     let line1point2 = new paper.Point(250 - this.cell_size*3/2, 250 - this.cell_size*3/2);
-                    let line1 = this.straightLine(line1point1, line1point2);
+                    let line1 = this.dottedLine(line1point1, line1point2);
                     group.addChild(line1);
 
                     let line2point1 = new paper.Point(250 + this.cell_size*3/2, 250 - gapSize);
                     let line2point2 = new paper.Point(250 + this.cell_size*3/2, 250 - this.cell_size*3/2);
-                    let line2 = this.straightLine(line2point1, line2point2);
+                    let line2 = this.dottedLine(line2point1, line2point2);
                     group.addChild(line2);
 
                 }
@@ -989,12 +1001,12 @@ class Drawer {
 
                     let line1point1 = new paper.Point(250 - this.cell_size*3/2, 250 + gapSize);
                     let line1point2 = new paper.Point(250 - this.cell_size*3/2, 250 + this.cell_size*3/2);
-                    let line1 = this.straightLine(line1point1, line1point2);
+                    let line1 = this.dottedLine(line1point1, line1point2);
                     group.addChild(line1);
 
                     let line2point1 = new paper.Point(250 + this.cell_size*3/2, 250 + gapSize);
                     let line2point2 = new paper.Point(250 + this.cell_size*3/2, 250 + this.cell_size*3/2);
-                    let line2 = this.straightLine(line2point1, line2point2);
+                    let line2 = this.dottedLine(line2point1, line2point2);
                     group.addChild(line2);
 
                 }
@@ -1126,10 +1138,10 @@ class Drawer {
                         lineHorizontalPoint2 = new paper.Point(250 + gapSizeY, 250+this.cell_size*3/2);
                 }
 
-                let lineHorizontal = this.straightLine(lineHorizontalPoint1, lineHorizontalPoint2);
+                let lineHorizontal = this.dottedLine(lineHorizontalPoint1, lineHorizontalPoint2);
                 group.addChild(lineHorizontal);
 
-                let lineVertical = this.straightLine(lineVerticalPoint1, lineVerticalPoint2);
+                let lineVertical = this.dottedLine(lineVerticalPoint1, lineVerticalPoint2);
                 group.addChild(lineVertical);
 
                 let arrowHorizontal = this.figureSize(false, true, this.cell_size);
