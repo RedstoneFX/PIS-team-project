@@ -72,7 +72,7 @@ function onFileUpload(e) {
 
 function onFileSave() {
     try {
-        writeFile("grammar.yml", YAML.dump(grammar.serialize()))
+        writeFile(Frontend.grammarFilename.value, YAML.dump(grammar.serialize()))
     } catch (err) {
         console.log(err.message);
         if (!/[а-яА-Я]/.test(err.message)) Frontend.halt(); // TODO: полностью завершает работу приложения, если ошибка была не через throw. Сломается, если изменить язык.
